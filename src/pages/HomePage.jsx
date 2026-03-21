@@ -2,9 +2,9 @@ import AboutSection from '../sections/AboutSection';
 import ContactSection from '../sections/ContactSection';
 import GallerySection from '../sections/GallerySection';
 import HeroSection from '../sections/HeroSection';
+import LocationMapSection from '../sections/LocationMapSection';
 import MenuPreviewSection from '../sections/MenuPreviewSection';
 import PhilosophySection from '../sections/PhilosophySection';
-import ReservationSection from '../sections/ReservationSection';
 
 function HomePage() {
   return (
@@ -14,7 +14,7 @@ function HomePage() {
       <PhilosophySection />
       <MenuPreviewSection />
       <GallerySection />
-      <ReservationSection />
+      <LocationMapSection />
       <ContactSection />
     </>
   );

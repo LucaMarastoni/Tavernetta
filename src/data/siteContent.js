@@ -26,20 +26,35 @@ export const heroSlides = [
   },
 ];
 
+export const aboutPageSlides = [
+  {
+    src: photo('photo-1552566626-52f8b828add9', 2400),
+    alt: 'Interno caldo di ristorante con tavoli ben distanziati e luce serale morbida',
+  },
+  {
+    src: photo('photo-1514933651103-005eec06c04b', 2400),
+    alt: 'Dettaglio di sala elegante con tavolo apparecchiato e riflessi ambrati',
+  },
+  {
+    src: photo('photo-1559339352-11d035aa65de', 2400),
+    alt: 'Gestualita di cucina e cura artigianale nella rifinitura di un piatto',
+  },
+];
+
 export const restaurant = {
   name: 'Tavernetta',
-  location: 'Milano',
+  location: 'San Giovanni Lupatoto',
   label: 'Ristorante italiano contemporaneo',
   hero: {
     scrollLabel: 'Scorri',
     orderCta: {
       label: 'Ordina ora',
-      to: '/menu',
+      to: '/ordina',
     },
   },
   about: {
     eyebrow: 'Atmosfera',
-    title: 'Una sala pensata per rallentare il passo e dare spazio alla sera.',
+    title: 'Luce morbida, tavoli larghi, una sala raccolta.',
     intro:
       "Tavernetta nasce come un rifugio urbano di luce morbida, superfici naturali e gesti misurati. Il tono e intimo ma aperto, curato senza rigidita, costruito per accogliere con calma.",
     body: [
@@ -52,10 +67,10 @@ export const restaurant = {
       { value: '140 etichette', label: 'cantina in evoluzione' },
     ],
     cta: {
-      label: 'Scopri chi siamo',
+      label: 'Chi siamo',
       to: '/chi-siamo',
     },
-    note: 'Luce calda, forno vivo, sala quieta, materia italiana scelta giorno per giorno.',
+    note: 'Milano, sera, forno acceso.',
     image: {
       src: photo('photo-1504674900247-0877df9cc836', 1600),
       alt: 'Ingredienti e piccoli piatti preparati con sensibilita contemporanea',
@@ -63,7 +78,7 @@ export const restaurant = {
   },
   philosophy: {
     eyebrow: 'Filosofia',
-    title: 'Il gusto arriva per sottrazione: forno, materia, ospitalita.',
+    title: 'Forno vivo, materia precisa, gesto misurato.',
     intro:
       "La cucina di Tavernetta non cerca effetti. Preferisce nettezza, temperatura giusta, condimenti essenziali e un ritmo di servizio che lascia respirare il tavolo.",
     quote:
@@ -111,13 +126,17 @@ export const restaurant = {
     },
   },
   preview: {
-    eyebrow: 'Menu preview',
-    title: 'Una carta composta come una sequenza: aperture, forno, piatti, finali, calici.',
+    eyebrow: 'Menu',
+    title: 'Una carta breve, pulita, pensata per la sera.',
     intro:
       'La struttura del menu segue il ritmo della cena, non l accumulo. Ogni categoria ha un tono preciso e una funzione nel percorso della tavola.',
     cta: {
-      label: 'Vai al menu completo',
+      label: 'Menu completo',
       to: '/menu',
+    },
+    image: {
+      src: photo('photo-1513104890138-7c749659a591', 1600),
+      alt: 'Pizza artigianale appena sfornata con luce calda e taglio editoriale',
     },
   },
   menu: {
@@ -132,15 +151,79 @@ export const restaurant = {
     intro:
       'Una lettura calma della carta: degustazione, forno, specialita stagionali, dessert e una bevuta costruita con la stessa precisione della cucina.',
   },
+  orderPage: {
+    eyebrow: 'Ordina',
+    title: 'Ordina online',
+    intro:
+      'Consulta la carta disponibile oggi, componi il carrello e inviaci il tuo ordine con un checkout semplice, misurato e sempre aggiornato in tempo reale.',
+  },
+  ordering: {
+    eyebrow: 'Carta disponibile oggi',
+    title: 'Scegli con calma, aggiungi al carrello, conferma in pochi passaggi.',
+    intro:
+      'La selezione online segue la disponibilita reale del servizio serale. Ogni richiesta entra subito nel flusso di cucina con stato iniziale pending, pronta per la conferma della sala.',
+    pickupEstimate: 'Ritiro indicativo: 25-35 minuti dal momento della conferma.',
+    deliveryEstimate: 'Consegna indicativa: 35-45 minuti, in base alla fascia e alla zona.',
+    emptyCartTitle: 'Il carrello e ancora vuoto.',
+    emptyCartBody: 'Aggiungi dalla carta i piatti che desideri e costruisci il tuo ordine con calma.',
+    successEyebrow: 'Ordine ricevuto',
+    successTitle: 'La richiesta e stata registrata correttamente.',
+    successBody:
+      'Ti ricontatteremo se serviranno dettagli aggiuntivi. Lo stato iniziale dell ordine e pending, in attesa della conferma da parte della sala.',
+  },
   aboutPage: {
     eyebrow: 'Chi siamo',
     title: 'Chi siamo',
     intro:
-      'Tavernetta e una casa di gusto e accoglienza italiana contemporanea: un progetto costruito su luce, misura, forno e una relazione autentica con il tempo della cena.',
+      'Tavernetta e un ristorante italiano contemporaneo, nato per unire cucina, forno e ospitalita in un ambiente raccolto, caldo e curato.',
+    scrollLabel: 'Scorri',
+    story: {
+      eyebrow: 'Il ristorante',
+      title: 'Un luogo raccolto, pensato per stare bene a tavola.',
+      intro:
+        'Tavernetta unisce cucina, forno e sala in un esperienza semplice, curata e naturale.',
+      details: [
+        { label: 'Dove', value: 'San Giovanni Lupatoto' },
+        { label: 'Cucina', value: 'italiana contemporanea' },
+        { label: 'Stile', value: 'accoglienza misurata' },
+      ],
+      image: {
+        src: photo('photo-1414235077428-338989a2e8c0', 1600),
+        alt: 'Sala elegante con tavolo apparecchiato e luce soffusa',
+      },
+    },
+    philosophy: {
+      eyebrow: 'Come lavoriamo',
+      title: 'Ingredienti scelti bene, lavorazioni essenziali, equilibrio.',
+      pillars: [
+        { title: 'Materia prima' },
+        { title: 'Lavoro artigianale' },
+        { title: 'Ospitalita curata' },
+      ],
+      image: {
+        src: photo('photo-1544025162-d76694265947', 1600),
+        alt: 'Dettaglio di una preparazione raffinata in cucina con gesto preciso',
+      },
+    },
+    team: {
+      eyebrow: 'La squadra',
+      title: 'Una squadra unita tra cucina e sala.',
+      quote:
+        'Ogni gesto nasce da un lavoro condiviso, continuo e attento.',
+      highlights: [
+        { label: 'Cucina', value: 'stagionale e curata' },
+        { label: 'Sala', value: 'attenta e discreta' },
+        { label: 'Selezione', value: 'vini e pairing in equilibrio' },
+      ],
+      image: {
+        src: photo('photo-1559339352-11d035aa65de', 1600),
+        alt: 'Mani in cucina durante la finitura di un piatto con gesto misurato',
+      },
+    },
   },
   gallery: {
     eyebrow: 'Atmosfera',
-    title: 'Interni caldi, dettagli di tavola, cucina in luce serale.',
+    title: 'Sala, tavola, forno, dettagli.',
     intro:
       'Tavernetta vive di materiali morbidi, riflessi, ombre leggere e immagini che alternano sala, mani, forno e tavola apparecchiata.',
   },
@@ -170,13 +253,16 @@ export const restaurant = {
       'Accogliamo tavoli intimi, cene condivise e richieste dedicate per piccoli eventi privati. Per il percorso degustazione consigliamo la prenotazione anticipata.',
     bookingLabel: 'Prenota un tavolo',
     bookingHref:
-      'mailto:prenotazioni@tavernetta-milano.it?subject=Richiesta%20prenotazione%20Tavernetta',
+      'mailto:prenotazioni@tavernetta.it?subject=Richiesta%20prenotazione%20Tavernetta',
     phoneLabel: '+39 02 5501 2486',
     phoneHref: 'tel:+390255012486',
-    emailLabel: 'prenotazioni@tavernetta-milano.it',
-    emailHref: 'mailto:prenotazioni@tavernetta-milano.it',
-    address: 'Via San Calocero 8, 20123 Milano',
-    mapUrl: 'https://www.google.com/maps/search/?api=1&query=Via+San+Calocero+8,+Milano',
+    emailLabel: 'prenotazioni@tavernetta.it',
+    emailHref: 'mailto:prenotazioni@tavernetta.it',
+    address: 'Via Federico Garofoli, 105, 37057 San Giovanni Lupatoto VR',
+    mapUrl:
+      'https://www.google.com/maps/search/?api=1&query=Via+Federico+Garofoli+105,+37057+San+Giovanni+Lupatoto+VR',
+    mapEmbedUrl:
+      'https://www.google.com/maps?q=Via%20Federico%20Garofoli%2C%20105%2C%2037057%20San%20Giovanni%20Lupatoto%20VR&z=16&output=embed',
     hours: [
       { day: 'Martedi - Giovedi', time: '19:00 - 23:00' },
       { day: 'Venerdi - Sabato', time: '19:00 - 00:00' },
@@ -184,14 +270,19 @@ export const restaurant = {
       { day: 'Lunedi', time: 'Chiuso' },
     ],
   },
+  locationSection: {
+    eyebrow: 'Dove siamo',
+    title: 'Dove siamo',
+    intro: 'Via Federico Garofoli, 105, 37057 San Giovanni Lupatoto VR',
+  },
   contact: {
     eyebrow: 'Contatti',
-    title: 'Una tavola raccolta nel cuore di Milano.',
+    title: 'Contatti e orari.',
     intro:
-      'Scrivici per prenotazioni, eventi privati, pairing dedicati o collaborazioni. Le informazioni restano semplici, leggibili e sempre vicine.',
-    mapTitle: 'Raggiungici tra corti milanesi, pietra chiara e luce bassa.',
+      'Qui trovi i recapiti diretti, l indirizzo e gli orari del servizio. Tutto in modo semplice e leggibile.',
+    mapTitle: 'Raggiungici a San Giovanni Lupatoto.',
     mapDescription:
-      'Una posizione centrale ma raccolta, ideale per una cena lenta o un incontro riservato dopo il tramonto.',
+      'Uno spazio raccolto, facile da raggiungere, pensato per una cena calma e curata.',
   },
 };
 
@@ -230,153 +321,6 @@ export const previewCategories = [
     description:
       'Calici italiani, bottiglie in movimento, pairing dedicati e signature drink a bassa voce.',
     price: '9',
-  },
-];
-
-export const menuCategories = [
-  {
-    id: 'degustazione',
-    name: 'Degustazione',
-    note: 'Per l intero tavolo',
-    description: 'Un percorso pensato per accompagnare la sera con progressione e leggerezza.',
-    items: [
-      {
-        name: 'Percorso Tavernetta',
-        description:
-          'Cinque passaggi tra forno, vegetali, una portata calda di cucina e un dessert finale.',
-        allergens: 'glutine, lattosio',
-        price: '65',
-      },
-      {
-        name: 'Abbinamento vini',
-        description: 'Tre calici scelti dalla sala per accompagnare il percorso con progressione netta.',
-        price: '34',
-      },
-      {
-        name: 'Abbinamento analcolico',
-        description:
-          'Infusi, agrumi, botaniche e fermentazioni leggere costruite come un pairing completo.',
-        price: '24',
-      },
-    ],
-  },
-  {
-    id: 'gourmet',
-    name: 'Pizze gourmet',
-    note: 'Forno, struttura, leggerezza',
-    description: 'Cotture vive, bordo arioso e condimenti pensati per lasciare il morso pulito.',
-    items: [
-      {
-        name: 'Bianca di cortile',
-        description: 'Fior di latte, zucchine marinate, menta, scorza di limone e pepe bianco.',
-        allergens: 'glutine, lattosio',
-        price: '21',
-      },
-      {
-        name: 'Rosso velluto',
-        description: 'Pomodoro arrosto, stracciatella, alici, polvere di capperi e origano selvatico.',
-        allergens: 'glutine, pesce, lattosio',
-        price: '24',
-      },
-      {
-        name: 'Fumo gentile',
-        description: 'Provola affumicata, cardoncelli, cipolla bruna e prezzemolo fresco.',
-        allergens: 'glutine, lattosio',
-        price: '23',
-      },
-      {
-        name: 'Autunno chiaro',
-        description: 'Crema di zucca, caprino soffice, semi di finocchio e nocciola tostata.',
-        allergens: 'glutine, lattosio, frutta a guscio',
-        price: '22',
-      },
-    ],
-  },
-  {
-    id: 'specialita',
-    name: 'Specialita',
-    note: 'Piccoli piatti e stagionali',
-    description: 'Portate pensate per aprire la tavola o attraversarla con una presenza discreta.',
-    items: [
-      {
-        name: 'Carciofo arrosto, limone bruciato e maggiorana',
-        description: 'Vegetale pieno, salsa chiara e finale erbaceo molto netto.',
-        allergens: 'sedano',
-        price: '18',
-      },
-      {
-        name: 'Ricciola, finocchio e olio alle foglie di fico',
-        description: 'Taglio pulito, acidita tenue, profilo verde e salinita misurata.',
-        allergens: 'pesce',
-        price: '21',
-      },
-      {
-        name: 'Vitello tonnato lieve',
-        description: 'Fettine rosee, salsa setosa, capperi piccoli e fondo molto asciutto.',
-        allergens: 'uova, pesce',
-        price: '19',
-      },
-      {
-        name: 'Patata fondente, robiola e timo limonato',
-        description: 'Calore, cremosita e un finale aromatico pulito e sottile.',
-        allergens: 'lattosio',
-        price: '16',
-      },
-    ],
-  },
-  {
-    id: 'dessert',
-    name: 'Dessert',
-    note: 'Finali sobri',
-    description: 'Dessert pensati per chiudere con pulizia, non con eccesso.',
-    items: [
-      {
-        name: 'Crema cotta al fieno, pere e moscovado',
-        description: 'Tessitura morbida, lieve affumicatura e frutto in primo piano.',
-        allergens: 'lattosio',
-        price: '12',
-      },
-      {
-        name: "Torta soffice all'olio, agrumi canditi e crema cruda",
-        description: 'Profumo mediterraneo, dolcezza trattenuta e texture estremamente leggera.',
-        allergens: 'glutine, uova, lattosio',
-        price: '11',
-      },
-      {
-        name: 'Gelato al latte affumicato, cacao e sale dolce',
-        description: 'Freddo, tostato, lattico e minerale in una chiusura breve e nitida.',
-        allergens: 'lattosio',
-        price: '13',
-      },
-    ],
-  },
-  {
-    id: 'wine',
-    name: 'Bevande e vini',
-    note: 'Calici, pairing, signature',
-    description: 'Una bevuta costruita con la stessa calma della cucina.',
-    items: [
-      {
-        name: 'Calice del giorno',
-        description: 'Una selezione che cambia spesso, sempre costruita per precisione e bevibilita.',
-        price: '9',
-      },
-      {
-        name: 'Metodo classico lombardo',
-        description: 'Bolla fine, sorso teso e una chiusura salina ideale per il forno.',
-        price: '14',
-      },
-      {
-        name: 'Rosso in affinamento',
-        description: 'Profilo sottile, tannino lieve e una presenza che accompagna senza coprire.',
-        price: '12',
-      },
-      {
-        name: 'Tavernetta Sera',
-        description: 'Signature drink con vermouth bianco, agrumi, erbe secche e soda limpida.',
-        price: '15',
-      },
-    ],
   },
 ];
 

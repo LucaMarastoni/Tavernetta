@@ -3,6 +3,7 @@ import SiteLayout from './components/SiteLayout';
 import ChiSiamoPage from './pages/ChiSiamoPage';
 import HomePage from './pages/HomePage';
 import MenuPage from './pages/MenuPage';
+import OrderPage from './pages/OrderPage';
 
 function App() {
   const basename = import.meta.env.BASE_URL.replace(/\/$/, '') || '/';
@@ -14,6 +15,7 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/menu" element={<MenuPage />} />
           <Route path="/chi-siamo" element={<ChiSiamoPage />} />
+          <Route path="/ordina" element={<OrderPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

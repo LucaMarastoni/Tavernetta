@@ -6,6 +6,7 @@ function Button({
   children,
   variant = 'primary',
   size = 'default',
+  type = 'button',
   className = '',
   target,
   rel,
@@ -32,7 +33,7 @@ function Button({
   }
 
   return (
-    <button className={classes} type="button" onClick={onClick}>
+    <button className={classes} type={type} onClick={onClick}>
       <span>{children}</span>
     </button>
   );

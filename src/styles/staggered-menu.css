@@ -1,0 +1,214 @@
+.staggered-menu-shell {
+  display: none;
+}
+
+.sm-toggle {
+  position: relative;
+  z-index: 82;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  transition:
+    color 0.28s ease,
+    opacity 0.28s ease;
+}
+
+.sm-toggle:hover {
+  opacity: 0.72;
+}
+
+.sm-toggle:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 0.3rem;
+}
+
+.sm-toggle-label {
+  font-size: 0.72rem;
+  line-height: 1;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.sm-toggle-icon {
+  position: relative;
+  width: 0.86rem;
+  height: 0.86rem;
+  display: inline-grid;
+  place-items: center;
+}
+
+.sm-toggle-line {
+  position: absolute;
+  width: 100%;
+  height: 1px;
+  background: currentColor;
+  border-radius: 999px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.sm-toggle-line-v {
+  transform: translate(-50%, -50%) rotate(90deg);
+}
+
+.sm-prelayers,
+.staggered-menu-panel {
+  position: fixed;
+  inset: 0;
+}
+
+.sm-prelayers {
+  z-index: 74;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.staggered-menu-shell.is-open .sm-prelayers {
+  visibility: visible;
+}
+
+.sm-prelayer {
+  position: absolute;
+  inset: 0;
+}
+
+.staggered-menu-panel {
+  z-index: 75;
+  pointer-events: none;
+  color: var(--color-espresso);
+  overflow-y: auto;
+  visibility: hidden;
+}
+
+.staggered-menu-shell.is-open .staggered-menu-panel {
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.staggered-menu-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at top left, rgba(200, 164, 125, 0.16), transparent 28%),
+    radial-gradient(circle at bottom right, rgba(184, 118, 95, 0.14), transparent 36%),
+    linear-gradient(180deg, rgba(251, 246, 239, 0.98), rgba(240, 227, 214, 0.98));
+}
+
+.staggered-menu-panel::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.14;
+  mix-blend-mode: multiply;
+  background-image: url('../assets/linen.svg');
+}
+
+.sm-panel-inner {
+  position: relative;
+  z-index: 1;
+  min-height: 100dvh;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  align-content: start;
+  padding: max(env(safe-area-inset-top, 0px), 1.2rem) 1.2rem 1.6rem;
+}
+
+.sm-panel-head {
+  display: grid;
+  max-width: 14rem;
+  padding-top: 0.1rem;
+}
+
+.sm-panel-brand {
+  font-family: var(--font-display);
+  font-size: 1.22rem;
+  line-height: 0.94;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.sm-panel-nav {
+  display: grid;
+  align-content: center;
+  min-height: calc(100dvh - 4.5rem);
+}
+
+.sm-panel-list {
+  list-style: none;
+  margin: 0;
+  padding: clamp(3.2rem, 10vh, 6rem) 0 max(env(safe-area-inset-bottom, 0px), 1rem);
+  display: grid;
+  gap: 0.3rem;
+  counter-reset: smItem;
+}
+
+.sm-panel-itemWrap {
+  position: relative;
+  overflow: hidden;
+}
+
+.sm-panel-item {
+  position: relative;
+  display: inline-flex;
+  width: 100%;
+  align-items: flex-end;
+  gap: 1rem;
+  padding: 0.35rem 0 0.85rem;
+  border-bottom: 1px solid rgba(36, 25, 20, 0.1);
+  color: inherit;
+}
+
+.sm-panel-item::after {
+  counter-increment: smItem;
+  content: counter(smItem, decimal-leading-zero);
+  position: absolute;
+  right: 0;
+  bottom: 1.1rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--sm-accent, var(--color-terra));
+  opacity: var(--sm-num-opacity, 0);
+}
+
+.sm-panel-itemLabel {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-size: clamp(2.8rem, 15vw, 4.95rem);
+  line-height: 0.92;
+  letter-spacing: 0.04em;
+  will-change: transform;
+}
+
+.sm-panel-item.is-active,
+.sm-panel-item:hover {
+  color: var(--sm-accent, var(--color-terra));
+}
+
+@media (max-width: 960px) {
+  .staggered-menu-shell {
+    display: block;
+    position: relative;
+  }
+
+  .sm-toggle {
+    justify-self: end;
+  }
+}
+
+@media (max-width: 540px) {
+  .sm-toggle-label {
+    font-size: 0.69rem;
+    letter-spacing: 0.18em;
+  }
+
+  .sm-panel-head {
+    max-width: 13rem;
+  }
+}

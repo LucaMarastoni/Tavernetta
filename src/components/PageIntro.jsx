@@ -1,8 +1,12 @@
 import SectionTitle from './SectionTitle';
 
-function PageIntro({ eyebrow, title, intro }) {
+function PageIntro({ eyebrow, title, intro, children, className = '', headerTone = 'dark' }) {
   return (
-    <section className="section page-intro" aria-labelledby="page-intro-title">
+    <section
+      className={`section page-intro ${className}`.trim()}
+      data-header-tone={headerTone}
+      aria-labelledby="page-intro-title"
+    >
       <div className="section-inner page-intro-inner">
         <SectionTitle
           eyebrow={eyebrow}
@@ -11,6 +15,8 @@ function PageIntro({ eyebrow, title, intro }) {
           title={title}
           titleTag="h1"
         />
+
+        {children ? <div className="page-intro-actions">{children}</div> : null}
       </div>
     </section>
   );

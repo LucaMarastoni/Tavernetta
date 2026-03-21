@@ -1,9 +1,14 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
-const siteBase = process.env.GITHUB_PAGES_BASE || '/Tavernetta/';
-
-export default defineConfig(({ command }) => ({
-  base: command === 'build' ? siteBase : '/',
+export default defineConfig({
   plugins: [react()],
-}));
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+      },
+    },
+  },
+});

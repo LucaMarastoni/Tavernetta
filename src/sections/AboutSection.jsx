@@ -5,38 +5,12 @@ import { restaurant } from '../data/siteContent';
 
 function AboutSection() {
   return (
-    <section className="section about-section" id="about" aria-labelledby="about-title">
+    <section className="section about-section" data-header-tone="dark" id="about" aria-labelledby="about-title">
       <div className="section-inner about-grid">
-        <Reveal className="about-copy">
-          <SectionTitle
-            eyebrow={restaurant.about.eyebrow}
-            id="about-title"
-            intro={restaurant.about.intro}
-            title={restaurant.about.title}
-          />
-
-          <div className="rich-text">
-            {restaurant.about.body.map((paragraph) => (
-              <p key={paragraph}>{paragraph}</p>
-            ))}
-          </div>
-
-          <dl className="about-metrics">
-            {restaurant.about.metrics.map((metric) => (
-              <div key={metric.label} className="metric-card">
-                <dt>{metric.label}</dt>
-                <dd>{metric.value}</dd>
-              </div>
-            ))}
-          </dl>
-
-          <Button to={restaurant.about.cta.to} variant="secondary">
-            {restaurant.about.cta.label}
-          </Button>
-        </Reveal>
-
-        <Reveal className="about-visual" delay={120} direction="left">
-          <div className="image-card">
+        <Reveal className="about-visual">
+          <span aria-hidden="true" className="section-ornament about-orbit" />
+          <span aria-hidden="true" className="section-ornament about-block" />
+          <div className="image-card about-image-card">
             <img
               alt={restaurant.about.image.alt}
               className="section-image"
@@ -45,10 +19,18 @@ function AboutSection() {
               src={restaurant.about.image.src}
             />
           </div>
+        </Reveal>
 
-          <div className="about-note-card">
-            <p>{restaurant.about.note}</p>
-          </div>
+        <Reveal className="about-copy about-copy-minimal" delay={120} direction="left">
+          <SectionTitle
+            eyebrow={restaurant.about.eyebrow}
+            id="about-title"
+            title={restaurant.about.title}
+          />
+
+          <Button className="editorial-link-button" to={restaurant.about.cta.to} variant="ghost-dark">
+            {restaurant.about.cta.label}
+          </Button>
         </Reveal>
       </div>
     </section>

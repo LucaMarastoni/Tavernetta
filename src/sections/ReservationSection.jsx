@@ -5,7 +5,12 @@ import { restaurant } from '../data/siteContent';
 
 function ReservationSection() {
   return (
-    <section className="section reservation-section" id="reservation" aria-labelledby="reservation-title">
+    <section
+      className="section reservation-section"
+      data-header-tone="dark"
+      id="reservation"
+      aria-labelledby="reservation-title"
+    >
       <div className="section-inner">
         <Reveal className="reservation-panel">
           <div className="reservation-copy">

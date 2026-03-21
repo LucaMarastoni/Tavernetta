@@ -2,38 +2,35 @@ import Reveal from '../components/Reveal';
 import SectionTitle from '../components/SectionTitle';
 import { restaurant } from '../data/siteContent';
 
-function TeamSection() {
+function TeamSection({ content = restaurant.team }) {
   return (
-    <section className="section team-section" id="team" aria-labelledby="team-title">
+    <section className="section team-section" data-header-tone="dark" id="team" aria-labelledby="team-title">
       <div className="section-inner team-grid">
-        <Reveal className="team-visual" direction="right">
+        <Reveal className="team-visual">
+          <span aria-hidden="true" className="section-ornament team-arc" />
+          <span aria-hidden="true" className="section-ornament team-disc" />
           <div className="image-card team-image-card">
             <img
-              alt={restaurant.team.image.alt}
+              alt={content.image.alt}
               className="section-image"
               decoding="async"
               loading="lazy"
-              src={restaurant.team.image.src}
+              src={content.image.src}
             />
           </div>
         </Reveal>
 
-        <Reveal className="team-copy" delay={120}>
+        <Reveal className="team-copy team-copy-minimal" delay={120} direction="left">
           <SectionTitle
-            eyebrow={restaurant.team.eyebrow}
+            eyebrow={content.eyebrow}
             id="team-title"
-            intro={restaurant.team.quote}
-            title={restaurant.team.title}
+            title={content.title}
           />
 
-          <div className="rich-text">
-            {restaurant.team.body.map((paragraph) => (
-              <p key={paragraph}>{paragraph}</p>
-            ))}
-          </div>
+          <p className="team-quote-minimal">{content.quote}</p>
 
-          <div className="team-highlights">
-            {restaurant.team.highlights.map((highlight) => (
+          <div className="team-highlights team-highlights-minimal">
+            {content.highlights.map((highlight) => (
               <article key={highlight.label} className="team-highlight-card">
                 <p>{highlight.label}</p>
                 <h3>{highlight.value}</h3>

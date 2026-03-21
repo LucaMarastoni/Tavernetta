@@ -4,7 +4,12 @@ import { heroSlides, restaurant } from '../data/siteContent';
 
 function HeroSection() {
   return (
-    <section className="hero-section" id="home" aria-label={`Intro visuale di ${restaurant.name}`}>
+    <section
+      className="hero-section"
+      data-header-tone="light"
+      id="home"
+      aria-label={`Intro visuale di ${restaurant.name}`}
+    >
       <h1 className="sr-only">
         {restaurant.name}, {restaurant.label} a {restaurant.location}
       </h1>

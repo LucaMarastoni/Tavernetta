@@ -1,0 +1,152 @@
+insert or ignore into categories (name, slug, sort_order)
+values
+  ('Antipasti', 'antipasti', 10),
+  ('Pizze Classiche', 'pizze-classiche', 20),
+  ('Pizze Gourmet', 'pizze-gourmet', 30),
+  ('Dessert', 'dessert', 40),
+  ('Bevande', 'bevande', 50);
+
+insert or ignore into menu_items (
+  category_id,
+  name,
+  slug,
+  description,
+  price,
+  image_url,
+  tags,
+  allergens,
+  available,
+  featured,
+  sort_order
+)
+values
+  (
+    (select id from categories where slug = 'antipasti'),
+    'Burrata affumicata',
+    'burrata-affumicata',
+    'Burrata pugliese, finocchio arrostito, limone candito e olio alle foglie di cappero.',
+    15,
+    'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=1600&q=80',
+    '["firma", "vegetariano"]',
+    '["latte"]',
+    1,
+    1,
+    10
+  ),
+  (
+    (select id from categories where slug = 'antipasti'),
+    'Crudo di ricciola',
+    'crudo-di-ricciola',
+    'Ricciola marinata agli agrumi, cetriolo, maggiorana fresca e pepe rosa.',
+    18,
+    'https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=1600&q=80',
+    '["stagionale", "mare"]',
+    '["pesce"]',
+    1,
+    0,
+    20
+  ),
+  (
+    (select id from categories where slug = 'pizze-classiche'),
+    'Margherita Tavola',
+    'margherita-tavola',
+    'Pomodoro San Marzano, fiordilatte, basilico fresco e olio extravergine delicato.',
+    12,
+    'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=1600&q=80',
+    '["forno", "classico"]',
+    '["glutine", "latte"]',
+    1,
+    1,
+    10
+  ),
+  (
+    (select id from categories where slug = 'pizze-classiche'),
+    'Marinara Antica',
+    'marinara-antica',
+    'Pomodoro, aglio dolce confit, origano di montagna e olio al prezzemolo.',
+    11,
+    'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?auto=format&fit=crop&w=1600&q=80',
+    '["vegano", "essenziale"]',
+    '["glutine"]',
+    1,
+    0,
+    20
+  ),
+  (
+    (select id from categories where slug = 'pizze-gourmet'),
+    'Tartufo e fior di latte',
+    'tartufo-e-fior-di-latte',
+    'Fiordilatte, crema leggera di patate, funghi trifolati e tartufo nero in uscita.',
+    22,
+    'https://images.unsplash.com/photo-1514326640560-7d063ef2aed5?auto=format&fit=crop&w=1600&q=80',
+    '["gourmet", "sera"]',
+    '["glutine", "latte"]',
+    1,
+    1,
+    10
+  ),
+  (
+    (select id from categories where slug = 'pizze-gourmet'),
+    'Acciughe del Cantabrico',
+    'acciughe-del-cantabrico',
+    'Pomodoro giallo, stracciatella, acciughe del Cantabrico e scorza di limone.',
+    21,
+    'https://images.unsplash.com/photo-1464306076886-da185f6a9d05?auto=format&fit=crop&w=1600&q=80',
+    '["mare", "gourmet"]',
+    '["glutine", "latte", "pesce"]',
+    1,
+    1,
+    20
+  ),
+  (
+    (select id from categories where slug = 'dessert'),
+    'Tiramisu al cucchiaio',
+    'tiramisu-al-cucchiaio',
+    'Crema al mascarpone montata leggera, savoiardo al caffe e cacao amaro.',
+    9,
+    'https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?auto=format&fit=crop&w=1600&q=80',
+    '["dolce", "classico"]',
+    '["uova", "latte", "glutine"]',
+    1,
+    0,
+    10
+  ),
+  (
+    (select id from categories where slug = 'dessert'),
+    'Cremoso al cioccolato',
+    'cremoso-al-cioccolato',
+    'Cioccolato fondente, olio d oliva lieve, sale dolce e nocciole tostate.',
+    10,
+    'https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=1600&q=80',
+    '["dessert", "firma"]',
+    '["latte", "frutta a guscio"]',
+    1,
+    0,
+    20
+  ),
+  (
+    (select id from categories where slug = 'bevande'),
+    'Franciacorta Brut',
+    'franciacorta-brut',
+    'Calice metodo classico, profilo teso e finale asciutto.',
+    12,
+    'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&w=1600&q=80',
+    '["vino", "calice"]',
+    '[]',
+    1,
+    0,
+    10
+  ),
+  (
+    (select id from categories where slug = 'bevande'),
+    'Spritz al bergamotto',
+    'spritz-al-bergamotto',
+    'Aperitivo morbido con bergamotto, bitter chiaro e bollicina secca.',
+    11,
+    'https://images.unsplash.com/photo-1470337458703-46ad1756a187?auto=format&fit=crop&w=1600&q=80',
+    '["cocktail", "aperitivo"]',
+    '[]',
+    1,
+    0,
+    20
+  );

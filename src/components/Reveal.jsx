@@ -13,10 +13,29 @@ function Reveal({
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const node = elementRef.current;
 
-    if (mediaQuery.matches) {
+    if (mediaQuery.matches || !node) {
       setIsVisible(true);
       return undefined;
+    }
+
+    if (typeof window.IntersectionObserver !== 'function') {
+      setIsVisible(true);
+      return undefined;
+    }
+
+    const revealImmediately = () => {
+      setIsVisible(true);
+    };
+
+    const bounds = node.getBoundingClientRect();
+    const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0;
+
+    if (bounds.top <= viewportHeight * 0.92) {
+      const frameId = window.requestAnimationFrame(revealImmediately);
+
+      return () => window.cancelAnimationFrame(frameId);
     }
 
     const observer = new IntersectionObserver(
@@ -29,16 +48,19 @@ function Reveal({
         });
       },
       {
-        threshold: 0.16,
-        rootMargin: '0px 0px -48px 0px',
+        threshold: 0.08,
+        rootMargin: '0px 0px -24px 0px',
       },
     );
 
-    if (elementRef.current) {
-      observer.observe(elementRef.current);
-    }
+    observer.observe(node);
 
-    return () => observer.disconnect();
+    const fallbackTimeout = window.setTimeout(revealImmediately, 700);
+
+    return () => {
+      window.clearTimeout(fallbackTimeout);
+      observer.disconnect();
+    };
   }, []);
 
   return (

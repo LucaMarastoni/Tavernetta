@@ -2,38 +2,40 @@ import Reveal from '../components/Reveal';
 import SectionTitle from '../components/SectionTitle';
 import { restaurant } from '../data/siteContent';
 
-function StorySection() {
+function StorySection({ content = restaurant.story }) {
   return (
-    <section className="section story-section" aria-labelledby="story-title">
+    <section
+      className="section story-section"
+      data-header-tone="dark"
+      id="story"
+      aria-labelledby="story-title"
+    >
       <div className="section-inner story-grid">
-        <Reveal className="story-visual" direction="right">
+        <Reveal className="story-visual">
+          <span aria-hidden="true" className="section-ornament story-orbit" />
+          <span aria-hidden="true" className="section-ornament story-slab" />
           <div className="image-card story-image-card">
             <img
-              alt={restaurant.story.image.alt}
+              alt={content.image.alt}
               className="section-image"
               decoding="async"
               loading="lazy"
-              src={restaurant.story.image.src}
+              src={content.image.src}
             />
           </div>
         </Reveal>
 
-        <Reveal className="story-copy" delay={120}>
+        <Reveal className="story-copy story-copy-minimal" delay={120} direction="left">
           <SectionTitle
-            eyebrow={restaurant.story.eyebrow}
+            eyebrow={content.eyebrow}
             id="story-title"
-            intro={restaurant.story.intro}
-            title={restaurant.story.title}
+            title={content.title}
           />
 
-          <div className="rich-text">
-            {restaurant.story.body.map((paragraph) => (
-              <p key={paragraph}>{paragraph}</p>
-            ))}
-          </div>
+          <p className="story-lead">{content.intro}</p>
 
-          <div className="story-details">
-            {restaurant.story.details.map((detail) => (
+          <div className="story-details story-details-minimal">
+            {content.details.map((detail) => (
               <article key={detail.label} className="story-detail-card">
                 <p>{detail.label}</p>
                 <h3>{detail.value}</h3>
