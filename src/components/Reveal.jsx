@@ -55,10 +55,7 @@ function Reveal({
 
     observer.observe(node);
 
-    const fallbackTimeout = window.setTimeout(revealImmediately, 700);
-
     return () => {
-      window.clearTimeout(fallbackTimeout);
       observer.disconnect();
     };
   }, []);

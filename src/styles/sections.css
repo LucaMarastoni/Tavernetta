@@ -343,6 +343,182 @@
   text-wrap: balance;
 }
 
+:is(.home-page, .chi-siamo-page) .section-heading .section-eyebrow,
+:is(.home-page, .chi-siamo-page) .section-heading .section-intro {
+  opacity: 0;
+  will-change: opacity, transform;
+}
+
+:is(.home-page, .chi-siamo-page) .section-heading .section-eyebrow {
+  transform: translate3d(0, 1.1rem, 0);
+  letter-spacing: 0.34em;
+}
+
+:is(.home-page, .chi-siamo-page) .section-heading .section-eyebrow::before {
+  opacity: 0;
+  transform: scaleX(0.18);
+  transform-origin: left center;
+}
+
+:is(.home-page, .chi-siamo-page) .section-heading-center .section-eyebrow::before {
+  transform-origin: center center;
+}
+
+:is(.home-page, .chi-siamo-page) .section-heading .section-intro {
+  transform: translate3d(0, 1.4rem, 0);
+}
+
+:is(.home-page, .chi-siamo-page) .reveal.is-visible .section-heading .section-eyebrow,
+:is(.home-page, .chi-siamo-page) .reveal.is-visible .section-heading .section-intro {
+  opacity: 1;
+}
+
+:is(.home-page, .chi-siamo-page) .reveal.is-visible .section-heading .section-eyebrow {
+  animation: home-eyebrow-in 960ms cubic-bezier(0.22, 1, 0.36, 1) 110ms both;
+}
+
+:is(.home-page, .chi-siamo-page) .reveal.is-visible .section-heading .section-eyebrow::before {
+  animation: home-eyebrow-line-in 900ms cubic-bezier(0.22, 1, 0.36, 1) 180ms both;
+}
+
+:is(.home-page, .chi-siamo-page) .reveal.is-visible .section-heading .section-intro {
+  animation: home-intro-in 1080ms cubic-bezier(0.22, 1, 0.36, 1) 220ms both;
+}
+
+:is(.home-page, .chi-siamo-page) .about-image-card,
+:is(.home-page, .chi-siamo-page) .story-image-card,
+:is(.home-page, .chi-siamo-page) .philosophy-image-card,
+:is(.home-page, .chi-siamo-page) .preview-image-card,
+:is(.home-page, .chi-siamo-page) .team-image-card,
+:is(.home-page, .chi-siamo-page) .gallery-card,
+:is(.home-page, .chi-siamo-page) .location-map-frame-shell {
+  opacity: 0;
+  transform: translate3d(0, 2rem, 0) scale(0.975);
+  will-change: opacity, transform;
+  transition:
+    opacity 980ms var(--ease) 90ms,
+    transform 1180ms cubic-bezier(0.22, 1, 0.36, 1) 90ms,
+    box-shadow 1180ms var(--ease) 90ms;
+}
+
+:is(.home-page, .chi-siamo-page) .about-image-card .section-image,
+:is(.home-page, .chi-siamo-page) .story-image-card .section-image,
+:is(.home-page, .chi-siamo-page) .philosophy-image-card .section-image,
+:is(.home-page, .chi-siamo-page) .preview-image-card .section-image,
+:is(.home-page, .chi-siamo-page) .team-image-card .section-image {
+  transform: scale(1.12);
+  filter: saturate(0.76) contrast(0.98) brightness(0.9);
+  will-change: transform, filter;
+  transition:
+    transform 1520ms cubic-bezier(0.22, 1, 0.36, 1) 140ms,
+    filter 1240ms var(--ease) 140ms;
+}
+
+:is(.home-page, .chi-siamo-page) .gallery-image,
+:is(.home-page, .chi-siamo-page) .location-map-frame {
+  transform: scale(1.04);
+  filter: saturate(0.8) contrast(0.98);
+  will-change: transform, filter;
+  transition:
+    transform 1380ms cubic-bezier(0.22, 1, 0.36, 1) 120ms,
+    filter 1080ms var(--ease) 120ms;
+}
+
+:is(.home-page, .chi-siamo-page) .about-visual.is-visible .about-image-card,
+:is(.home-page, .chi-siamo-page) .story-visual.is-visible .story-image-card,
+:is(.home-page, .chi-siamo-page) .philosophy-visual.is-visible .philosophy-image-card,
+:is(.home-page, .chi-siamo-page) .preview-visual.is-visible .preview-image-card,
+:is(.home-page, .chi-siamo-page) .team-visual.is-visible .team-image-card,
+:is(.home-page, .chi-siamo-page) .gallery-card.is-visible,
+:is(.home-page, .chi-siamo-page) .location-map-frame-shell.is-visible {
+  opacity: 1;
+  animation: home-visual-card-in 1180ms cubic-bezier(0.22, 1, 0.36, 1) 90ms both;
+}
+
+:is(.home-page, .chi-siamo-page) .about-visual.is-visible .about-image-card .section-image,
+:is(.home-page, .chi-siamo-page) .story-visual.is-visible .story-image-card .section-image,
+:is(.home-page, .chi-siamo-page) .philosophy-visual.is-visible .philosophy-image-card .section-image,
+:is(.home-page, .chi-siamo-page) .preview-visual.is-visible .preview-image-card .section-image,
+:is(.home-page, .chi-siamo-page) .team-visual.is-visible .team-image-card .section-image {
+  transform: scale(1);
+  filter: saturate(0.88) contrast(1.03) brightness(1);
+}
+
+:is(.home-page, .chi-siamo-page) .gallery-card.is-visible .gallery-image,
+:is(.home-page, .chi-siamo-page) .location-map-frame-shell.is-visible .location-map-frame {
+  transform: scale(1);
+  filter: saturate(0.92) contrast(1.02);
+}
+
+.chi-siamo-page .about-page-hero-title,
+.chi-siamo-page .about-page-hero-copy .menu-landing-scroll {
+  opacity: 0;
+  transform: translate3d(0, 1.2rem, 0);
+  will-change: opacity, transform;
+}
+
+.chi-siamo-page .about-page-hero-title {
+  animation: home-intro-in 1100ms cubic-bezier(0.22, 1, 0.36, 1) 180ms both;
+}
+
+.chi-siamo-page .about-page-hero-copy .menu-landing-scroll {
+  animation: home-intro-in 960ms cubic-bezier(0.22, 1, 0.36, 1) 420ms both;
+}
+
+@keyframes home-eyebrow-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 1.1rem, 0);
+    letter-spacing: 0.34em;
+    filter: blur(3px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+    letter-spacing: 0.24em;
+    filter: blur(0);
+  }
+}
+
+@keyframes home-eyebrow-line-in {
+  from {
+    opacity: 0;
+    transform: scaleX(0.18);
+  }
+
+  to {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+}
+
+@keyframes home-intro-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 1.4rem, 0);
+    filter: blur(5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+    filter: blur(0);
+  }
+}
+
+@keyframes home-visual-card-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 2rem, 0) scale(0.975);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
 .about-section {
   padding-top: clamp(4.5rem, 6vw, 6.5rem);
 }

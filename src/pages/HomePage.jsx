@@ -8,7 +8,7 @@ import PhilosophySection from '../sections/PhilosophySection';
 
 function HomePage() {
   return (
-    <>
+    <div className="home-page">
       <HeroSection />
       <AboutSection />
       <PhilosophySection />
@@ -16,7 +16,7 @@ function HomePage() {
       <GallerySection />
       <LocationMapSection />
       <ContactSection />
-    </>
+    </div>
   );
 }
 
