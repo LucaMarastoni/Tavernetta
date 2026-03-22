@@ -1,58 +1,61 @@
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export function sanitizeOrderForm(formData) {
+export const initialOrderDraft = {
+  customerName: '',
+  customerPhone: '',
+  customerEmail: '',
+  orderType: 'pickup',
+  address: '',
+  preferredTime: '',
+  notes: '',
+  privacyAccepted: false,
+};
+
+export function sanitizeOrderDraft(draft = {}) {
   return {
-    fullName: formData.fullName?.trim() || '',
-    phone: formData.phone?.replace(/\s+/g, ' ').trim() || '',
-    email: formData.email?.trim() || '',
-    orderType: formData.orderType || 'pickup',
-    address: formData.address?.trim() || '',
-    preferredTime: formData.preferredTime?.trim() || '',
-    notes: formData.notes?.trim() || '',
+    customerName: draft.customerName?.trim() || '',
+    customerPhone: draft.customerPhone?.replace(/\s+/g, ' ').trim() || '',
+    customerEmail: draft.customerEmail?.trim() || '',
+    orderType: draft.orderType === 'delivery' ? 'delivery' : 'pickup',
+    address: draft.address?.trim() || '',
+    preferredTime: draft.preferredTime?.trim() || '',
+    notes: draft.notes?.trim() || '',
+    privacyAccepted: Boolean(draft.privacyAccepted),
   };
 }
 
-export function validateOrderForm({ formData, items, catalogItemsById = {} }) {
+export function validateOrderDraft({ draft, items }) {
   const errors = {};
-  const normalizedPhone = formData.phone.replace(/[^\d+]/g, '');
+  const normalizedPhone = draft.customerPhone.replace(/[^\d+]/g, '');
 
   if (!items.length) {
-    errors.cart = 'Aggiungi almeno un piatto prima di confermare l ordine.';
+    errors.cart = 'Aggiungi almeno un prodotto prima di continuare.';
   }
 
-  if (!formData.fullName) {
-    errors.fullName = 'Inserisci nome e cognome.';
-  }
-
-  if (!formData.phone) {
-    errors.phone = 'Inserisci un numero di telefono.';
-  } else if (normalizedPhone.length < 7) {
-    errors.phone = 'Inserisci un telefono valido.';
-  }
-
-  if (formData.email && !EMAIL_PATTERN.test(formData.email)) {
-    errors.email = 'L email non sembra valida.';
-  }
-
-  if (!['pickup', 'delivery'].includes(formData.orderType)) {
-    errors.orderType = 'Scegli se desideri ritiro o consegna.';
-  }
-
-  if (formData.orderType === 'delivery' && !formData.address) {
-    errors.address = 'Per la consegna serve un indirizzo completo.';
-  }
-
-  if (items.some((item) => Number(item.quantity) <= 0)) {
+  if (items.some((item) => Number(item.quantity) < 1)) {
     errors.cart = 'Controlla le quantita presenti nel carrello.';
   }
 
-  const unavailableItem = items.find((item) => {
-    const liveItem = catalogItemsById[String(item.id)];
-    return !liveItem || liveItem.available === false;
-  });
+  if (!draft.customerName) {
+    errors.customerName = 'Inserisci nome e cognome.';
+  }
 
-  if (unavailableItem) {
-    errors.cart = 'Uno o piu piatti selezionati non sono piu disponibili.';
+  if (!draft.customerPhone) {
+    errors.customerPhone = 'Inserisci un numero di telefono.';
+  } else if (normalizedPhone.length < 7) {
+    errors.customerPhone = 'Inserisci un numero di telefono valido.';
+  }
+
+  if (draft.customerEmail && !EMAIL_PATTERN.test(draft.customerEmail)) {
+    errors.customerEmail = 'L email non sembra valida.';
+  }
+
+  if (draft.orderType === 'delivery' && !draft.address) {
+    errors.address = 'Per la consegna serve un indirizzo completo.';
+  }
+
+  if (!draft.privacyAccepted) {
+    errors.privacyAccepted = 'Per proseguire devi accettare la privacy policy.';
   }
 
   return {

@@ -68,13 +68,34 @@
   visibility: hidden;
 }
 
-.staggered-menu-shell.is-open .sm-prelayers {
+.sm-prelayers.is-visible {
   visibility: visible;
 }
 
 .sm-prelayer {
   position: absolute;
   inset: 0;
+}
+
+.sm-overlay-close {
+  position: fixed;
+  top: max(env(safe-area-inset-top, 0px), 0.95rem);
+  right: 1rem;
+  z-index: 76;
+  color: var(--color-espresso);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.sm-overlay-close.is-visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.sm-overlay-close .sm-toggle-icon {
+  transform: rotate(225deg);
 }
 
 .staggered-menu-panel {
@@ -85,7 +106,7 @@
   visibility: hidden;
 }
 
-.staggered-menu-shell.is-open .staggered-menu-panel {
+.staggered-menu-panel.is-visible {
   visibility: visible;
   pointer-events: auto;
 }

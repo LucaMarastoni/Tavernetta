@@ -1,4 +1,51 @@
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Poiret+One&display=swap');
+/* GDPR-safe: fonts are self-hosted locally to avoid third-party requests to Google Fonts on page load. */
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../assets/fonts/Manrope-400.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('../assets/fonts/Manrope-500.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('../assets/fonts/Manrope-600.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('../assets/fonts/Manrope-700.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Manrope';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url('../assets/fonts/Manrope-800.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Poiret One';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../assets/fonts/PoiretOne-400.ttf') format('truetype');
+}
 
 :root {
   color-scheme: light;
@@ -82,6 +129,10 @@ body::after {
 }
 
 body.menu-open {
+  overflow: hidden;
+}
+
+body.cookie-modal-open {
   overflow: hidden;
 }
 
@@ -228,5 +279,11 @@ address {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+@media (max-width: 720px) {
+  :root {
+    --header-offset: 5.75rem;
   }
 }

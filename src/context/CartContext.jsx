@@ -1,45 +1,42 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { normalizeStoredCart } from '../utils/cart';
+import { calculateCartTotals } from '../utils/pricing';
+import { initialOrderDraft, sanitizeOrderDraft } from '../utils/validators';
 
-const CART_STORAGE_KEY = 'tavernetta-cart-v1';
+const CART_STORAGE_KEY = 'tavernetta-cart-v2';
+const ORDER_DRAFT_STORAGE_KEY = 'tavernetta-order-draft-v1';
+
 const CartContext = createContext(null);
 
-function normalizeCartItem(item) {
-  return {
-    id: item.id,
-    name: item.name,
-    price: Number(item.price),
-    quantity: Math.max(1, Number(item.quantity) || 1),
-    imageUrl: item.imageUrl || '',
-    tags: Array.isArray(item.tags) ? item.tags : [],
-  };
-}
-
-function readStoredCart() {
+function readJsonStorage(key, fallbackValue) {
   if (typeof window === 'undefined') {
-    return [];
+    return fallbackValue;
   }
 
   try {
-    const rawValue = window.localStorage.getItem(CART_STORAGE_KEY);
+    const rawValue = window.localStorage.getItem(key);
 
     if (!rawValue) {
-      return [];
+      return fallbackValue;
     }
 
-    const parsed = JSON.parse(rawValue);
-
-    if (!Array.isArray(parsed)) {
-      return [];
-    }
-
-    return parsed.map(normalizeCartItem);
-  } catch (error) {
-    return [];
+    return JSON.parse(rawValue);
+  } catch {
+    return fallbackValue;
   }
+}
+
+function readStoredCart() {
+  return normalizeStoredCart(readJsonStorage(CART_STORAGE_KEY, []));
+}
+
+function readStoredDraft() {
+  return sanitizeOrderDraft(readJsonStorage(ORDER_DRAFT_STORAGE_KEY, initialOrderDraft));
 }
 
 export function CartProvider({ children }) {
   const [items, setItems] = useState(readStoredCart);
+  const [orderDraft, setOrderDraftState] = useState(readStoredDraft);
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -49,36 +46,63 @@ export function CartProvider({ children }) {
     window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
   }, [items]);
 
-  const addItem = (item, quantity = 1) => {
-    setItems((currentItems) => {
-      const incomingId = String(item.id);
-      const existingItem = currentItems.find((currentItem) => String(currentItem.id) === incomingId);
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
 
-      if (existingItem) {
-        return currentItems.map((currentItem) =>
-          String(currentItem.id) === incomingId
-            ? {
-                ...currentItem,
-                quantity: currentItem.quantity + quantity,
-              }
-            : currentItem,
-        );
+    window.localStorage.setItem(ORDER_DRAFT_STORAGE_KEY, JSON.stringify(orderDraft));
+  }, [orderDraft]);
+
+  const addConfiguredItem = (line) => {
+    setItems((currentItems) => {
+      const existingLine = currentItems.find((item) => item.lineId === line.lineId);
+
+      if (!existingLine) {
+        return [...currentItems, line];
       }
 
-      return [...currentItems, normalizeCartItem({ ...item, quantity })];
+      return currentItems.map((item) =>
+        item.lineId === line.lineId
+          ? {
+              ...item,
+              quantity: item.quantity + line.quantity,
+            }
+          : item,
+      );
     });
   };
 
-  const updateQuantity = (itemId, quantity) => {
+  const replaceConfiguredItem = (previousLineId, nextLine) => {
+    setItems((currentItems) => {
+      const itemsWithoutPrevious = currentItems.filter((item) => item.lineId !== previousLineId);
+      const existingMatchingLine = itemsWithoutPrevious.find((item) => item.lineId === nextLine.lineId);
+
+      if (!existingMatchingLine) {
+        return [...itemsWithoutPrevious, nextLine];
+      }
+
+      return itemsWithoutPrevious.map((item) =>
+        item.lineId === nextLine.lineId
+          ? {
+              ...item,
+              quantity: item.quantity + nextLine.quantity,
+            }
+          : item,
+      );
+    });
+  };
+
+  const updateQuantity = (lineId, quantity) => {
     const nextQuantity = Number(quantity);
 
     setItems((currentItems) => {
       if (nextQuantity <= 0) {
-        return currentItems.filter((item) => String(item.id) !== String(itemId));
+        return currentItems.filter((item) => item.lineId !== lineId);
       }
 
       return currentItems.map((item) =>
-        String(item.id) === String(itemId)
+        item.lineId === lineId
           ? {
               ...item,
               quantity: nextQuantity,
@@ -88,24 +112,33 @@ export function CartProvider({ children }) {
     });
   };
 
-  const removeItem = (itemId) => {
-    setItems((currentItems) => currentItems.filter((item) => String(item.id) !== String(itemId)));
+  const removeItem = (lineId) => {
+    setItems((currentItems) => currentItems.filter((item) => item.lineId !== lineId));
   };
 
   const clearCart = () => setItems([]);
-  const getItemQuantity = (itemId) => items.find((item) => String(item.id) === String(itemId))?.quantity ?? 0;
+
+  const updateOrderDraft = (patch) => {
+    setOrderDraftState((currentDraft) => sanitizeOrderDraft({ ...currentDraft, ...patch }));
+  };
+
+  const resetOrderDraft = () => setOrderDraftState(initialOrderDraft);
 
   const value = useMemo(
     () => ({
       items,
       itemCount: items.reduce((sum, item) => sum + item.quantity, 0),
-      addItem,
+      totals: calculateCartTotals(items, orderDraft.orderType),
+      orderDraft,
+      addConfiguredItem,
+      replaceConfiguredItem,
       updateQuantity,
       removeItem,
       clearCart,
-      getItemQuantity,
+      updateOrderDraft,
+      resetOrderDraft,
     }),
-    [items],
+    [items, orderDraft],
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

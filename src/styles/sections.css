@@ -74,29 +74,28 @@
 }
 
 .hero-order-cta {
-  min-width: 14rem;
-  min-height: 3.7rem;
-  padding: 1rem 2rem;
+  min-width: 16.5rem;
+  min-height: 4.25rem;
+  padding: 1.15rem 2.55rem;
   font-family: var(--font-display);
-  font-size: clamp(1.02rem, 1.9vw, 1.26rem);
+  font-size: clamp(1.14rem, 2.15vw, 1.42rem);
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: none;
   color: var(--color-shell);
-  -webkit-text-stroke: 0.22px currentColor;
-  text-shadow: 0 0 0.01em currentColor;
-  background: rgba(255, 247, 239, 0.1);
-  border-color: rgba(255, 250, 244, 0.34);
-  box-shadow: 0 20px 44px rgba(18, 13, 10, 0.18);
-  backdrop-filter: blur(14px);
+  -webkit-text-stroke: 0;
+  text-shadow: none;
+  background: transparent;
+  border-color: rgba(255, 250, 244, 0.54);
+  box-shadow: 0 20px 44px rgba(18, 13, 10, 0.16);
   opacity: 0;
   animation: hero-cta-in 900ms var(--ease) 850ms forwards;
 }
 
 .hero-order-cta:hover {
-  background: rgba(255, 247, 239, 0.18);
-  border-color: rgba(255, 250, 244, 0.52);
-  box-shadow: 0 24px 48px rgba(18, 13, 10, 0.22);
+  background: transparent;
+  border-color: rgba(255, 250, 244, 0.82);
+  box-shadow: 0 24px 48px rgba(18, 13, 10, 0.2);
 }
 
 @keyframes hero-cta-in {
@@ -173,6 +172,175 @@
   pointer-events: auto;
   margin-left: clamp(1.5rem, 4vw, 3rem);
   margin-bottom: clamp(2.6rem, 6vw, 4rem);
+}
+
+.chi-siamo-page .about-page-hero-section .hero-wash {
+  background:
+    linear-gradient(180deg, rgba(17, 12, 9, 0.72) 0%, rgba(17, 12, 9, 0.28) 30%, rgba(17, 12, 9, 0.1) 66%, rgba(17, 12, 9, 0.04) 100%),
+    linear-gradient(120deg, rgba(17, 12, 9, 0.3) 0%, rgba(17, 12, 9, 0.08) 45%, rgba(17, 12, 9, 0.18) 100%);
+}
+
+.chi-siamo-page .about-page-hero-chrome {
+  display: grid;
+}
+
+.chi-siamo-page .about-page-hero-inner {
+  min-height: 100svh;
+  display: grid;
+  align-items: end;
+  justify-items: center;
+  padding-top: calc(var(--header-offset) + clamp(2rem, 4vw, 3rem));
+  padding-bottom: clamp(7rem, 12vw, 9.4rem);
+}
+
+.chi-siamo-page .about-page-hero-copy {
+  position: static;
+  transform: none;
+  display: grid;
+  justify-items: center;
+  gap: 1.35rem;
+  width: min(100%, 44rem);
+  max-width: min(44rem, calc(100vw - 3rem));
+  text-align: center;
+  pointer-events: auto;
+}
+
+.chi-siamo-page .about-page-hero-title {
+  margin: 0;
+  max-width: 10ch;
+  font-size: clamp(2.6rem, 5.3vw, 5rem);
+  line-height: 1.06;
+  letter-spacing: 0.05em;
+  font-weight: 400;
+  text-shadow: none;
+}
+
+.chi-siamo-page .about-page-hero-scroll {
+  display: inline-grid;
+  justify-items: center;
+  gap: 0.75rem;
+  color: rgba(255, 250, 244, 0.84);
+  text-decoration: none;
+}
+
+.chi-siamo-page .about-page-hero-scroll-line {
+  width: clamp(5.5rem, 10vw, 8.5rem);
+  height: 1px;
+  background: currentColor;
+  opacity: 0.72;
+  transition: transform 0.3s var(--ease);
+}
+
+.chi-siamo-page .about-page-hero-scroll-label {
+  font-size: 0.74rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+
+.chi-siamo-page .about-page-hero-scroll:hover .about-page-hero-scroll-line,
+.chi-siamo-page .about-page-hero-scroll:focus-visible .about-page-hero-scroll-line {
+  transform: translateY(0.18rem);
+}
+
+.chi-siamo-page .story-grid,
+.chi-siamo-page .philosophy-grid,
+.chi-siamo-page .team-grid {
+  gap: clamp(2.6rem, 5vw, 5.8rem);
+}
+
+.chi-siamo-page .story-copy,
+.chi-siamo-page .philosophy-copy,
+.chi-siamo-page .team-copy {
+  gap: 2.2rem;
+}
+
+.chi-siamo-page .story-copy-minimal,
+.chi-siamo-page .philosophy-copy-minimal,
+.chi-siamo-page .team-copy-minimal {
+  max-width: 36rem;
+  gap: 1.85rem;
+}
+
+.chi-siamo-page .story-copy .section-title,
+.chi-siamo-page .philosophy-copy .section-title,
+.chi-siamo-page .team-copy .section-title {
+  font-size: clamp(2.35rem, 4.2vw, 4.2rem);
+  line-height: 1.18;
+  letter-spacing: 0.04em;
+  max-width: 11ch;
+}
+
+.chi-siamo-page .story-lead {
+  max-width: 32rem;
+  line-height: 1.95;
+}
+
+.chi-siamo-page .team-quote-minimal {
+  max-width: 31rem;
+  font-size: clamp(1.45rem, 2.55vw, 2rem);
+  line-height: 1.24;
+}
+
+.chi-siamo-page .story-details,
+.chi-siamo-page .team-highlights {
+  gap: 1.2rem;
+}
+
+.chi-siamo-page .story-detail-card,
+.chi-siamo-page .team-highlight-card {
+  display: grid;
+  align-content: start;
+  gap: 0.55rem;
+  min-height: 9.8rem;
+  padding: 1.55rem 1.4rem;
+  transition:
+    transform 0.3s var(--ease),
+    box-shadow 0.3s var(--ease),
+    border-color 0.3s var(--ease);
+}
+
+.chi-siamo-page .story-detail-card:hover,
+.chi-siamo-page .team-highlight-card:hover,
+.chi-siamo-page .philosophy-card-minimal:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 34px rgba(34, 24, 18, 0.08);
+}
+
+.chi-siamo-page .story-detail-card p,
+.chi-siamo-page .team-highlight-card p {
+  margin-bottom: 0;
+  font-size: 0.76rem;
+  letter-spacing: 0.18em;
+}
+
+.chi-siamo-page .story-detail-card h3,
+.chi-siamo-page .team-highlight-card h3 {
+  font-size: clamp(1.4rem, 2.1vw, 1.82rem);
+  line-height: 1.24;
+  text-wrap: balance;
+}
+
+.chi-siamo-page .philosophy-card-minimal {
+  gap: 1.25rem;
+  padding: 2rem;
+  transition:
+    transform 0.3s var(--ease),
+    box-shadow 0.3s var(--ease),
+    border-color 0.3s var(--ease);
+}
+
+.chi-siamo-page .philosophy-pillars-minimal {
+  gap: 0.15rem;
+}
+
+.chi-siamo-page .philosophy-pillars-minimal .philosophy-pillar {
+  padding: 1.15rem 0;
+}
+
+.chi-siamo-page .philosophy-pillars-minimal .philosophy-pillar h3 {
+  font-size: clamp(1.45rem, 2.3vw, 1.95rem);
+  line-height: 1.3;
+  text-wrap: balance;
 }
 
 .about-section {
@@ -1311,6 +1479,17 @@
   .gallery-card.standard {
     grid-column: span 6;
   }
+
+  .chi-siamo-page .story-copy-minimal,
+  .chi-siamo-page .philosophy-copy-minimal,
+  .chi-siamo-page .team-copy-minimal {
+    max-width: none;
+  }
+
+  .chi-siamo-page .story-details,
+  .chi-siamo-page .team-highlights {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 720px) {
@@ -1336,6 +1515,29 @@
   .about-page-hero-chrome .scroll-indicator {
     margin-left: 1rem;
     margin-bottom: 2.4rem;
+  }
+
+  .chi-siamo-page .about-page-hero-inner {
+    padding-bottom: 5.2rem;
+  }
+
+  .chi-siamo-page .about-page-hero-copy {
+    gap: 1.05rem;
+    max-width: calc(100vw - 2rem);
+  }
+
+  .chi-siamo-page .about-page-hero-title {
+    max-width: 9ch;
+    font-size: clamp(2.25rem, 10vw, 3.45rem);
+    line-height: 1.1;
+  }
+
+  .chi-siamo-page .about-page-hero-scroll {
+    gap: 0.55rem;
+  }
+
+  .chi-siamo-page .about-page-hero-scroll-line {
+    width: 5rem;
   }
 
   .about-metrics,
@@ -1425,6 +1627,42 @@
 
   .location-map-frame {
     height: 26rem;
+  }
+
+  .chi-siamo-page .story-grid,
+  .chi-siamo-page .philosophy-grid,
+  .chi-siamo-page .team-grid {
+    gap: 2.2rem;
+  }
+
+  .chi-siamo-page .story-copy,
+  .chi-siamo-page .philosophy-copy,
+  .chi-siamo-page .team-copy {
+    gap: 1.5rem;
+  }
+
+  .chi-siamo-page .story-copy .section-title,
+  .chi-siamo-page .philosophy-copy .section-title,
+  .chi-siamo-page .team-copy .section-title {
+    font-size: clamp(2rem, 8.2vw, 2.8rem);
+    line-height: 1.2;
+  }
+
+  .chi-siamo-page .story-detail-card,
+  .chi-siamo-page .team-highlight-card,
+  .chi-siamo-page .philosophy-card-minimal {
+    min-height: 0;
+    padding: 1.35rem 1.2rem;
+  }
+
+  .chi-siamo-page .story-detail-card h3,
+  .chi-siamo-page .team-highlight-card h3 {
+    font-size: 1.45rem;
+  }
+
+  .chi-siamo-page .team-quote-minimal {
+    font-size: clamp(1.32rem, 6vw, 1.7rem);
+    line-height: 1.28;
   }
 }
 

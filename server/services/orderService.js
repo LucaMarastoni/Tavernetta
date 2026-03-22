@@ -1,140 +1,112 @@
 import { getDatabase } from '../db/database.js';
-import { calculateCartTotals } from '../utils/calculateTotals.js';
-import { HttpError } from '../utils/httpError.js';
-import { upsertCustomer } from './customerService.js';
+import { calculateOrderTotals, buildOrderLine } from './pricingService.js';
+import { assert, assertEmail, assertPhone, normalizeNullableText, normalizePhone, normalizeText } from '../utils/validators.js';
 
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const ALLOWED_ORDER_TYPES = new Set(['pickup', 'delivery']);
 
 function sanitizeOrderPayload(payload = {}) {
-  const customer = payload.customer ?? {};
-  const order = payload.order ?? {};
+  const customer = payload.customer ?? payload;
+  const order = payload.order ?? payload;
   const items = Array.isArray(payload.items) ? payload.items : [];
 
   return {
     customer: {
-      fullName: customer.full_name?.trim() || customer.fullName?.trim() || '',
-      phone: customer.phone?.replace(/\s+/g, ' ').trim() || '',
-      email: customer.email?.trim() || '',
+      name: normalizeText(customer.customerName ?? customer.name),
+      phone: normalizePhone(customer.customerPhone ?? customer.phone),
+      email: normalizeNullableText(customer.customerEmail ?? customer.email),
     },
     order: {
-      orderType: order.order_type || order.orderType || 'pickup',
-      address: order.address?.trim() || '',
-      preferredTime: order.preferred_time?.trim() || order.preferredTime?.trim() || '',
-      notes: order.notes?.trim() || '',
+      orderType: normalizeText(order.orderType) || 'pickup',
+      address: normalizeNullableText(order.address),
+      preferredTime: normalizeNullableText(order.preferredTime),
+      notes: normalizeNullableText(order.notes),
+      privacyAccepted: Boolean(order.privacyAccepted),
     },
     items: items.map((item) => ({
-      menuItemId: Number(item.menu_item_id ?? item.menuItemId ?? item.id),
+      menuItemId: Number(item.menuItemId ?? item.menu_item_id),
       quantity: Number(item.quantity),
+      note: normalizeNullableText(item.note ?? item.notes),
+      customization: {
+        removedIngredientIds: item.customization?.removedIngredientIds ?? item.customization?.removed_ingredient_ids,
+        addedExtraIds: item.customization?.addedExtraIds ?? item.customization?.added_extra_ids,
+        selectedOptionIds: item.customization?.selectedOptionIds ?? item.customization?.selected_option_ids,
+      },
     })),
   };
 }
 
 function validatePayload(payload) {
-  const normalizedPhone = payload.customer.phone.replace(/[^\d+]/g, '');
+  assert(payload.items.length > 0, 400, 'EMPTY_CART', 'Il carrello e vuoto.');
+  assert(payload.customer.name, 400, 'INVALID_CUSTOMER_NAME', 'Inserisci nome e cognome.');
+  assertPhone(payload.customer.phone);
+  assertEmail(payload.customer.email);
+  assert(
+    ALLOWED_ORDER_TYPES.has(payload.order.orderType),
+    400,
+    'INVALID_ORDER_TYPE',
+    'Scegli se desideri ritiro o consegna.',
+  );
+  assert(
+    payload.order.privacyAccepted,
+    400,
+    'PRIVACY_CONSENT_REQUIRED',
+    'Per inviare l ordine devi accettare la privacy policy.',
+  );
 
-  if (!payload.items.length) {
-    throw new HttpError(400, 'EMPTY_CART', 'Il carrello e vuoto.');
+  if (payload.order.orderType === 'delivery') {
+    assert(payload.order.address, 400, 'ADDRESS_REQUIRED', 'Per la consegna serve un indirizzo completo.');
   }
 
-  if (!payload.customer.fullName) {
-    throw new HttpError(400, 'INVALID_CUSTOMER_NAME', 'Inserisci nome e cognome.');
-  }
-
-  if (!payload.customer.phone || normalizedPhone.length < 7) {
-    throw new HttpError(400, 'INVALID_PHONE', 'Inserisci un numero di telefono valido.');
-  }
-
-  if (payload.customer.email && !EMAIL_PATTERN.test(payload.customer.email)) {
-    throw new HttpError(400, 'INVALID_EMAIL', 'L email non sembra valida.');
-  }
-
-  if (!ALLOWED_ORDER_TYPES.has(payload.order.orderType)) {
-    throw new HttpError(400, 'INVALID_ORDER_TYPE', 'Scegli se desideri ritiro o consegna.');
-  }
-
-  if (payload.order.orderType === 'delivery' && !payload.order.address) {
-    throw new HttpError(400, 'ADDRESS_REQUIRED', 'Per la consegna serve un indirizzo completo.');
-  }
-
-  if (payload.items.some((item) => !Number.isInteger(item.quantity) || item.quantity <= 0 || !Number.isInteger(item.menuItemId))) {
-    throw new HttpError(400, 'INVALID_QUANTITY', 'Controlla le quantita presenti nel carrello.');
-  }
+  payload.items.forEach((item) => {
+    assert(Number.isInteger(item.menuItemId), 400, 'INVALID_MENU_ITEM', 'Controlla i prodotti nel carrello.');
+    assert(
+      Number.isInteger(item.quantity) && item.quantity >= 1,
+      400,
+      'INVALID_QUANTITY',
+      'Controlla le quantita presenti nel carrello.',
+    );
+  });
 }
 
-function fetchLiveMenuItems(itemIds, database) {
-  if (!itemIds.length) {
-    return [];
-  }
-
-  const placeholders = itemIds.map(() => '?').join(', ');
-
-  return database
-    .prepare(
-      `
-        select id, name, price, available
-        from menu_items
-        where id in (${placeholders})
-      `,
-    )
-    .all(...itemIds);
-}
-
-export function createGuestOrder(payload, database = getDatabase()) {
+export function createOrder(payload, database = getDatabase()) {
   const cleanPayload = sanitizeOrderPayload(payload);
   validatePayload(cleanPayload);
 
-  const distinctItemIds = [...new Set(cleanPayload.items.map((item) => item.menuItemId))];
-  const liveRows = fetchLiveMenuItems(distinctItemIds, database);
-  const liveItemsById = new Map(liveRows.map((row) => [row.id, row]));
+  const orderLines = cleanPayload.items.map((item) =>
+    buildOrderLine(item.menuItemId, item.quantity, item.note, item.customization, database),
+  );
+  const totals = calculateOrderTotals(orderLines, cleanPayload.order.orderType);
 
-  const unavailableItem = cleanPayload.items.find((item) => {
-    const liveItem = liveItemsById.get(item.menuItemId);
-    return !liveItem || !Number(liveItem.available);
-  });
-
-  if (unavailableItem) {
-    throw new HttpError(400, 'ITEM_UNAVAILABLE', 'Uno o piu piatti selezionati non sono piu disponibili.');
-  }
-
-  const orderItems = cleanPayload.items.map((item) => {
-    const liveItem = liveItemsById.get(item.menuItemId);
-
-    return {
-      id: liveItem.id,
-      name: liveItem.name,
-      price: Number(liveItem.price),
-      quantity: item.quantity,
-    };
-  });
-
-  const totals = calculateCartTotals(orderItems, cleanPayload.order.orderType);
-
-  const createOrderTransaction = database.transaction(() => {
-    const customer = upsertCustomer(cleanPayload.customer, database);
+  const transaction = database.transaction(() => {
     const orderResult = database
       .prepare(
         `
           insert into orders (
-            customer_id,
+            customer_name,
+            customer_phone,
+            customer_email,
+            privacy_accepted_at,
             order_type,
-            status,
             address,
             preferred_time,
             notes,
+            status,
             subtotal,
             delivery_fee,
             total
           )
-          values (?, ?, 'pending', ?, ?, ?, ?, ?, ?)
+          values (?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?)
         `,
       )
       .run(
-        customer.id,
+        cleanPayload.customer.name,
+        cleanPayload.customer.phone,
+        cleanPayload.customer.email,
+        new Date().toISOString(),
         cleanPayload.order.orderType,
         cleanPayload.order.orderType === 'delivery' ? cleanPayload.order.address : null,
-        cleanPayload.order.preferredTime || null,
-        cleanPayload.order.notes || null,
+        cleanPayload.order.preferredTime,
+        cleanPayload.order.notes,
         totals.subtotal,
         totals.deliveryFee,
         totals.total,
@@ -147,16 +119,29 @@ export function createGuestOrder(payload, database = getDatabase()) {
           order_id,
           menu_item_id,
           item_name_snapshot,
-          unit_price_snapshot,
+          base_price_snapshot,
+          final_unit_price,
           quantity,
-          line_total
+          line_total,
+          customization_json,
+          notes
         )
-        values (?, ?, ?, ?, ?, ?)
+        values (?, ?, ?, ?, ?, ?, ?, ?, ?)
       `,
     );
 
-    orderItems.forEach((item) => {
-      insertOrderItem.run(orderId, item.id, item.name, item.price, item.quantity, item.price * item.quantity);
+    orderLines.forEach((line) => {
+      insertOrderItem.run(
+        orderId,
+        line.menuItemId,
+        line.itemNameSnapshot,
+        line.basePriceSnapshot,
+        line.finalUnitPrice,
+        line.quantity,
+        line.lineTotal,
+        JSON.stringify(line.customization),
+        line.notes,
+      );
     });
 
     const savedOrder = database
@@ -177,8 +162,17 @@ export function createGuestOrder(payload, database = getDatabase()) {
       deliveryFee: Number(savedOrder.delivery_fee),
       total: Number(savedOrder.total),
       createdAt: savedOrder.created_at,
+      items: orderLines.map((line, index) => ({
+        id: `${orderId}-${index + 1}`,
+        menuItemId: line.menuItemId,
+        name: line.itemNameSnapshot,
+        quantity: line.quantity,
+        finalUnitPrice: line.finalUnitPrice,
+        lineTotal: line.lineTotal,
+        customization: line.customization,
+      })),
     };
   });
 
-  return createOrderTransaction();
+  return transaction();
 }

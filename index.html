@@ -9,6 +9,21 @@
       content="Tavernetta e un sito editoriale multi-page per un ristorante italiano elegante, caldo e contemporaneo, con hero carousel immersivo e un tono visivo premium."
     />
     <title>Tavernetta</title>
+    <script>
+      (function () {
+        const basePath = '%BASE_URL%';
+        const params = new URLSearchParams(window.location.search);
+        const redirect = params.get('redirect');
+
+        if (!redirect) {
+          return;
+        }
+
+        const normalizedBasePath = basePath.endsWith('/') ? basePath.slice(0, -1) : basePath;
+        const nextPath = redirect.startsWith('/') ? redirect : `/${redirect}`;
+        window.history.replaceState(null, '', `${normalizedBasePath}${nextPath}`);
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

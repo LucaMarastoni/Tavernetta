@@ -108,6 +108,8 @@ function CursorFollower() {
       }`}
       aria-hidden="true"
     >
+      <span className="cursor-follower-halo" />
+      <span className="cursor-follower-accent" />
       <span className="cursor-follower-ring" />
       <span className="cursor-follower-dot" />
     </div>

@@ -1,137 +1,219 @@
 # Tavernetta
 
-Sito multipagina editoriale per un ristorante italiano contemporaneo, costruito con React, Vite, React Router ed un backend locale `Express + SQLite`. La parte marketing mantiene il tono premium del progetto; la parte ordini usa un database reale file-based, adatto a un hosting casalingo o su una macchina privata.
+Esperienza menu e ordering per un ristorante italiano premium, costruita con `React + Vite` sul frontend e `Express + SQLite` sul backend. Il focus del progetto e una navigazione mobile-first della carta, con personalizzazione sicura delle pizze, carrello persistente e checkout guest pronto per futuri strumenti admin.
 
 ## Cosa include
 
-- Home editoriale con hero carousel full screen
-- Pagina `Menu` alimentata da SQLite
-- Pagina `Chi siamo`
-- Pagina `Ordina` con consultazione menu, carrello, checkout guest e persistenza reale
-- API locali `/api/menu`, `/api/orders`, `/api/customers`
-- Database relazionale con `categories`, `menu_items`, `customers`, `orders`, `order_items`
-- Seed iniziale automatico con dati demo Tavernetta
-- Architettura pronta per un futuro pannello admin
+- Pagina `/menu` come flusso principale di ordering
+- Pagina `/ordina` per revisione carrello e checkout
+- Banner cookie con consenso granulare e riapertura preferenze dal footer
+- Privacy Policy e Cookie Policy dedicate
+- Caricamento condizionale degli script opzionali e blocco preventivo dei servizi non essenziali
+- Google Fonts in self-hosting locale per evitare richieste automatiche a terze parti
+- Personalizzazione pizze con ingredienti rimovibili, extra e varianti
+- Pricing client live e ricalcolo server-side obbligatorio
+- Persistenza locale di carrello e order draft
+- SQLite con schema relazionale pronto per dashboard ordini e gestione menu
+- API REST per catalogo, dettagli prodotto, personalizzazione e invio ordini
+- Seed demo realistico Tavernetta con antipasti, pizze, dessert e bevande
+
+## Architettura
+
+### Frontend
+
+- `src/pages/MenuPage.jsx`
+  `/menu` gestisce category chips, lista prodotti, drawer di personalizzazione, sticky cart mobile e sidebar carrello desktop.
+- `src/pages/OrderPage.jsx`
+  `/ordina` riusa lo stesso stato globale per mostrare riepilogo, form checkout e conferma ordine.
+- `src/context/CartContext.jsx`
+  conserva linee carrello personalizzate e order draft in `localStorage`.
+- `src/context/CookieContext.jsx`
+  gestisce stato del consenso, banner iniziale, modal preferenze e persistenza delle scelte.
+- `src/utils/cart.js`
+  definisce identity delle linee, migrazione storage e riepiloghi personalizzazioni.
+- `src/utils/consentStorage.js`
+  centralizza schema del consenso, categorie cookie e lettura/scrittura sicura delle preferenze.
+- `src/utils/pricing.js`
+  calcola prezzi line item e totali ordine lato client.
+- `src/services/menuApi.js`, `src/services/orderApi.js`
+  centralizzano il dialogo con il backend.
+- `src/components/cookie/`
+  contiene banner, modal preferenze e manager dei servizi opzionali caricati solo dopo consenso.
+- `src/pages/PrivacyPolicy.jsx`, `src/pages/CookiePolicy.jsx`
+  espongono le pagine legali collegate dal footer e dal banner.
+
+### Backend
+
+- `server/routes/`
+  espone endpoint REST separati per `categories`, `menu`, `orders` e proxy media server-side.
+- `server/services/menuService.js`
+  compone catalogo, dettagli prodotto e struttura di personalizzazione.
+- `server/services/pricingService.js`
+  valida varianti/extra/ingredienti rimossi e ricalcola il prezzo finale.
+- `server/services/orderService.js`
+  valida il payload ordine, salva snapshot in `orders` e `order_items`.
+- `server/db/database.js`
+  inizializza SQLite, applica schema/seed e gestisce reset pulito dei sidecar `-wal` e `-shm`.
 
 ## File structure
 
 ```text
 .
-|-- .env.example
-|-- README.md
 |-- database/
 |   |-- schema.sql
 |   `-- seed.sql
-|-- index.html
-|-- package.json
-|-- public/
-|   `-- favicon.svg
 |-- server/
 |   |-- db/
 |   |   `-- database.js
 |   |-- index.js
+|   |-- routes/
+|   |   |-- categories.js
+|   |   |-- media.js
+|   |   |-- menu.js
+|   |   `-- orders.js
 |   |-- scripts/
 |   |   `-- resetDatabase.js
 |   |-- services/
-|   |   |-- customerService.js
 |   |   |-- menuService.js
-|   |   `-- orderService.js
+|   |   |-- orderService.js
+|   |   `-- pricingService.js
 |   `-- utils/
-|       |-- calculateTotals.js
-|       `-- httpError.js
+|       |-- httpError.js
+|       `-- validators.js
 |-- src/
-|   |-- App.jsx
-|   |-- assets/
-|   |   `-- linen.svg
 |   |-- components/
-|   |   |-- Button.jsx
-|   |   |-- CursorFollower.jsx
-|   |   |-- Footer.jsx
-|   |   |-- Header.jsx
-|   |   |-- HeroCarousel.jsx
-|   |   |-- MenuCatalogSkeleton.jsx
-|   |   |-- MobileMenu.jsx
-|   |   |-- PageIntro.jsx
-|   |   |-- QuantityControl.jsx
-|   |   |-- Reveal.jsx
-|   |   |-- ScrollManager.jsx
-|   |   |-- SectionTitle.jsx
-|   |   |-- SiteLayout.jsx
-|   |   `-- StatusPanel.jsx
+|   |   |-- cart/
+|   |   |   |-- CartStickyBar.jsx
+|   |   |   `-- CartSummary.jsx
+|   |   |-- checkout/
+|   |   |   `-- CheckoutForm.jsx
+|   |   |-- cookie/
+|   |   |   |-- ConsentScriptsManager.jsx
+|   |   |   |-- CookieBanner.jsx
+|   |   |   `-- CookiePreferencesModal.jsx
+|   |   |-- customization/
+|   |   |   `-- CustomizationDrawer.jsx
+|   |   `-- menu/
+|   |       |-- MenuCategoryNav.jsx
+|   |       `-- MenuItemCard.jsx
 |   |-- context/
-|   |   `-- CartContext.jsx
-|   |-- data/
-|   |   `-- siteContent.js
+|   |   |-- CartContext.jsx
+|   |   `-- CookieContext.jsx
 |   |-- hooks/
+|   |   |-- useCookieConsent.js
 |   |   `-- useMenuCatalog.js
-|   |-- lib/
-|   |   `-- apiClient.js
 |   |-- pages/
-|   |   |-- ChiSiamoPage.jsx
-|   |   |-- HomePage.jsx
+|   |   |-- CookiePolicy.jsx
 |   |   |-- MenuPage.jsx
-|   |   `-- OrderPage.jsx
-|   |-- sections/
-|   |   |-- AboutSection.jsx
-|   |   |-- ContactSection.jsx
-|   |   |-- FullMenuSection.jsx
-|   |   |-- GallerySection.jsx
-|   |   |-- HeroSection.jsx
-|   |   |-- MenuPreviewSection.jsx
-|   |   |-- OrderExperienceSection.jsx
-|   |   |-- PhilosophySection.jsx
-|   |   |-- ReservationSection.jsx
-|   |   |-- StorySection.jsx
-|   |   `-- TeamSection.jsx
+|   |   |-- OrderPage.jsx
+|   |   `-- PrivacyPolicy.jsx
 |   |-- services/
-|   |   |-- customerService.js
-|   |   |-- menuService.js
-|   |   `-- orderService.js
+|   |   |-- menuApi.js
+|   |   `-- orderApi.js
 |   |-- styles/
-|   |   |-- components.css
-|   |   |-- layout.css
-|   |   |-- ordering.css
-|   |   |-- sections.css
-|   |   `-- theme.css
-|   |-- utils/
-|   |   |-- calculateCartTotals.js
-|   |   |-- formatPrice.js
-|   |   `-- validators.js
-|   `-- main.jsx
+|   |   |-- privacy.css
+|   |   `-- menu-ordering.css
+|   `-- utils/
+|       |-- cart.js
+|       |-- consentStorage.js
+|       |-- formatPrice.js
+|       |-- pricing.js
+|       `-- validators.js
+|-- .env
+|-- package.json
 `-- vite.config.js
 ```
 
-## Installazione
+## Database
+
+Le tabelle principali sono:
+
+- `categories`
+- `menu_items`
+- `ingredients`
+- `menu_item_ingredients`
+- `extra_ingredients`
+- `menu_item_allowed_extras`
+- `product_options`
+- `orders`
+- `order_items`
+
+`order_items.customization_json` salva lo snapshot completo della configurazione:
+
+- `removedIngredients`
+- `addedExtras`
+- `selectedOptions`
+- `defaultIngredients`
+- `specialNotes`
+
+Questo mantiene gli ordini storici coerenti anche se il menu cambia nel tempo.
+
+## API
+
+- `GET /api/health`
+- `GET /api/categories`
+- `GET /api/menu`
+- `GET /api/menu-items`
+- `GET /api/menu-items/:id`
+- `GET /api/menu-items/:id/customization`
+- `POST /api/orders`
+
+### `POST /api/orders`
+
+Payload atteso:
+
+```json
+{
+  "customer": {
+    "customerName": "Giulia Rossi",
+    "customerPhone": "+39 333 000 0000",
+    "customerEmail": "giulia@example.com"
+  },
+  "order": {
+    "orderType": "delivery",
+    "address": "Via Roma 10, Verona",
+    "preferredTime": "20:30",
+    "notes": "Citofono Rossi",
+    "privacyAccepted": true
+  },
+  "items": [
+    {
+      "menuItemId": 3,
+      "quantity": 2,
+      "note": "Taglio in 6",
+      "customization": {
+        "removedIngredientIds": [2],
+        "addedExtraIds": [1],
+        "selectedOptionIds": [1, 4]
+      }
+    }
+  ]
+}
+```
+
+## Avvio locale
+
+Installa dipendenze:
 
 ```bash
 npm install
 ```
 
-## Configurazione
-
-1. Copia `.env.example` in `.env`.
-2. Imposta i valori desiderati:
+Configura `.env`:
 
 ```bash
 PORT=3001
 DATABASE_FILE=./data/tavernetta.sqlite
 ```
 
-Note:
-
-- `PORT` e la porta del server API locale.
-- `DATABASE_FILE` e il percorso del file SQLite.
-- `VITE_API_BASE_URL` serve solo se frontend e backend girano su host diversi. Se usi il proxy Vite o servi tutto dallo stesso server, puoi lasciarlo assente.
-
-## Sviluppo locale
-
-Avvia frontend Vite e server SQLite insieme:
+Avvia frontend e backend insieme:
 
 ```bash
 npm run dev
 ```
 
-Il frontend gira su `http://localhost:5173` e il backend API su `http://localhost:3001`.
+- Frontend Vite: `http://localhost:5173`
+- API Express: `http://localhost:3001`
 
 ## Build produzione
 
@@ -139,70 +221,67 @@ Il frontend gira su `http://localhost:5173` e il backend API su `http://localhos
 npm run build
 ```
 
-## Avvio produzione
-
-Serve la build React e le API dallo stesso server Express:
+Per servire build e API dallo stesso processo:
 
 ```bash
 npm start
 ```
 
-## Reset del database
+## Reset database
 
-Per rigenerare il file SQLite da zero:
+Per ricreare SQLite da zero:
 
 ```bash
 npm run db:reset
 ```
 
-Al successivo avvio del server, schema e seed verranno applicati automaticamente.
+Il reset rimuove anche i file `-wal` e `-shm`, cosi il riavvio resta pulito.
 
-## Come funziona il database
+## Validazione e pricing
 
-All avvio del server:
+- Il frontend mostra un prezzo live mentre l utente personalizza.
+- Il backend non si fida mai del prezzo client.
+- Il checkout richiede l accettazione della privacy policy prima dell invio ordine.
+- `pricingService` verifica:
+  - prodotto attivo
+  - quantita valida
+  - ingredienti rimossi ammessi
+  - extra consentiti per quel prodotto
+  - una sola opzione valida per gruppo
+- Prezzo finale:
+  - `base_price`
+  - `+ selected option deltas`
+  - `+ added extras`
+  - nessuno sconto per ingredienti rimossi
 
-1. viene creato il file SQLite se non esiste
-2. viene applicato `database/schema.sql`
-3. se il database e vuoto, viene applicato `database/seed.sql`
+## Privacy e consenso
 
-Le tabelle principali sono:
+- Cookie necessari sempre attivi per carrello, ordine, sicurezza applicativa e preferenze essenziali.
+- Cookie analitici caricati solo se `analytics = true`.
+- Cookie marketing/contenuti esterni caricati solo se `marketing = true`.
+- Se `VITE_GA_MEASUREMENT_ID` non e definito, nessuno script analytics viene caricato.
+- Google Maps incorporato resta bloccato fino al consenso marketing; e sempre disponibile il link esterno manuale.
+- I font display e body sono serviti localmente tramite `@font-face`, quindi non richiedono consenso.
+- Le immagini editoriali Unsplash vengono richieste dal server tramite `/api/media`, evitando chiamate dirette del browser a terze parti.
 
-- `categories`
-- `menu_items`
-- `customers`
-- `orders`
-- `order_items`
+## UX flow
 
-`order_items` salva anche gli snapshot di nome e prezzo, cosi gli ordini storici restano coerenti anche se la carta cambia.
+1. L utente apre `/menu`.
+2. Scorre le category chips.
+3. Apre una pizza nel drawer di personalizzazione.
+4. Seleziona impasto, extra, rimozioni e quantita.
+5. Aggiunge la configurazione al carrello.
+6. Su mobile usa la barra sticky; su desktop la sidebar resta visibile.
+7. Va su `/ordina`, conferma il riepilogo e compila i dati ordine.
+8. Il server ricalcola il totale e salva `orders` + `order_items`.
 
-## API disponibili
+## Note future
 
-- `GET /api/health`
-- `GET /api/menu`
-- `GET /api/customers/lookup?phone=...`
-- `POST /api/customers`
-- `POST /api/orders`
+La struttura attuale e pronta per aggiungere in seguito:
 
-## Flusso ordine
-
-1. Il frontend legge categorie e piatti disponibili da SQLite.
-2. L utente compone il carrello localmente.
-3. Il checkout valida nome, telefono, tipo ordine, indirizzo se necessario e disponibilita corrente.
-4. Il frontend invia `POST /api/orders`.
-5. Il server:
-   - crea o aggiorna il cliente
-   - rilegge i prezzi dal database
-   - calcola subtotal, delivery fee e total
-   - crea l ordine con stato iniziale `pending`
-   - salva tutte le righe in `order_items`
-6. Il frontend mostra una conferma elegante e svuota il carrello.
-
-## Personalizzazione rapida
-
-- Copy editoriale, immagini e contenuti marketing: `src/data/siteContent.js`
-- Schema e seed SQLite: `database/schema.sql`, `database/seed.sql`
-- API client frontend: `src/lib/apiClient.js`
-- Logica dati frontend: `src/services/`
-- Logica dati backend: `server/services/`
-- Carrello e stato locale ordine: `src/context/CartContext.jsx`
-- UI ordine: `src/pages/OrderPage.jsx`, `src/sections/OrderExperienceSection.jsx`
+- dashboard ordini
+- stato ordine aggiornabile
+- attivazione/disattivazione prodotti
+- gestione disponibilita ingredienti
+- editing menu da admin
+- sostituzione futura di SQLite con PostgreSQL mantenendo separazione tra route, service e pricing

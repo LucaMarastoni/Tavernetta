@@ -48,7 +48,6 @@ function ReservationSection() {
               <p className="reservation-card-label">Contatti diretti</p>
               <div className="reservation-contact-stack">
                 <a href={restaurant.reservation.phoneHref}>{restaurant.reservation.phoneLabel}</a>
-                <a href={restaurant.reservation.emailHref}>{restaurant.reservation.emailLabel}</a>
                 <p>{restaurant.reservation.address}</p>
               </div>
             </div>

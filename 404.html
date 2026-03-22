@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tavernetta</title>
+    <script>
+      (function () {
+        const basePath = '%BASE_URL%';
+        const normalizedBasePath = basePath.endsWith('/') ? basePath : `${basePath}/`;
+        const currentUrl = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+        const relativePath = currentUrl.startsWith(normalizedBasePath)
+          ? currentUrl.slice(normalizedBasePath.length - 1)
+          : currentUrl;
+        const redirectTarget = relativePath.startsWith('/') ? relativePath : `/${relativePath}`;
+
+        window.location.replace(
+          `${window.location.origin}${normalizedBasePath}?redirect=${encodeURIComponent(redirectTarget)}`,
+        );
+      })();
+    </script>
+  </head>
+  <body></body>
+</html>

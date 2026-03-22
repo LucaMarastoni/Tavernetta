@@ -47,11 +47,42 @@ const resolveToneFromElement = (element) => {
   return 'dark';
 };
 
+const getToneFromSections = (x, y) => {
+  const toneSections = document.querySelectorAll('[data-header-tone]');
+
+  for (const section of toneSections) {
+    if (!(section instanceof HTMLElement)) {
+      continue;
+    }
+
+    const rect = section.getBoundingClientRect();
+
+    if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
+      return section.getAttribute('data-header-tone') || 'dark';
+    }
+  }
+
+  return null;
+};
+
 const getToneAtPoint = (x, y) => {
+  const toneFromSection = getToneFromSections(x, y);
+
+  if (toneFromSection) {
+    return toneFromSection;
+  }
+
   const elements = document.elementsFromPoint(x, y);
 
   for (const element of elements) {
-    if (!(element instanceof Element) || element.closest('.site-header')) {
+    if (
+      !(element instanceof Element) ||
+      element.closest('.site-header') ||
+      element.closest('.staggered-menu-panel') ||
+      element.closest('.sm-prelayers') ||
+      element.closest('.sm-overlay-close') ||
+      element.closest('.cursor-follower')
+    ) {
       continue;
     }
 
@@ -66,14 +97,14 @@ function Header({ navigation }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [brandTone, setBrandTone] = useState('light');
   const [menuTone, setMenuTone] = useState('light');
-  const headerRef = useRef(null);
   const brandRef = useRef(null);
   const navRef = useRef(null);
   const actionsRef = useRef(null);
   const frameRef = useRef(null);
 
-  const isHome = location.pathname === '/';
-  const isSolid = !isHome || isScrolled;
+  const usesEditorialHeader =
+    location.pathname === '/' || location.pathname === '/chi-siamo' || location.pathname === '/menu';
+  const isSolid = !usesEditorialHeader || isScrolled;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -117,7 +148,7 @@ function Header({ navigation }) {
 
     const requestUpdate = () => {
       if (frameRef.current) {
-        return;
+        window.cancelAnimationFrame(frameRef.current);
       }
 
       frameRef.current = window.requestAnimationFrame(updateHeaderTones);
@@ -138,40 +169,38 @@ function Header({ navigation }) {
   }, [location.pathname]);
 
   return (
-    <>
-      <header ref={headerRef} className={`site-header ${isSolid ? 'is-solid' : ''}`}>
-        <div className="section-inner header-inner">
-          <NavLink ref={brandRef} className={`brand is-tone-${brandTone}`} to="/" viewTransition>
-            <span className="brand-copy">
-              <span className="brand-name">{restaurant.name}</span>
-            </span>
-          </NavLink>
+    <header className={`site-header ${isSolid ? 'is-solid' : ''}`}>
+      <div className="section-inner header-inner">
+        <NavLink ref={brandRef} className={`brand is-tone-${brandTone}`} to="/" viewTransition>
+          <span className="brand-copy">
+            <span className="brand-name">{restaurant.name}</span>
+          </span>
+        </NavLink>
 
-          <nav ref={navRef} className={`site-nav is-tone-${menuTone}`} aria-label="Navigazione principale">
-            {navigation.map((item) => (
-              <NavLink
-                key={item.to}
-                className={({ isActive }) => `nav-link ${isActive ? 'is-active' : ''}`}
-                end={item.to === '/'}
-                to={item.to}
-                viewTransition
-              >
-                {item.label}
-              </NavLink>
-            ))}
-          </nav>
+        <nav ref={navRef} className={`site-nav is-tone-${menuTone}`} aria-label="Navigazione principale">
+          {navigation.map((item) => (
+            <NavLink
+              key={item.to}
+              className={({ isActive }) => `nav-link ${isActive ? 'is-active' : ''}`}
+              end={item.to === '/'}
+              to={item.to}
+              viewTransition
+            >
+              {item.label}
+            </NavLink>
+          ))}
+        </nav>
 
-          <div ref={actionsRef} className={`header-actions is-tone-${menuTone}`}>
-            <StaggeredMenu
-              buttonColor={menuTone === 'dark' ? '#241914' : '#fffaf3'}
-              colors={['#cda68f', '#9e6556', '#f4e8da']}
-              navigation={navigation}
-              openButtonColor="#241914"
-            />
-          </div>
+        <div ref={actionsRef} className={`header-actions is-tone-${menuTone}`}>
+          <StaggeredMenu
+            buttonColor={menuTone === 'dark' ? '#241914' : '#fffaf3'}
+            colors={['#cda68f', '#9e6556', '#f4e8da']}
+            navigation={navigation}
+            openButtonColor="#241914"
+          />
         </div>
-      </header>
-    </>
+      </div>
+    </header>
   );
 }
 

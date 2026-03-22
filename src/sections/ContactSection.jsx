@@ -29,7 +29,6 @@ function ContactSection() {
             <p className="contact-card-label">Contatti</p>
             <div className="contact-stack">
               <a href={restaurant.reservation.phoneHref}>{restaurant.reservation.phoneLabel}</a>
-              <a href={restaurant.reservation.emailHref}>{restaurant.reservation.emailLabel}</a>
               <address>{restaurant.reservation.address}</address>
               <a href={restaurant.reservation.mapUrl} rel="noreferrer" target="_blank">
                 Apri su Google Maps

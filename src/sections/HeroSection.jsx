@@ -22,10 +22,6 @@ function HeroSection() {
             {restaurant.hero.orderCta.label}
           </Button>
         </div>
-
-        <a className="scroll-indicator" href="#about">
-          {restaurant.hero.scrollLabel}
-        </a>
       </div>
     </section>
   );

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { fetchPublicMenuCatalog } from '../services/menuService';
+import { fetchMenuCatalog } from '../services/menuApi';
 
 export function useMenuCatalog() {
   const [categories, setCategories] = useState([]);
@@ -13,12 +13,12 @@ export function useMenuCatalog() {
     setError('');
 
     try {
-      const catalog = await fetchPublicMenuCatalog();
-      setCategories(catalog.categories);
-      setFeaturedItems(catalog.featuredItems);
-      setItemsById(catalog.itemsById);
+      const catalog = await fetchMenuCatalog();
+      setCategories(catalog.categories ?? []);
+      setFeaturedItems(catalog.featuredItems ?? []);
+      setItemsById(catalog.itemsById ?? {});
     } catch (fetchError) {
-      setError(fetchError.message || 'Non riusciamo a caricare la carta in questo momento.');
+      setError(fetchError.message || 'Non riusciamo a caricare il menu in questo momento.');
     } finally {
       setLoading(false);
     }

@@ -6,6 +6,8 @@ import './styles/layout.css';
 import './styles/components.css';
 import './styles/sections.css';
 import './styles/ordering.css';
+import './styles/menu-ordering.css';
+import './styles/privacy.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

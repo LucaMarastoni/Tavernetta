@@ -3,15 +3,17 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import express from 'express';
 import { getDatabaseFile, initializeDatabase } from './db/database.js';
-import { findCustomerByPhone, upsertCustomer } from './services/customerService.js';
-import { getPublicMenuCatalog } from './services/menuService.js';
-import { createGuestOrder } from './services/orderService.js';
+import categoriesRouter from './routes/categories.js';
+import mediaRouter from './routes/media.js';
+import menuRouter from './routes/menu.js';
+import ordersRouter from './routes/orders.js';
 import { HttpError } from './utils/httpError.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const projectRoot = path.resolve(__dirname, '..');
 const distDir = path.resolve(projectRoot, 'dist');
+const host = process.env.HOST || '127.0.0.1';
 const port = Number(process.env.PORT || 3001);
 
 initializeDatabase();
@@ -28,47 +30,10 @@ app.get('/api/health', (request, response) => {
   });
 });
 
-app.get('/api/menu', (request, response, next) => {
-  try {
-    response.json(getPublicMenuCatalog());
-  } catch (error) {
-    next(error);
-  }
-});
-
-app.get('/api/customers/lookup', (request, response, next) => {
-  try {
-    const phone = request.query.phone?.toString() || '';
-
-    if (!phone.trim()) {
-      throw new HttpError(400, 'INVALID_PHONE', 'Inserisci un numero di telefono valido.');
-    }
-
-    response.json({
-      customer: findCustomerByPhone(phone),
-    });
-  } catch (error) {
-    next(error);
-  }
-});
-
-app.post('/api/customers', (request, response, next) => {
-  try {
-    response.status(201).json({
-      customer: upsertCustomer(request.body || {}),
-    });
-  } catch (error) {
-    next(error);
-  }
-});
-
-app.post('/api/orders', (request, response, next) => {
-  try {
-    response.status(201).json(createGuestOrder(request.body || {}));
-  } catch (error) {
-    next(error);
-  }
-});
+app.use('/api/categories', categoriesRouter);
+app.use('/api/media', mediaRouter);
+app.use('/api', menuRouter);
+app.use('/api/orders', ordersRouter);
 
 if (fs.existsSync(path.join(distDir, 'index.html'))) {
   app.use(express.static(distDir));
@@ -76,6 +41,10 @@ if (fs.existsSync(path.join(distDir, 'index.html'))) {
     response.sendFile(path.join(distDir, 'index.html'));
   });
 }
+
+app.use((request, response, next) => {
+  next(new HttpError(404, 'NOT_FOUND', 'La risorsa richiesta non esiste.'));
+});
 
 app.use((error, request, response, next) => {
   if (response.headersSent) {
@@ -100,7 +69,22 @@ app.use((error, request, response, next) => {
   });
 });
 
-app.listen(port, () => {
-  console.log(`Tavernetta server attivo su http://localhost:${port}`);
+const server = app.listen(port, host, () => {
+  console.log(`Tavernetta server attivo su http://${host}:${port}`);
   console.log(`Database SQLite: ${getDatabaseFile()}`);
+});
+
+server.once('error', (error) => {
+  console.error(`Impossibile avviare il server su ${host}:${port}`);
+  console.error(error);
+  process.exitCode = 1;
+});
+
+server.once('close', () => {
+  console.log('Server HTTP arrestato.');
+});
+
+await new Promise((resolve) => {
+  server.once('close', resolve);
+  server.once('error', resolve);
 });

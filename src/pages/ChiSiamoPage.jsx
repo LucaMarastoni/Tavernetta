@@ -9,7 +9,7 @@ import TeamSection from '../sections/TeamSection';
 
 function ChiSiamoPage() {
   return (
-    <>
+    <div className="chi-siamo-page">
       <AboutPageHeroSection />
       <StorySection content={restaurant.aboutPage.story} />
       <PhilosophySection content={restaurant.aboutPage.philosophy} />
@@ -17,7 +17,7 @@ function ChiSiamoPage() {
       <GallerySection />
       <LocationMapSection />
       <ContactSection />
-    </>
+    </div>
   );
 }
 

@@ -1,5 +1,25 @@
-const photo = (id, width = 1600) =>
-  `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${width}&q=80`;
+const localEditorialPhotoIds = new Set([
+  'photo-1414235077428-338989a2e8c0',
+  'photo-1470337458703-46ad1756a187',
+  'photo-1498654896293-37aacf113fd9',
+  'photo-1504674900247-0877df9cc836',
+  'photo-1513104890138-7c749659a591',
+  'photo-1514933651103-005eec06c04b',
+  'photo-1517248135467-4c7edcad34c4',
+  'photo-1544025162-d76694265947',
+  'photo-1552566626-52f8b828add9',
+  'photo-1559339352-11d035aa65de',
+]);
+
+const withBase = (path) => `${import.meta.env.BASE_URL}${path.replace(/^\/+/, '')}`;
+
+const photo = (id, width = 1600) => {
+  if (localEditorialPhotoIds.has(id)) {
+    return withBase(`images/editorial/${id}.jpg`);
+  }
+
+  return `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${width}&q=80`;
+};
 
 export const pageNavigation = [
   { to: '/', label: 'Home' },
@@ -48,8 +68,8 @@ export const restaurant = {
   hero: {
     scrollLabel: 'Scorri',
     orderCta: {
-      label: 'Ordina ora',
-      to: '/ordina',
+      label: 'Menu',
+      to: '/menu',
     },
   },
   about: {
@@ -252,21 +272,16 @@ export const restaurant = {
     intro:
       'Accogliamo tavoli intimi, cene condivise e richieste dedicate per piccoli eventi privati. Per il percorso degustazione consigliamo la prenotazione anticipata.',
     bookingLabel: 'Prenota un tavolo',
-    bookingHref:
-      'mailto:prenotazioni@tavernetta.it?subject=Richiesta%20prenotazione%20Tavernetta',
-    phoneLabel: '+39 02 5501 2486',
-    phoneHref: 'tel:+390255012486',
-    emailLabel: 'prenotazioni@tavernetta.it',
-    emailHref: 'mailto:prenotazioni@tavernetta.it',
+    bookingHref: 'tel:+390456111712',
+    phoneLabel: '045 6111712',
+    phoneHref: 'tel:+390456111712',
     address: 'Via Federico Garofoli, 105, 37057 San Giovanni Lupatoto VR',
     mapUrl:
       'https://www.google.com/maps/search/?api=1&query=Via+Federico+Garofoli+105,+37057+San+Giovanni+Lupatoto+VR',
     mapEmbedUrl:
       'https://www.google.com/maps?q=Via%20Federico%20Garofoli%2C%20105%2C%2037057%20San%20Giovanni%20Lupatoto%20VR&z=16&output=embed',
     hours: [
-      { day: 'Martedi - Giovedi', time: '19:00 - 23:00' },
-      { day: 'Venerdi - Sabato', time: '19:00 - 00:00' },
-      { day: 'Domenica', time: '12:30 - 15:00 / 19:00 - 22:30' },
+      { day: 'Martedi - Domenica', time: '19:00 - 22:00' },
       { day: 'Lunedi', time: 'Chiuso' },
     ],
   },
@@ -289,38 +304,38 @@ export const restaurant = {
 export const previewCategories = [
   {
     index: '01',
-    title: 'Degustazione',
+    title: 'Le Pizze',
     description:
-      'Un percorso in cinque passaggi tra forno, piccoli piatti stagionali e un finale pulito.',
-    price: '65',
+      'Le rosse della casa, dai grandi classici alle combinazioni piu personali e identitarie.',
+    price: '5,85',
   },
   {
     index: '02',
-    title: 'Pizze gourmet',
+    title: 'Le Bianche',
     description:
-      'Impasti maturati a lungo, condimenti leggibili, struttura sottile e grande digeribilita.',
-    price: '18',
+      'Pizze senza pomodoro, piu cremose e avvolgenti, con una lettura netta degli ingredienti.',
+    price: '9,30',
   },
   {
     index: '03',
-    title: 'Specialita',
+    title: 'Le Speciali',
     description:
-      'Verdure, crudi, brace leggera e piatti pensati per aprire o accompagnare la tavola.',
-    price: '15',
+      'Le proposte piu distintive di Tavernetta, tra ripiene, mare, mortadella e richiami di territorio.',
+    price: '11,00',
   },
   {
     index: '04',
-    title: 'Dessert',
+    title: 'I Calzoni',
     description:
-      'Finali lattici, agrumi, cacao e tessiture morbide, sempre con una dolcezza trattenuta.',
-    price: '11',
+      'Versioni chiuse, piu golose e sostanziose, pensate per chi cerca una pizza dal carattere pieno.',
+    price: '9,40',
   },
   {
     index: '05',
-    title: 'Bevande e vini',
+    title: 'Fritteria',
     description:
-      'Calici italiani, bottiglie in movimento, pairing dedicati e signature drink a bassa voce.',
-    price: '9',
+      'Calzoni fritti con anima popolare e gusto deciso, da scegliere quando vuoi qualcosa di piu sfizioso.',
+    price: '9,10',
   },
 ];
 

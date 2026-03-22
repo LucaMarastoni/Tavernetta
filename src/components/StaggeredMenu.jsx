@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
+import { createPortal } from 'react-dom';
 import { NavLink, useLocation } from 'react-router-dom';
 import { restaurant } from '../data/siteContent';
 import '../styles/staggered-menu.css';
@@ -14,6 +15,7 @@ function StaggeredMenu({
   const location = useLocation();
   const [open, setOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const portalTarget = typeof document !== 'undefined' ? document.body : null;
   const wrapperRef = useRef(null);
   const panelRef = useRef(null);
   const preLayersRef = useRef(null);
@@ -280,13 +282,10 @@ function StaggeredMenu({
     [],
   );
 
-  const menuItems = [...navigation, { label: 'Prenota', href: '#reservation' }];
-
   return (
     <div
       ref={wrapperRef}
-      className={`staggered-menu-shell ${isVisible ? 'is-open' : ''}`}
-      style={{ '--sm-accent': accentColor }}
+      className="staggered-menu-shell"
     >
       <button
         ref={toggleBtnRef}
@@ -304,56 +303,81 @@ function StaggeredMenu({
         </span>
       </button>
 
-      <div ref={preLayersRef} className="sm-prelayers" aria-hidden="true">
-        {colors.map((color, index) => (
-          <span key={color + index} className="sm-prelayer" style={{ background: color }} />
-        ))}
-      </div>
+      {portalTarget
+        ? createPortal(
+            <>
+              <div
+                ref={preLayersRef}
+                className={`sm-prelayers ${isVisible ? 'is-visible' : ''}`}
+                aria-hidden="true"
+              >
+                {colors.map((color, index) => (
+                  <span key={color + index} className="sm-prelayer" style={{ background: color }} />
+                ))}
+              </div>
 
-      <aside
-        id="staggered-menu-panel"
-        ref={panelRef}
-        className="staggered-menu-panel"
-        aria-hidden={!open}
-        role="dialog"
-        aria-modal="true"
-        aria-label="Menu mobile"
-        onClick={(event) => {
-          if (event.target === event.currentTarget) {
-            closeMenu();
-          }
-        }}
-      >
-        <div className="sm-panel-inner">
-          <div className="sm-panel-head">
-            <p className="sm-panel-brand">{restaurant.name}</p>
-          </div>
+              <button
+                className={`sm-toggle sm-overlay-close ${isVisible ? 'is-visible' : ''}`}
+                type="button"
+                aria-label="Chiudi il menu"
+                onClick={closeMenu}
+              >
+                <span className="sm-toggle-label">Chiudi</span>
+                <span className="sm-toggle-icon" aria-hidden="true">
+                  <span className="sm-toggle-line" />
+                  <span className="sm-toggle-line sm-toggle-line-v" />
+                </span>
+              </button>
 
-          <nav className="sm-panel-nav" aria-label="Navigazione mobile">
-            <ul className="sm-panel-list" data-numbering role="list">
-              {menuItems.map((item, index) => (
-                <li key={item.label + index} className="sm-panel-itemWrap">
-                  {item.to ? (
-                    <NavLink
-                      className={({ isActive }) => `sm-panel-item ${isActive ? 'is-active' : ''}`}
-                      end={item.to === '/'}
-                      to={item.to}
-                      onClick={closeMenu}
-                      viewTransition
-                    >
-                      <span className="sm-panel-itemLabel">{item.label}</span>
-                    </NavLink>
-                  ) : (
-                    <a className="sm-panel-item" href={item.href} onClick={closeMenu}>
-                      <span className="sm-panel-itemLabel">{item.label}</span>
-                    </a>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </nav>
-        </div>
-      </aside>
+              <aside
+                id="staggered-menu-panel"
+                ref={panelRef}
+                className={`staggered-menu-panel ${isVisible ? 'is-visible' : ''}`}
+                style={{ '--sm-accent': accentColor }}
+                aria-hidden={!open}
+                role="dialog"
+                aria-modal="true"
+                aria-label="Menu mobile"
+                onClick={(event) => {
+                  if (event.target === event.currentTarget) {
+                    closeMenu();
+                  }
+                }}
+              >
+                <div className="sm-panel-inner">
+                  <div className="sm-panel-head">
+                    <p className="sm-panel-brand">{restaurant.name}</p>
+                  </div>
+
+                  <nav className="sm-panel-nav" aria-label="Navigazione mobile">
+                    <ul className="sm-panel-list" data-numbering role="list">
+                      {navigation.map((item, index) => (
+                        <li key={item.label + index} className="sm-panel-itemWrap">
+                          {item.to ? (
+                            <NavLink
+                              className={({ isActive }) => `sm-panel-item ${isActive ? 'is-active' : ''}`}
+                              end={item.to === '/'}
+                              to={item.to}
+                              onClick={closeMenu}
+                              viewTransition
+                            >
+                              <span className="sm-panel-itemLabel">{item.label}</span>
+                            </NavLink>
+                          ) : (
+                            <a className="sm-panel-item" href={item.href} onClick={closeMenu}>
+                              <span className="sm-panel-itemLabel">{item.label}</span>
+                            </a>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </nav>
+                </div>
+              </aside>
+            </>,
+            portalTarget,
+          )
+        : null}
     </div>
   );
 }
