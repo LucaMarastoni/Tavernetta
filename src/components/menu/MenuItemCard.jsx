@@ -1,7 +1,7 @@
 import { formatPrice } from '../../utils/formatPrice';
 
 function MenuItemCard({ item, onSelect }) {
-  const kicker = item.tags?.slice(0, 2).join(' / ') || 'Forno Tavernetta';
+  const kicker = item.tags?.slice(0, 2).join(' / ');
   const description = item.description || 'Preparazione della casa.';
 
   return (
@@ -18,7 +18,7 @@ function MenuItemCard({ item, onSelect }) {
         </div>
 
         <div className="menu-catalog-item-main">
-          <p className="menu-catalog-item-kicker">{kicker}</p>
+          {kicker ? <p className="menu-catalog-item-kicker">{kicker}</p> : null}
 
           <div className="menu-catalog-item-copy">
             <h3>{item.name}</h3>

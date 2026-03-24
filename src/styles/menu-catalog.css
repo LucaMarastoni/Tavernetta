@@ -205,16 +205,6 @@
   padding: 0;
 }
 
-.menu-catalog-tabs-bar::after {
-  content: '';
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  height: 1px;
-  background: rgba(61, 43, 33, 0.14);
-}
-
 .menu-catalog-tabs {
   display: flex;
   width: 100%;

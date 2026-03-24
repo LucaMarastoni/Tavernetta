@@ -1,7 +1,6 @@
 import MenuItemCard from './MenuItemCard';
 
 function MenuProductSection({ group, setSectionRef, onSelectProduct }) {
-  const totalItems = group.categories.reduce((total, category) => total + category.items.length, 0);
   const hasMultipleCategories = group.categories.length > 1;
 
   return (
@@ -14,16 +13,8 @@ function MenuProductSection({ group, setSectionRef, onSelectProduct }) {
     >
       <header className="menu-catalog-section-head">
         <div className="menu-catalog-section-copy">
-          <p className="ordering-eyebrow">Sezione</p>
           <h2 id={`menu-group-title-${group.id}`}>{group.title}</h2>
           <p>{group.description}</p>
-        </div>
-
-        <div className="menu-catalog-section-meta" aria-label="Dettagli sezione">
-          <span>
-            {totalItems} {totalItems === 1 ? 'proposta' : 'proposte'}
-          </span>
-          <strong>{group.categorySummary}</strong>
         </div>
       </header>
 
