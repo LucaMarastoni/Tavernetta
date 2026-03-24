@@ -1,0 +1,38 @@
+export const adminMockOrders = [
+  {
+    id: 'TV-1042',
+    customerName: 'Giulia R.',
+    type: 'Ritiro',
+    scheduledAt: '19:20',
+    total: 38.9,
+    status: 'new',
+    items: ['Bufalina x1', 'Margherita 2.0 x1', 'Acqua naturale x2'],
+  },
+  {
+    id: 'TV-1041',
+    customerName: 'Andrea M.',
+    type: 'Sala',
+    scheduledAt: '19:05',
+    total: 29.4,
+    status: 'preparing',
+    items: ['Inferno x1', 'Calabrese x1', 'Patatine x1'],
+  },
+  {
+    id: 'TV-1038',
+    customerName: 'Laura P.',
+    type: 'Asporto',
+    scheduledAt: '18:45',
+    total: 51.8,
+    status: 'completed',
+    items: ['Golosa x2', 'Paradiso x1', 'Birra artigianale x2'],
+  },
+  {
+    id: 'TV-1034',
+    customerName: 'Matteo C.',
+    type: 'Ritiro',
+    scheduledAt: '18:10',
+    total: 16.8,
+    status: 'cancelled',
+    items: ['Marinara x1', 'Margherita x1'],
+  },
+];

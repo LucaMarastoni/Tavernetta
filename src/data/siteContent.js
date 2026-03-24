@@ -273,6 +273,7 @@ export const restaurant = {
       'Accogliamo tavoli intimi, cene condivise e richieste dedicate per piccoli eventi privati. Per il percorso degustazione consigliamo la prenotazione anticipata.',
     bookingLabel: 'Prenota un tavolo',
     bookingHref: 'tel:+390456111712',
+    phoneCompactLabel: '0456111712',
     phoneLabel: '045 6111712',
     phoneHref: 'tel:+390456111712',
     address: 'Via Federico Garofoli, 105, 37057 San Giovanni Lupatoto VR',

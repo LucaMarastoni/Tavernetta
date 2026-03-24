@@ -11,8 +11,7 @@
           "ingredienti": ["pomodoro", "mozzarella", "funghi freschi", "tastasal", "monte veronese DOP"]
         },
         {
-          "nome": "ANDR
-",
+          "nome": "ANDRE'",
           "prezzo": 9.1,
           "allergeni": [3],
           "piccante": false,
@@ -139,8 +138,7 @@
           "prezzo": 5.85,
           "allergeni": [],
           "piccante": false,
-          "ingredienti": ["pomodoro", "olio all
-aglio", "origano siciliano"]
+          "ingredienti": ["pomodoro", "olio all aglio", "origano siciliano"]
         },
         {
           "nome": "PARADISO",
@@ -305,8 +303,7 @@ aglio", "origano siciliano"]
           "ingredienti": ["mozzarella", "zucchine grigliate", "pancetta arrotolata piccante", "stracciatella", "peperoncini in fili sottili"]
         },
         {
-          "nome": "SAPORE D
-AMARONE",
+          "nome": "SAPORE DI AMARONE",
           "prezzo": 12.2,
           "allergeni": [2, 3],
           "piccante": false,

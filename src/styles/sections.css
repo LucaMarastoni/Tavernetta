@@ -500,6 +500,23 @@
   align-items: center;
 }
 
+.about-top-action {
+  grid-column: 1 / -1;
+  display: grid;
+  justify-items: center;
+  gap: 0.55rem;
+  margin-top: clamp(-1.2rem, -2vw, -0.5rem);
+  margin-bottom: clamp(-0.25rem, 0.5vw, 0.35rem);
+}
+
+.about-top-action-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-terra);
+}
+
 .about-copy {
   display: grid;
   gap: 2rem;
@@ -545,8 +562,31 @@
 
 .about-visual {
   position: relative;
+  display: grid;
+  gap: clamp(1rem, 2vw, 1.45rem);
   padding-left: 0;
   padding: clamp(0.8rem, 2vw, 1.5rem) clamp(0.8rem, 2vw, 1.6rem) clamp(1.6rem, 3vw, 2.3rem);
+}
+
+.about-call-cta {
+  width: min(100%, 58rem);
+  min-height: 4rem;
+  padding-inline: clamp(1.6rem, 3vw, 2.4rem);
+  font-size: clamp(0.88rem, 1vw, 0.98rem);
+  letter-spacing: 0.18em;
+  box-shadow: 0 18px 34px rgba(34, 24, 18, 0.08);
+}
+
+.about-call-cta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.72rem;
+}
+
+.about-call-cta-icon {
+  width: 1.05rem;
+  height: 1.05rem;
+  flex: 0 0 auto;
 }
 
 .section-ornament {
@@ -1758,6 +1798,11 @@
     max-width: none;
   }
 
+  .about-top-action {
+    margin-top: 0;
+    margin-bottom: -0.15rem;
+  }
+
   .about-visual,
   .story-visual,
   .philosophy-visual,
@@ -1814,6 +1859,10 @@
 
   .about-page-hero-title {
     max-width: 11ch;
+  }
+
+  .about-call-cta {
+    width: 100%;
   }
 
   .about-page-hero-chrome .scroll-indicator {
