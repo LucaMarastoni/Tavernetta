@@ -1,25 +1,46 @@
-function MenuCategoryNav({ categories, activeCategoryId, onSelect }) {
-  return (
-    <section className="ordering-category-nav-shell" aria-label="Categorie del menu">
-      <div className="ordering-category-nav-head">
-        <p className="ordering-category-nav-kicker">Carta</p>
-        <span className="ordering-category-nav-note">Scorri e scegli la categoria</span>
-      </div>
+import { useEffect, useRef } from 'react';
 
-      <nav className="ordering-category-nav" aria-label="Categorie del menu">
-        {categories.map((category, index) => (
-          <button
-            key={category.id}
-            className={`ordering-category-chip ${activeCategoryId === category.id ? 'is-active' : ''}`}
-            type="button"
-            onClick={() => onSelect(category.id)}
-          >
-            <small className="ordering-category-chip-index">{String(index + 1).padStart(2, '0')}</small>
-            <span>{category.name}</span>
-            <strong>{category.items.length} proposte</strong>
-          </button>
-        ))}
-      </nav>
+function MenuCategoryNav({ groups, activeGroupId, onSelect }) {
+  const tabRefs = useRef({});
+
+  useEffect(() => {
+    const activeTab = tabRefs.current[activeGroupId];
+
+    if (!activeTab) {
+      return;
+    }
+
+    activeTab.scrollIntoView({
+      behavior: 'smooth',
+      block: 'nearest',
+      inline: 'center',
+    });
+  }, [activeGroupId]);
+
+  return (
+    <section className="menu-catalog-tabs-shell" aria-label="Categorie del menu">
+      <div className="menu-catalog-tabs-bar">
+        <nav className="menu-catalog-tabs" aria-label="Categorie del menu">
+          {groups.map((group) => (
+            <button
+              key={group.id}
+              ref={(node) => {
+                if (node) {
+                  tabRefs.current[group.id] = node;
+                } else {
+                  delete tabRefs.current[group.id];
+                }
+              }}
+              className={`menu-catalog-tab ${activeGroupId === group.id ? 'is-active' : ''}`}
+              type="button"
+              aria-pressed={activeGroupId === group.id}
+              onClick={() => onSelect(group.id)}
+            >
+              <span className="menu-catalog-tab-label">{group.title}</span>
+            </button>
+          ))}
+        </nav>
+      </div>
     </section>
   );
 }

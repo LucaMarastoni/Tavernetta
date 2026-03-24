@@ -28,15 +28,6 @@ function TeamSection({ content = restaurant.team }) {
           />
 
           <p className="team-quote-minimal">{content.quote}</p>
-
-          <div className="team-highlights team-highlights-minimal">
-            {content.highlights.map((highlight) => (
-              <article key={highlight.label} className="team-highlight-card">
-                <p>{highlight.label}</p>
-                <h3>{highlight.value}</h3>
-              </article>
-            ))}
-          </div>
         </Reveal>
       </div>
     </section>

@@ -1,13 +1,30 @@
 import { useEffect, useMemo, useState } from 'react';
 import QuantityControl from '../QuantityControl';
+import ProductOptionsGroup from './ProductOptionsGroup';
 import { createCartLine } from '../../utils/cart';
 import { formatPrice } from '../../utils/formatPrice';
 import { calculateConfiguredUnitPrice } from '../../utils/pricing';
 
+function getDefaultSelectionsForGroup(group) {
+  if (group.selectionType === 'multiple') {
+    return group.options.filter((option) => option.isDefault).map((option) => option.id);
+  }
+
+  const explicitDefault = group.options.find((option) => option.isDefault);
+
+  if (explicitDefault) {
+    return [explicitDefault.id];
+  }
+
+  if (group.required && group.minSelections > 0 && group.options[0]) {
+    return [group.options[0].id];
+  }
+
+  return [];
+}
+
 function getDefaultOptionSelections(optionGroups) {
-  return optionGroups
-    .map((group) => group.options.find((option) => option.isDefault)?.id ?? group.options[0]?.id ?? null)
-    .filter(Boolean);
+  return optionGroups.flatMap(getDefaultSelectionsForGroup);
 }
 
 function createInitialState(configuration, initialLine) {
@@ -43,6 +60,38 @@ function createInitialState(configuration, initialLine) {
   };
 }
 
+function getSelectedOptionIdsForGroup(group, selectedOptionIds) {
+  const groupOptionIds = new Set(group.options.map((option) => option.id));
+  return selectedOptionIds.filter((optionId) => groupOptionIds.has(optionId));
+}
+
+function getSelectedOptions(configuration, selectedOptionIds) {
+  if (!configuration) {
+    return [];
+  }
+
+  return configuration.optionGroups.flatMap((group) =>
+    group.options
+      .filter((option) => selectedOptionIds.includes(option.id))
+      .map((option) => ({
+        ...option,
+        groupName: group.name,
+        groupSlug: group.slug,
+      })),
+  );
+}
+
+function getMissingGroups(configuration, selectedOptionIds) {
+  if (!configuration) {
+    return [];
+  }
+
+  return configuration.optionGroups.filter((group) => {
+    const selectedCount = getSelectedOptionIdsForGroup(group, selectedOptionIds).length;
+    return selectedCount < group.minSelections;
+  });
+}
+
 function CustomizationDrawer({ open, loading, error, configuration, initialLine, onClose, onConfirm }) {
   const [state, setState] = useState(createInitialState(configuration, initialLine));
 
@@ -75,18 +124,10 @@ function CustomizationDrawer({ open, loading, error, configuration, initialLine,
     setState(createInitialState(configuration, initialLine));
   }, [configuration, initialLine, open]);
 
-  const selectedOptions = useMemo(() => {
-    if (!configuration) {
-      return [];
-    }
-
-    return configuration.optionGroups
-      .map((group) => {
-        const requestedOption = group.options.find((option) => state.selectedOptionIds.includes(option.id));
-        return requestedOption ?? group.options.find((option) => option.isDefault) ?? group.options[0] ?? null;
-      })
-      .filter(Boolean);
-  }, [configuration, state.selectedOptionIds]);
+  const selectedOptions = useMemo(
+    () => getSelectedOptions(configuration, state.selectedOptionIds),
+    [configuration, state.selectedOptionIds],
+  );
 
   const removedIngredients = useMemo(
     () =>
@@ -100,6 +141,11 @@ function CustomizationDrawer({ open, loading, error, configuration, initialLine,
     [configuration, state.addedExtraIds],
   );
 
+  const missingGroups = useMemo(
+    () => getMissingGroups(configuration, state.selectedOptionIds),
+    [configuration, state.selectedOptionIds],
+  );
+
   const finalUnitPrice = useMemo(
     () =>
       configuration
@@ -111,6 +157,12 @@ function CustomizationDrawer({ open, loading, error, configuration, initialLine,
         : 0,
     [addedExtras, configuration, selectedOptions],
   );
+
+  const totalPrice = useMemo(() => finalUnitPrice * state.quantity, [finalUnitPrice, state.quantity]);
+  const confirmDisabled = Boolean(loading || error || !configuration || missingGroups.length);
+  const confirmLabel = initialLine
+    ? `Aggiorna ${state.quantity} per ${formatPrice(totalPrice)}`
+    : `Aggiungi ${state.quantity} per ${formatPrice(totalPrice)}`;
 
   if (!open) {
     return null;
@@ -134,22 +186,41 @@ function CustomizationDrawer({ open, loading, error, configuration, initialLine,
     }));
   };
 
-  const selectOption = (groupSlug, optionId) => {
+  const toggleOption = (group, optionId) => {
     setState((currentState) => {
-      const idsWithoutGroup = currentState.selectedOptionIds.filter((entry) => {
-        const group = configuration.optionGroups.find((optionGroup) => optionGroup.slug === groupSlug);
-        return !group?.options.some((option) => option.id === entry);
-      });
+      const groupSelections = getSelectedOptionIdsForGroup(group, currentState.selectedOptionIds);
+      const isSelected = groupSelections.includes(optionId);
+
+      let nextGroupSelections = groupSelections;
+
+      if (group.selectionType === 'single') {
+        if (isSelected && group.minSelections === 0) {
+          nextGroupSelections = [];
+        } else {
+          nextGroupSelections = [optionId];
+        }
+      } else if (isSelected) {
+        nextGroupSelections = groupSelections.filter((entry) => entry !== optionId);
+      } else if (groupSelections.length < group.maxSelections) {
+        nextGroupSelections = [...groupSelections, optionId];
+      } else {
+        return currentState;
+      }
+
+      const groupOptionIds = new Set(group.options.map((option) => option.id));
 
       return {
         ...currentState,
-        selectedOptionIds: [...idsWithoutGroup, optionId],
+        selectedOptionIds: [
+          ...currentState.selectedOptionIds.filter((entry) => !groupOptionIds.has(entry)),
+          ...nextGroupSelections,
+        ],
       };
     });
   };
 
   const handleConfirm = () => {
-    if (!configuration) {
+    if (!configuration || confirmDisabled) {
       return;
     }
 
@@ -168,111 +239,75 @@ function CustomizationDrawer({ open, loading, error, configuration, initialLine,
   };
 
   return (
-    <div className="ordering-drawer-shell" role="dialog" aria-modal="true" aria-labelledby="customization-title">
-      <button className="ordering-drawer-backdrop" type="button" aria-label="Chiudi personalizzazione" onClick={onClose} />
+    <div className="menu-product-sheet" role="dialog" aria-modal="true" aria-labelledby="customization-title">
+      <button className="menu-product-sheet-backdrop" type="button" aria-label="Chiudi personalizzazione" onClick={onClose} />
 
-      <aside className="ordering-drawer-panel">
-        <div className="ordering-drawer-header">
-          <div>
-            <p className="ordering-eyebrow">{initialLine ? 'Modifica riga' : 'Personalizza'}</p>
-            <h2 id="customization-title">{configuration?.item.name ?? 'Prodotto'}</h2>
-            <p>{configuration?.item.description ?? 'Stiamo caricando il dettaglio del prodotto.'}</p>
+      <aside className="menu-product-sheet-panel">
+        <div className="menu-product-sheet-scroll">
+          <div className={`menu-product-sheet-hero ${configuration?.item.imageUrl ? '' : 'is-placeholder'}`}>
+            {configuration?.item.imageUrl ? (
+              <img
+                alt={configuration?.item.name ?? 'Prodotto'}
+                loading="lazy"
+                decoding="async"
+                src={configuration.item.imageUrl}
+              />
+            ) : (
+              <div className="menu-product-sheet-placeholder" aria-hidden="true">
+                <span>{configuration?.item.name?.charAt(0) ?? 'T'}</span>
+              </div>
+            )}
+
+            <div className="menu-product-sheet-hero-bar">
+              {initialLine ? <span className="menu-product-sheet-mode">Modifica prodotto</span> : <span aria-hidden="true" />}
+
+              <button className="menu-product-sheet-close" type="button" onClick={onClose}>
+                Chiudi
+              </button>
+            </div>
           </div>
 
-          <button className="ordering-drawer-close" type="button" onClick={onClose}>
-            Chiudi
-          </button>
-        </div>
+          <div className="menu-product-sheet-header">
+            {initialLine ? <p className="ordering-eyebrow">Rivedi la configurazione</p> : null}
 
-        {loading ? <p className="ordering-drawer-status">Stiamo preparando gli ingredienti e le varianti disponibili.</p> : null}
-        {error ? <p className="ordering-drawer-status is-error">{error}</p> : null}
+            <div className="menu-product-sheet-title-row">
+              <h2 id="customization-title">{configuration?.item.name ?? 'Prodotto'}</h2>
+              {configuration ? <strong>{formatPrice(configuration.item.basePrice)}</strong> : null}
+            </div>
 
-        {!loading && !error && configuration ? (
-          <>
-            <div className="ordering-drawer-body">
-              <section className="ordering-customization-section">
-                <div className="ordering-section-heading">
-                  <h3>Base della pizza</h3>
-                  <span>{formatPrice(configuration.item.basePrice)}</span>
-                </div>
+            <p className="menu-product-sheet-description">
+              {configuration?.item.description ?? 'Stiamo caricando il dettaglio del prodotto.'}
+            </p>
+          </div>
 
-                <div className="ordering-ingredient-list">
-                  {configuration.defaultIngredients.map((ingredient) => {
-                    const isRemoved = state.removedIngredientIds.includes(ingredient.ingredientId);
+          {loading ? <p className="menu-product-sheet-status">Stiamo preparando ingredienti, varianti e note disponibili.</p> : null}
+          {error ? <p className="menu-product-sheet-status is-error">{error}</p> : null}
 
-                    return (
-                      <button
-                        key={ingredient.ingredientId}
-                        className={`ordering-ingredient-pill ${ingredient.isRemovable ? '' : 'is-locked'} ${isRemoved ? 'is-removed' : ''}`.trim()}
-                        type="button"
-                        onClick={() => ingredient.isRemovable && toggleRemovedIngredient(ingredient.ingredientId)}
-                        disabled={!ingredient.isRemovable}
-                      >
-                        <span>{ingredient.name}</span>
-                        <small>{ingredient.isRemovable ? (isRemoved ? 'Rimosso' : 'Incluso') : 'Fisso'}</small>
-                      </button>
-                    );
-                  })}
-                </div>
-              </section>
-
-              {configuration.optionGroups.length ? (
-                <section className="ordering-customization-section">
-                  <div className="ordering-section-heading">
-                    <h3>Varianti</h3>
-                    <span>Scelta guidata</span>
+          {!loading && !error && configuration ? (
+            <div className="menu-product-sheet-body">
+              {configuration.defaultIngredients.length ? (
+                <section className="menu-product-section-block">
+                  <div className="menu-product-section-head">
+                    <div>
+                      <h3>Ingredienti di base</h3>
+                    </div>
+                    <span>{formatPrice(configuration.item.basePrice)}</span>
                   </div>
 
-                  <div className="ordering-option-groups">
-                    {configuration.optionGroups.map((group) => (
-                      <div key={group.slug} className="ordering-option-group">
-                        <p>{group.name}</p>
-                        <div className="ordering-option-grid">
-                          {group.options.map((option) => {
-                            const isSelected = selectedOptions.some((selectedOption) => selectedOption.id === option.id);
-
-                            return (
-                              <button
-                                key={option.id}
-                                className={`ordering-option-card ${isSelected ? 'is-selected' : ''}`}
-                                type="button"
-                                onClick={() => selectOption(group.slug, option.id)}
-                              >
-                                <span>{option.optionName}</span>
-                                <small>{option.priceDelta ? `+ ${formatPrice(option.priceDelta)}` : 'Incluso'}</small>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </section>
-              ) : null}
-
-              {configuration.allowedExtras.length ? (
-                <section className="ordering-customization-section">
-                  <div className="ordering-section-heading">
-                    <h3>Aggiungi extra</h3>
-                    <span>Prezzo per singola pizza</span>
-                  </div>
-
-                  <div className="ordering-extra-list">
-                    {configuration.allowedExtras.map((extra) => {
-                      const isActive = state.addedExtraIds.includes(extra.id);
+                  <div className="menu-product-ingredient-list">
+                    {configuration.defaultIngredients.map((ingredient) => {
+                      const isRemoved = state.removedIngredientIds.includes(ingredient.ingredientId);
 
                       return (
                         <button
-                          key={extra.id}
-                          className={`ordering-extra-row ${isActive ? 'is-active' : ''}`}
+                          key={ingredient.ingredientId}
+                          className={`menu-product-ingredient ${ingredient.isRemovable ? '' : 'is-locked'} ${isRemoved ? 'is-removed' : ''}`.trim()}
                           type="button"
-                          onClick={() => toggleExtra(extra.id)}
+                          onClick={() => ingredient.isRemovable && toggleRemovedIngredient(ingredient.ingredientId)}
+                          disabled={!ingredient.isRemovable}
                         >
-                          <div>
-                            <strong>{extra.name}</strong>
-                            {extra.allergenInfo ? <span>{extra.allergenInfo}</span> : null}
-                          </div>
-                          <small>+ {formatPrice(extra.extraPrice)}</small>
+                          <span>{ingredient.name}</span>
+                          <small>{ingredient.isRemovable ? (isRemoved ? 'Rimosso' : 'Tocca per togliere') : 'Sempre incluso'}</small>
                         </button>
                       );
                     })}
@@ -280,23 +315,78 @@ function CustomizationDrawer({ open, loading, error, configuration, initialLine,
                 </section>
               ) : null}
 
-              <section className="ordering-customization-section">
-                <div className="ordering-section-heading">
-                  <h3>Note per la cucina</h3>
-                  <span>Facoltative</span>
+              {configuration.optionGroups.map((group) => (
+                <ProductOptionsGroup
+                  key={group.slug}
+                  group={group}
+                  selectedOptionIds={getSelectedOptionIdsForGroup(group, state.selectedOptionIds)}
+                  onToggle={toggleOption}
+                />
+              ))}
+
+              {configuration.allowedExtras.length ? (
+                <section className="menu-product-section-block">
+                  <div className="menu-product-section-head">
+                    <div>
+                      <h3>Aggiungi extra</h3>
+                      <p>Ogni extra viene calcolato sul singolo prodotto.</p>
+                    </div>
+                    <span>Facoltativi</span>
+                  </div>
+
+                  <div className="menu-product-extra-list">
+                    {configuration.allowedExtras.map((extra) => {
+                      const isActive = state.addedExtraIds.includes(extra.id);
+
+                      return (
+                        <button
+                          key={extra.id}
+                          className={`menu-product-extra ${isActive ? 'is-active' : ''}`}
+                          type="button"
+                          aria-pressed={isActive}
+                          onClick={() => toggleExtra(extra.id)}
+                        >
+                          <div className="menu-product-extra-copy">
+                            <strong>{extra.name}</strong>
+                            {extra.allergenInfo ? <small>{extra.allergenInfo}</small> : null}
+                          </div>
+
+                          <span>{extra.extraPrice ? `+ ${formatPrice(extra.extraPrice)}` : 'Incluso'}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </section>
+              ) : null}
+
+              <section className="menu-product-section-block">
+                <div className="menu-product-section-head">
+                  <div>
+                    <h3>Note per la cucina</h3>
+                  </div>
                 </div>
 
                 <textarea
-                  className="ordering-note-field"
-                  rows="4"
+                  className="menu-product-note-field"
+                  rows="3"
                   placeholder="Es. taglio in 6, cottura leggermente piu asciutta"
                   value={state.note}
                   onChange={(event) => setState((currentState) => ({ ...currentState, note: event.target.value }))}
                 />
               </section>
             </div>
+          ) : null}
+        </div>
 
-            <div className="ordering-drawer-footer">
+        {!loading && !error && configuration ? (
+          <div className="menu-product-sheet-footer">
+            {missingGroups.length ? (
+              <p className="menu-product-sheet-footer-note is-warning">
+                {`Completa "${missingGroups[0].name}" per continuare.`}
+              </p>
+            ) : null}
+
+            <div className="menu-product-sheet-footer-main">
               <QuantityControl
                 value={state.quantity}
                 onDecrease={() =>
@@ -305,16 +395,11 @@ function CustomizationDrawer({ open, loading, error, configuration, initialLine,
                 onIncrease={() => setState((currentState) => ({ ...currentState, quantity: currentState.quantity + 1 }))}
               />
 
-              <div className="ordering-drawer-price">
-                <span>Prezzo finale</span>
-                <strong>{formatPrice(finalUnitPrice * state.quantity)}</strong>
-              </div>
-
-              <button className="ordering-primary-cta" type="button" onClick={handleConfirm}>
-                {initialLine ? 'Aggiorna carrello' : 'Aggiungi al carrello'}
+              <button className="ordering-primary-cta menu-product-sheet-submit" type="button" disabled={confirmDisabled} onClick={handleConfirm}>
+                {confirmLabel}
               </button>
             </div>
-          </>
+          </div>
         ) : null}
       </aside>
     </div>

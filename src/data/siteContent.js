@@ -287,14 +287,13 @@ export const restaurant = {
   },
   locationSection: {
     eyebrow: 'Dove siamo',
-    title: 'Dove siamo',
+    title: 'Ci trovi qui',
     intro: 'Via Federico Garofoli, 105, 37057 San Giovanni Lupatoto VR',
   },
   contact: {
     eyebrow: 'Contatti',
     title: 'Contatti e orari.',
-    intro:
-      'Qui trovi i recapiti diretti, l indirizzo e gli orari del servizio. Tutto in modo semplice e leggibile.',
+    intro: 'Qui trovi subito telefono, WhatsApp, orari e indicazioni per raggiungerci senza passaggi inutili.',
     mapTitle: 'Raggiungici a San Giovanni Lupatoto.',
     mapDescription:
       'Uno spazio raccolto, facile da raggiungere, pensato per una cena calma e curata.',

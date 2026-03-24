@@ -244,14 +244,21 @@
 }
 
 .chi-siamo-page .story-copy,
-.chi-siamo-page .philosophy-copy,
 .chi-siamo-page .team-copy {
+  gap: 1.45rem;
+}
+
+.chi-siamo-page .philosophy-copy {
   gap: 2.2rem;
 }
 
 .chi-siamo-page .story-copy-minimal,
-.chi-siamo-page .philosophy-copy-minimal,
 .chi-siamo-page .team-copy-minimal {
+  max-width: 31rem;
+  gap: 1.35rem;
+}
+
+.chi-siamo-page .philosophy-copy-minimal {
   max-width: 36rem;
   gap: 1.85rem;
 }
@@ -271,48 +278,14 @@
 }
 
 .chi-siamo-page .team-quote-minimal {
-  max-width: 31rem;
+  max-width: 28rem;
   font-size: clamp(1.45rem, 2.55vw, 2rem);
   line-height: 1.24;
 }
 
-.chi-siamo-page .story-details,
-.chi-siamo-page .team-highlights {
-  gap: 1.2rem;
-}
-
-.chi-siamo-page .story-detail-card,
-.chi-siamo-page .team-highlight-card {
-  display: grid;
-  align-content: start;
-  gap: 0.55rem;
-  min-height: 9.8rem;
-  padding: 1.55rem 1.4rem;
-  transition:
-    transform 0.3s var(--ease),
-    box-shadow 0.3s var(--ease),
-    border-color 0.3s var(--ease);
-}
-
-.chi-siamo-page .story-detail-card:hover,
-.chi-siamo-page .team-highlight-card:hover,
 .chi-siamo-page .philosophy-card-minimal:hover {
   transform: translateY(-4px);
   box-shadow: 0 20px 34px rgba(34, 24, 18, 0.08);
-}
-
-.chi-siamo-page .story-detail-card p,
-.chi-siamo-page .team-highlight-card p {
-  margin-bottom: 0;
-  font-size: 0.76rem;
-  letter-spacing: 0.18em;
-}
-
-.chi-siamo-page .story-detail-card h3,
-.chi-siamo-page .team-highlight-card h3 {
-  font-size: clamp(1.4rem, 2.1vw, 1.82rem);
-  line-height: 1.24;
-  text-wrap: balance;
 }
 
 .chi-siamo-page .philosophy-card-minimal {
@@ -424,6 +397,7 @@
 :is(.home-page, .chi-siamo-page) .philosophy-visual.is-visible .philosophy-image-card,
 :is(.home-page, .chi-siamo-page) .preview-visual.is-visible .preview-image-card,
 :is(.home-page, .chi-siamo-page) .team-visual.is-visible .team-image-card,
+:is(.home-page, .chi-siamo-page) .contact-map-block.is-visible .location-map-frame-shell,
 :is(.home-page, .chi-siamo-page) .gallery-card.is-visible,
 :is(.home-page, .chi-siamo-page) .location-map-frame-shell.is-visible {
   opacity: 1;
@@ -439,6 +413,7 @@
   filter: saturate(0.88) contrast(1.03) brightness(1);
 }
 
+:is(.home-page, .chi-siamo-page) .contact-map-block.is-visible .location-map-frame,
 :is(.home-page, .chi-siamo-page) .gallery-card.is-visible .gallery-image,
 :is(.home-page, .chi-siamo-page) .location-map-frame-shell.is-visible .location-map-frame {
   transform: scale(1);
@@ -1527,31 +1502,91 @@
 
 .contact-shell {
   display: grid;
-  grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr);
-  gap: clamp(2rem, 4vw, 3.5rem);
-  align-items: start;
+  gap: clamp(1.8rem, 4vw, 3rem);
 }
 
 .contact-copy {
   display: grid;
-  gap: 1.75rem;
+  gap: 1.6rem;
+  max-width: min(42rem, 100%);
+}
+
+.contact-quick-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+}
+
+.contact-quick-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 3.1rem;
+  padding: 0.88rem 1.3rem;
+  border-radius: 999px;
+  border: 1px solid rgba(55, 37, 27, 0.14);
+  background: rgba(255, 250, 244, 0.74);
+  box-shadow: 0 14px 28px rgba(35, 25, 18, 0.05);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-espresso);
+  transition:
+    transform 0.3s var(--ease),
+    background-color 0.3s var(--ease),
+    border-color 0.3s var(--ease),
+    box-shadow 0.3s var(--ease);
+}
+
+.contact-quick-action.is-primary {
+  background: rgba(244, 236, 226, 0.98);
+  border-color: rgba(61, 43, 33, 0.2);
+}
+
+.contact-quick-action:hover,
+.contact-quick-action:focus-visible {
+  transform: translateY(-2px);
+  background: rgba(255, 251, 247, 0.96);
+  border-color: rgba(184, 118, 95, 0.34);
+  box-shadow: 0 18px 34px rgba(35, 25, 18, 0.08);
+}
+
+.contact-social-links {
+  gap: 0.75rem 1.25rem;
+}
+
+.contact-social-links a {
+  font-size: 0.74rem;
+  letter-spacing: 0.16em;
 }
 
 .contact-info-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem;
+  gap: 1.1rem;
 }
 
 .contact-info-card {
   display: grid;
-  gap: 1rem;
+  align-content: start;
+  gap: 1.25rem;
   min-height: 100%;
-  padding: 1.5rem;
-  border-radius: 1.7rem;
-  background: rgba(255, 250, 244, 0.78);
+  padding: clamp(1.6rem, 3vw, 2rem);
+  border-radius: 1.9rem;
+  background: rgba(255, 250, 244, 0.8);
   border: 1px solid rgba(55, 37, 27, 0.1);
-  box-shadow: 0 18px 34px rgba(35, 25, 18, 0.06);
+  box-shadow: 0 18px 38px rgba(35, 25, 18, 0.06);
+  transition:
+    transform 0.3s var(--ease),
+    box-shadow 0.3s var(--ease),
+    border-color 0.3s var(--ease);
+}
+
+.contact-info-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 22px 40px rgba(35, 25, 18, 0.08);
+  border-color: rgba(184, 118, 95, 0.22);
 }
 
 .contact-card-label {
@@ -1561,9 +1596,30 @@
   color: var(--color-terra);
 }
 
+.contact-primary-links {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.contact-primary-phone {
+  width: fit-content;
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  line-height: 0.98;
+  letter-spacing: 0.04em;
+  color: var(--color-espresso);
+}
+
+.contact-address {
+  font-style: normal;
+  font-size: 1rem;
+  line-height: 1.85;
+  color: var(--color-mocha);
+}
+
 .contact-stack {
   display: grid;
-  gap: 0.75rem;
+  gap: 0.8rem;
 }
 
 .contact-stack a,
@@ -1573,8 +1629,91 @@
   color: var(--color-mocha);
 }
 
-.contact-stack a:hover {
-  text-decoration: underline;
+.contact-utility-link {
+  width: fit-content;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-espresso);
+  transition:
+    transform 0.3s var(--ease),
+    color 0.3s var(--ease);
+}
+
+.contact-utility-link:hover,
+.contact-utility-link:focus-visible {
+  transform: translateX(0.2rem);
+  color: var(--color-terra);
+}
+
+.contact-map-link {
+  margin-top: 0.2rem;
+}
+
+.contact-hours-list {
+  gap: 1.2rem;
+}
+
+.contact-hours-list li {
+  padding-top: 1.1rem;
+  border-top: 1px solid rgba(61, 43, 33, 0.1);
+}
+
+.contact-hours-list li:first-child {
+  padding-top: 0;
+  border-top: none;
+}
+
+.contact-hours-day {
+  font-size: 0.82rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-terra);
+}
+
+.contact-hours-time {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 2.4vw, 1.95rem);
+  line-height: 1.18;
+  letter-spacing: 0.04em;
+  color: var(--color-espresso);
+}
+
+.contact-map-block {
+  display: grid;
+  gap: 1.35rem;
+}
+
+.contact-map-copy {
+  display: grid;
+  gap: 0.75rem;
+  max-width: min(36rem, 100%);
+}
+
+.contact-map-copy h3 {
+  font-family: var(--font-display);
+  font-size: clamp(1.55rem, 2.6vw, 2rem);
+  line-height: 1.08;
+  letter-spacing: 0.04em;
+  font-weight: 400;
+}
+
+.contact-map-copy p:last-child {
+  line-height: 1.8;
+  color: var(--color-ink);
+}
+
+.contact-map-frame-shell {
+  box-shadow: 0 22px 52px rgba(34, 24, 18, 0.08);
+}
+
+.contact-map-frame {
+  height: min(58vh, 30rem);
+}
+
+.contact-map-block .external-content-card {
+  min-height: 18rem;
 }
 
 @media (max-width: 1180px) {
@@ -1602,8 +1741,7 @@
   .preview-layout,
   .menu-layout,
   .team-grid,
-  .reservation-panel,
-  .contact-shell {
+  .reservation-panel {
     grid-template-columns: 1fr;
   }
 
@@ -1655,11 +1793,6 @@
   .chi-siamo-page .philosophy-copy-minimal,
   .chi-siamo-page .team-copy-minimal {
     max-width: none;
-  }
-
-  .chi-siamo-page .story-details,
-  .chi-siamo-page .team-highlights {
-    grid-template-columns: 1fr;
   }
 }
 
@@ -1796,8 +1929,34 @@
     align-items: flex-start;
   }
 
-  .location-map-frame {
-    height: 26rem;
+  .contact-copy {
+    gap: 1.35rem;
+  }
+
+  .contact-quick-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .contact-quick-action {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .contact-info-card {
+    padding: 1.35rem;
+  }
+
+  .contact-primary-phone {
+    font-size: clamp(1.7rem, 9vw, 2.3rem);
+  }
+
+  .contact-map-frame {
+    height: 24rem;
+  }
+
+  .contact-map-block .external-content-card {
+    min-height: auto;
   }
 
   .chi-siamo-page .story-grid,
@@ -1807,8 +1966,11 @@
   }
 
   .chi-siamo-page .story-copy,
-  .chi-siamo-page .philosophy-copy,
   .chi-siamo-page .team-copy {
+    gap: 1.2rem;
+  }
+
+  .chi-siamo-page .philosophy-copy {
     gap: 1.5rem;
   }
 
@@ -1819,16 +1981,9 @@
     line-height: 1.2;
   }
 
-  .chi-siamo-page .story-detail-card,
-  .chi-siamo-page .team-highlight-card,
   .chi-siamo-page .philosophy-card-minimal {
     min-height: 0;
     padding: 1.35rem 1.2rem;
-  }
-
-  .chi-siamo-page .story-detail-card h3,
-  .chi-siamo-page .team-highlight-card h3 {
-    font-size: 1.45rem;
   }
 
   .chi-siamo-page .team-quote-minimal {

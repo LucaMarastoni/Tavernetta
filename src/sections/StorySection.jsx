@@ -33,15 +33,6 @@ function StorySection({ content = restaurant.story }) {
           />
 
           <p className="story-lead">{content.intro}</p>
-
-          <div className="story-details story-details-minimal">
-            {content.details.map((detail) => (
-              <article key={detail.label} className="story-detail-card">
-                <p>{detail.label}</p>
-                <h3>{detail.value}</h3>
-              </article>
-            ))}
-          </div>
         </Reveal>
       </div>
     </section>

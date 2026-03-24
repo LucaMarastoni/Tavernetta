@@ -8,6 +8,15 @@ const CATEGORY_META_BY_KEY = {
   'calzoni in fritteria': { name: 'Calzoni in Fritteria', slug: 'calzoni-in-fritteria' },
 };
 
+const CATEGORY_IMAGE_IDS = {
+  'le-pizze': ['photo-1513104890138-7c749659a591', 'photo-1414235077428-338989a2e8c0'],
+  'le-bianche': ['photo-1504674900247-0877df9cc836', 'photo-1498654896293-37aacf113fd9'],
+  'le-speciali': ['photo-1544025162-d76694265947', 'photo-1559339352-11d035aa65de'],
+  'i-calzoni': ['photo-1514933651103-005eec06c04b', 'photo-1513104890138-7c749659a591'],
+  'calzoni-in-fritteria': ['photo-1414235077428-338989a2e8c0', 'photo-1498654896293-37aacf113fd9'],
+  fallback: ['photo-1414235077428-338989a2e8c0'],
+};
+
 function normalizeText(value = '') {
   return value
     .toString()
@@ -30,6 +39,155 @@ function cleanInlineText(value = '') {
     .replace(/\s+/g, ' ')
     .replace(/\s+,/g, ',')
     .trim();
+}
+
+function withBase(path) {
+  return `${import.meta.env.BASE_URL}${path.replace(/^\/+/, '')}`;
+}
+
+function resolveItemImage(categorySlug, itemIndex) {
+  const imageIds = CATEGORY_IMAGE_IDS[categorySlug] ?? CATEGORY_IMAGE_IDS.fallback;
+  const imageId = imageIds[itemIndex % imageIds.length];
+
+  return withBase(`images/editorial/${imageId}.jpg`);
+}
+
+function normalizeSelectionType(value = '') {
+  return value === 'multiple' ? 'multiple' : 'single';
+}
+
+function toBoolean(value) {
+  if (typeof value === 'boolean') {
+    return value;
+  }
+
+  if (typeof value === 'string') {
+    return ['true', '1', 'yes', 'si'].includes(value.toLowerCase());
+  }
+
+  return Boolean(value);
+}
+
+function toPositiveInteger(value, fallbackValue) {
+  const parsed = Number.parseInt(value, 10);
+  return Number.isInteger(parsed) && parsed >= 0 ? parsed : fallbackValue;
+}
+
+function mapOptionGroups(rawItem, itemId) {
+  const rawGroups = rawItem.optionGroups ?? rawItem.opzioni ?? rawItem.varianti ?? [];
+
+  if (!Array.isArray(rawGroups)) {
+    return [];
+  }
+
+  return rawGroups
+    .map((rawGroup, groupIndex) => {
+      const name = cleanInlineText(rawGroup.name ?? rawGroup.label ?? rawGroup.titolo ?? `Scelta ${groupIndex + 1}`);
+      const selectionType = normalizeSelectionType(rawGroup.selectionType ?? rawGroup.type ?? rawGroup.tipo);
+      const required = toBoolean(rawGroup.required ?? rawGroup.obbligatoria);
+      const rawOptions = rawGroup.options ?? rawGroup.scelte ?? rawGroup.items ?? [];
+
+      if (!Array.isArray(rawOptions) || !rawOptions.length) {
+        return null;
+      }
+
+      const options = rawOptions
+        .map((rawOption, optionIndex) => {
+          const optionName = cleanInlineText(
+            rawOption.optionName ?? rawOption.name ?? rawOption.label ?? rawOption.titolo ?? `Opzione ${optionIndex + 1}`,
+          );
+
+          if (!optionName) {
+            return null;
+          }
+
+          const optionId = itemId * 10000 + groupIndex * 100 + optionIndex + 1;
+
+          return {
+            id: optionId,
+            optionId,
+            groupName: name,
+            groupSlug: slugify(name),
+            optionName,
+            description: cleanInlineText(rawOption.description ?? rawOption.sottotitolo ?? ''),
+            priceDelta: Number(rawOption.priceDelta ?? rawOption.extraPrice ?? rawOption.prezzo ?? 0),
+            isDefault: toBoolean(rawOption.defaultSelected ?? rawOption.isDefault ?? rawOption.predefinita),
+          };
+        })
+        .filter(Boolean);
+
+      if (!options.length) {
+        return null;
+      }
+
+      const maxSelections =
+        selectionType === 'single'
+          ? 1
+          : toPositiveInteger(rawGroup.maxSelections ?? rawGroup.max ?? rawGroup.massimo, options.length);
+      const minSelections = toPositiveInteger(
+        rawGroup.minSelections ?? rawGroup.min ?? rawGroup.minimo,
+        required ? 1 : 0,
+      );
+
+      return {
+        id: itemId * 100 + groupIndex + 1,
+        slug: slugify(name),
+        name,
+        description: cleanInlineText(rawGroup.description ?? rawGroup.subtitle ?? rawGroup.istruzione ?? ''),
+        selectionType,
+        required,
+        minSelections,
+        maxSelections,
+        options,
+      };
+    })
+    .filter(Boolean);
+}
+
+function mapAllowedExtras(rawItem, itemId) {
+  const rawExtras = rawItem.allowedExtras ?? rawItem.extra ?? rawItem.extras ?? [];
+
+  if (!Array.isArray(rawExtras)) {
+    return [];
+  }
+
+  return rawExtras
+    .map((rawExtra, extraIndex) => {
+      const name = cleanInlineText(rawExtra.name ?? rawExtra.label ?? rawExtra.titolo ?? '');
+
+      if (!name) {
+        return null;
+      }
+
+      const extraId = itemId * 1000 + extraIndex + 1;
+
+      return {
+        id: extraId,
+        extraIngredientId: extraId,
+        ingredientId: extraId,
+        name,
+        allergenInfo: cleanInlineText(rawExtra.allergenInfo ?? rawExtra.allergeni ?? ''),
+        extraPrice: Number(rawExtra.extraPrice ?? rawExtra.prezzo ?? 0),
+      };
+    })
+    .filter(Boolean);
+}
+
+function mapDefaultIngredients(ingredients, itemId) {
+  return ingredients.map((ingredientName, index) => {
+    const ingredientId = itemId * 1000 + index + 1;
+    const isRemovable = !/a piacere/i.test(ingredientName);
+
+    return {
+      id: ingredientId,
+      ingredientId,
+      name: ingredientName,
+      slug: slugify(ingredientName),
+      allergenInfo: null,
+      isRemovable,
+      sortOrder: index,
+    };
+  });
 }
 
 function sanitizeBrokenJson(raw) {
@@ -117,7 +275,7 @@ function mapCategory(rawCategory, categoryIndex, itemIdRef) {
   };
 
   const categoryId = categoryIndex + 1;
-  const items = Array.isArray(rawCategory.items)
+  const itemsWithCustomization = Array.isArray(rawCategory.items)
     ? rawCategory.items.map((rawItem, itemIndex) => {
         const nextItemId = itemIdRef.current;
         itemIdRef.current += 1;
@@ -127,28 +285,43 @@ function mapCategory(rawCategory, categoryIndex, itemIdRef) {
         const ingredients = Array.isArray(rawItem.ingredienti)
           ? rawItem.ingredienti.map(cleanInlineText).filter(Boolean)
           : [];
+        const defaultIngredients = mapDefaultIngredients(ingredients, nextItemId);
+        const removableIngredients = defaultIngredients.filter((ingredient) => ingredient.isRemovable);
+        const optionGroups = mapOptionGroups(rawItem, nextItemId);
+        const allowedExtras = mapAllowedExtras(rawItem, nextItemId);
 
         return {
-          id: nextItemId,
-          categoryId,
-          categorySlug: categoryMeta.slug,
-          name,
-          slug: slugify(name),
-          description: buildDescription(rawItem),
-          basePrice: price,
-          price,
-          imageUrl: '',
-          tags: mapTags(rawItem),
-          allergens: Array.isArray(rawItem.allergeni) ? rawItem.allergeni.map((entry) => String(entry)) : [],
-          active: true,
-          featured: false,
-          sortOrder: itemIndex,
-          hasCustomization: false,
-          ingredients,
-          note: cleanInlineText(rawItem.note || ''),
+          item: {
+            id: nextItemId,
+            categoryId,
+            categorySlug: categoryMeta.slug,
+            name,
+            slug: slugify(name),
+            description: buildDescription(rawItem),
+            basePrice: price,
+            price,
+            imageUrl: resolveItemImage(categoryMeta.slug, itemIndex),
+            tags: mapTags(rawItem),
+            allergens: Array.isArray(rawItem.allergeni) ? rawItem.allergeni.map((entry) => String(entry)) : [],
+            active: true,
+            featured: false,
+            sortOrder: itemIndex,
+            hasCustomization:
+              defaultIngredients.length > 0 || removableIngredients.length > 0 || allowedExtras.length > 0 || optionGroups.length > 0,
+            ingredients,
+            note: cleanInlineText(rawItem.note || ''),
+          },
+          customization: {
+            defaultIngredients,
+            removableIngredients,
+            allowedExtras,
+            optionGroups,
+          },
         };
       })
     : [];
+
+  const items = itemsWithCustomization.map((entry) => entry.item);
 
   return {
     id: categoryId,
@@ -156,6 +329,7 @@ function mapCategory(rawCategory, categoryIndex, itemIdRef) {
     slug: categoryMeta.slug,
     sortOrder: categoryIndex,
     items,
+    customizationByItemId: Object.fromEntries(itemsWithCustomization.map((entry) => [String(entry.item.id), entry.customization])),
   };
 }
 
@@ -166,11 +340,16 @@ function createCatalog() {
     .filter((category) => category.items.length > 0);
 
   const allItems = categories.flatMap((category) => category.items);
+  const customizationByItemId = Object.assign(
+    {},
+    ...categories.map((category) => category.customizationByItemId ?? {}),
+  );
 
   return {
-    categories,
+    categories: categories.map(({ customizationByItemId: _ignoredCustomizationByItemId, ...category }) => category),
     featuredItems: allItems.slice(0, 4),
     itemsById: Object.fromEntries(allItems.map((item) => [String(item.id), item])),
+    customizationByItemId,
   };
 }
 
@@ -182,6 +361,7 @@ export function getLocalMenuCatalog() {
 
 export function getLocalMenuItemCustomization(menuItemId) {
   const item = localCatalog.itemsById[String(menuItemId)];
+  const customization = localCatalog.customizationByItemId[String(menuItemId)];
 
   if (!item) {
     throw new Error('Questo prodotto non e disponibile.');
@@ -189,17 +369,9 @@ export function getLocalMenuItemCustomization(menuItemId) {
 
   return {
     item,
-    defaultIngredients: item.ingredients.map((ingredientName, index) => ({
-      id: item.id * 1000 + index + 1,
-      ingredientId: item.id * 1000 + index + 1,
-      name: ingredientName,
-      slug: slugify(ingredientName),
-      allergenInfo: null,
-      isRemovable: false,
-      sortOrder: index,
-    })),
-    removableIngredients: [],
-    allowedExtras: [],
-    optionGroups: [],
+    defaultIngredients: customization?.defaultIngredients ?? [],
+    removableIngredients: customization?.removableIngredients ?? [],
+    allowedExtras: customization?.allowedExtras ?? [],
+    optionGroups: customization?.optionGroups ?? [],
   };
 }

@@ -104,6 +104,7 @@ function Header({ navigation }) {
 
   const usesEditorialHeader =
     location.pathname === '/' || location.pathname === '/chi-siamo' || location.pathname === '/menu';
+  const hidesHeader = location.pathname === '/menu/pizze';
   const isSolid = !usesEditorialHeader || isScrolled;
 
   useEffect(() => {
@@ -167,6 +168,10 @@ function Header({ navigation }) {
       }
     };
   }, [location.pathname]);
+
+  if (hidesHeader) {
+    return null;
+  }
 
   return (
     <header className={`site-header ${isSolid ? 'is-solid' : ''}`}>
