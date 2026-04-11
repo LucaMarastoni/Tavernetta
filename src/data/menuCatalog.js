@@ -373,5 +373,9 @@ export function getLocalMenuItemCustomization(menuItemId) {
     removableIngredients: customization?.removableIngredients ?? [],
     allowedExtras: customization?.allowedExtras ?? [],
     optionGroups: customization?.optionGroups ?? [],
+    pricing: {
+      currency: 'EUR',
+      basePrice: item.basePrice,
+    },
   };
 }

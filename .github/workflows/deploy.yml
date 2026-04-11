@@ -33,6 +33,10 @@ jobs:
         uses: actions/configure-pages@v5
 
       - name: Resolve static build variables
+        env:
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_SUPABASE_STORAGE_BUCKET: ${{ vars.VITE_SUPABASE_STORAGE_BUCKET }}
         run: |
           if [[ "${{ github.event.repository.name }}" == *.github.io ]]; then
             echo "VITE_BASE_PATH=/" >> "$GITHUB_ENV"
@@ -40,6 +44,15 @@ jobs:
             echo "VITE_BASE_PATH=/${{ github.event.repository.name }}/" >> "$GITHUB_ENV"
           fi
           echo "VITE_STATIC_EXPORT=true" >> "$GITHUB_ENV"
+          if [[ -n "$VITE_SUPABASE_URL" ]]; then
+            echo "VITE_SUPABASE_URL=$VITE_SUPABASE_URL" >> "$GITHUB_ENV"
+          fi
+          if [[ -n "$VITE_SUPABASE_ANON_KEY" ]]; then
+            echo "VITE_SUPABASE_ANON_KEY=$VITE_SUPABASE_ANON_KEY" >> "$GITHUB_ENV"
+          fi
+          if [[ -n "$VITE_SUPABASE_STORAGE_BUCKET" ]]; then
+            echo "VITE_SUPABASE_STORAGE_BUCKET=$VITE_SUPABASE_STORAGE_BUCKET" >> "$GITHUB_ENV"
+          fi
 
       - name: Install dependencies
         run: npm ci
