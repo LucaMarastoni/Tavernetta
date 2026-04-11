@@ -3,6 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import express from 'express';
 import { getDatabaseFile, initializeDatabase } from './db/database.js';
+import { hasSupabaseConfig } from './lib/supabase.js';
 import categoriesRouter from './routes/categories.js';
 import mediaRouter from './routes/media.js';
 import menuRouter from './routes/menu.js';
@@ -15,8 +16,11 @@ const projectRoot = path.resolve(__dirname, '..');
 const distDir = path.resolve(projectRoot, 'dist');
 const host = process.env.HOST || '127.0.0.1';
 const port = Number(process.env.PORT || 3001);
+const usesSupabase = hasSupabaseConfig();
 
-initializeDatabase();
+if (!usesSupabase) {
+  initializeDatabase();
+}
 
 const app = express();
 
@@ -26,7 +30,8 @@ app.use(express.json({ limit: '1mb' }));
 app.get('/api/health', (request, response) => {
   response.json({
     status: 'ok',
-    databaseFile: getDatabaseFile(),
+    dataSource: usesSupabase ? 'supabase' : 'sqlite',
+    databaseFile: usesSupabase ? null : getDatabaseFile(),
   });
 });
 
@@ -71,7 +76,7 @@ app.use((error, request, response, next) => {
 
 const server = app.listen(port, host, () => {
   console.log(`Tavernetta server attivo su http://${host}:${port}`);
-  console.log(`Database SQLite: ${getDatabaseFile()}`);
+  console.log(usesSupabase ? 'Datasource: Supabase' : `Database SQLite: ${getDatabaseFile()}`);
 });
 
 server.once('error', (error) => {

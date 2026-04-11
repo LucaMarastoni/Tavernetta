@@ -1,5 +1,4 @@
-import { getDatabase } from '../db/database.js';
-import { assert, normalizeIntegerList } from '../utils/validators.js';
+import { assert, normalizeIdentifierList } from '../utils/validators.js';
 import { getMenuItemCustomization } from './menuService.js';
 
 export const DELIVERY_FEE = 5;
@@ -9,25 +8,56 @@ export function roundCurrency(value) {
 }
 
 function selectOptions(optionGroups, selectedOptionIds) {
-  const requestedIds = new Set(normalizeIntegerList(selectedOptionIds));
+  const requestedIds = new Set(normalizeIdentifierList(selectedOptionIds));
   const selectedOptions = [];
 
   optionGroups.forEach((group) => {
-    const selectedInGroup = group.options.filter((option) => requestedIds.has(option.id));
+    const selectedInGroup = group.options.filter((option) => requestedIds.has(String(option.id)));
+
+    selectedInGroup.forEach((option) => {
+      requestedIds.delete(String(option.id));
+    });
+
+    const defaultSelections =
+      group.selectionType === 'multiple'
+        ? group.options.filter((option) => option.isDefault)
+        : group.options.find((option) => option.isDefault)
+          ? [group.options.find((option) => option.isDefault)]
+          : [];
+
+    const fallbackSelections =
+      !defaultSelections.length && group.required && group.minSelections > 0 ? group.options.slice(0, group.minSelections) : defaultSelections;
+
+    const resolvedSelections = selectedInGroup.length ? selectedInGroup : fallbackSelections;
+    const maxSelections = group.selectionType === 'single' ? 1 : group.maxSelections ?? group.options.length;
+    const minSelections = group.minSelections ?? 0;
 
     assert(
-      selectedInGroup.length <= 1,
+      group.selectionType !== 'single' || resolvedSelections.length <= 1,
+      400,
+      'INVALID_OPTION_SELECTION',
+      'Le opzioni selezionate non sono valide per questo prodotto.',
+    );
+    assert(
+      resolvedSelections.length >= minSelections,
+      400,
+      'INVALID_OPTION_SELECTION',
+      'Le opzioni selezionate non sono valide per questo prodotto.',
+    );
+    assert(
+      resolvedSelections.length <= maxSelections,
       400,
       'INVALID_OPTION_SELECTION',
       'Le opzioni selezionate non sono valide per questo prodotto.',
     );
 
-    const resolvedOption = selectedInGroup[0] ?? group.options.find((option) => option.isDefault) ?? group.options[0];
-
-    if (resolvedOption) {
-      selectedOptions.push(resolvedOption);
-      requestedIds.delete(resolvedOption.id);
-    }
+    resolvedSelections.forEach((option) => {
+      selectedOptions.push({
+        ...option,
+        groupName: option.groupName ?? group.name,
+        groupSlug: option.groupSlug ?? group.slug,
+      });
+    });
   });
 
   assert(
@@ -40,16 +70,16 @@ function selectOptions(optionGroups, selectedOptionIds) {
   return selectedOptions;
 }
 
-export function resolveMenuItemPricing(menuItemId, customization = {}, database = getDatabase()) {
-  const configuration = getMenuItemCustomization(menuItemId, database);
-  const removedIngredientIds = normalizeIntegerList(customization.removedIngredientIds);
-  const addedExtraIds = normalizeIntegerList(customization.addedExtraIds);
-  const selectedOptionIds = normalizeIntegerList(customization.selectedOptionIds);
+export async function resolveMenuItemPricing(menuItemId, customization = {}) {
+  const configuration = await getMenuItemCustomization(menuItemId);
+  const removedIngredientIds = normalizeIdentifierList(customization.removedIngredientIds);
+  const addedExtraIds = normalizeIdentifierList(customization.addedExtraIds);
+  const selectedOptionIds = normalizeIdentifierList(customization.selectedOptionIds);
 
   const removableIngredientsById = new Map(
-    configuration.removableIngredients.map((ingredient) => [ingredient.ingredientId, ingredient]),
+    configuration.removableIngredients.map((ingredient) => [String(ingredient.ingredientId), ingredient]),
   );
-  const allowedExtrasById = new Map(configuration.allowedExtras.map((extra) => [extra.id, extra]));
+  const allowedExtrasById = new Map(configuration.allowedExtras.map((extra) => [String(extra.id), extra]));
 
   const removedIngredients = removedIngredientIds.map((ingredientId) => {
     const ingredient = removableIngredientsById.get(ingredientId);
@@ -86,7 +116,7 @@ export function resolveMenuItemPricing(menuItemId, customization = {}, database 
   });
 
   const selectedOptions = selectOptions(configuration.optionGroups, selectedOptionIds).map((option) => ({
-    optionId: option.id,
+    optionId: String(option.id),
     groupName: option.groupName,
     groupSlug: option.groupSlug,
     optionName: option.optionName,
@@ -114,8 +144,8 @@ export function resolveMenuItemPricing(menuItemId, customization = {}, database 
   };
 }
 
-export function buildOrderLine(menuItemId, quantity, note, customization = {}, database = getDatabase()) {
-  const resolvedPricing = resolveMenuItemPricing(menuItemId, customization, database);
+export async function buildOrderLine(menuItemId, quantity, note, customization = {}) {
+  const resolvedPricing = await resolveMenuItemPricing(menuItemId, customization);
   const normalizedQuantity = Number(quantity);
 
   assert(

@@ -15,6 +15,22 @@ export function normalizePhone(value) {
   return normalizeText(value).replace(/\s+/g, ' ');
 }
 
+export function normalizeIdentifier(value) {
+  if (value === null || value === undefined) {
+    return '';
+  }
+
+  return String(value).trim();
+}
+
+export function normalizeIdentifierList(value) {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return [...new Set(value.map((entry) => normalizeIdentifier(entry)).filter(Boolean))];
+}
+
 export function normalizeIntegerList(value) {
   if (!Array.isArray(value)) {
     return [];

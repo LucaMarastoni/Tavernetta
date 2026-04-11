@@ -3,9 +3,9 @@ import { createOrder } from '../services/orderService.js';
 
 const router = Router();
 
-router.post('/', (request, response, next) => {
+router.post('/', async (request, response, next) => {
   try {
-    response.status(201).json(createOrder(request.body || {}));
+    response.status(201).json(await createOrder(request.body || {}));
   } catch (error) {
     next(error);
   }

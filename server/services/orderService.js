@@ -1,8 +1,19 @@
 import { getDatabase } from '../db/database.js';
+import { getSupabaseAdmin, hasSupabaseConfig } from '../lib/supabase.js';
 import { calculateOrderTotals, buildOrderLine } from './pricingService.js';
-import { assert, assertEmail, assertPhone, normalizeNullableText, normalizePhone, normalizeText } from '../utils/validators.js';
+import {
+  assert,
+  assertEmail,
+  assertPhone,
+  normalizeIdentifier,
+  normalizeNullableText,
+  normalizePhone,
+  normalizeText,
+} from '../utils/validators.js';
+import { HttpError } from '../utils/httpError.js';
 
 const ALLOWED_ORDER_TYPES = new Set(['pickup', 'delivery']);
+const MISSING_RESOURCE_CODES = new Set(['42703', 'PGRST204', 'PGRST205', '42P01']);
 
 function sanitizeOrderPayload(payload = {}) {
   const customer = payload.customer ?? payload;
@@ -23,7 +34,7 @@ function sanitizeOrderPayload(payload = {}) {
       privacyAccepted: Boolean(order.privacyAccepted),
     },
     items: items.map((item) => ({
-      menuItemId: Number(item.menuItemId ?? item.menu_item_id),
+      menuItemId: normalizeIdentifier(item.menuItemId ?? item.menu_item_id),
       quantity: Number(item.quantity),
       note: normalizeNullableText(item.note ?? item.notes),
       customization: {
@@ -58,7 +69,7 @@ function validatePayload(payload) {
   }
 
   payload.items.forEach((item) => {
-    assert(Number.isInteger(item.menuItemId), 400, 'INVALID_MENU_ITEM', 'Controlla i prodotti nel carrello.');
+    assert(item.menuItemId, 400, 'INVALID_MENU_ITEM', 'Controlla i prodotti nel carrello.');
     assert(
       Number.isInteger(item.quantity) && item.quantity >= 1,
       400,
@@ -68,15 +79,125 @@ function validatePayload(payload) {
   });
 }
 
-export function createOrder(payload, database = getDatabase()) {
-  const cleanPayload = sanitizeOrderPayload(payload);
-  validatePayload(cleanPayload);
+function isMissingSupabaseResource(error) {
+  return MISSING_RESOURCE_CODES.has(error?.code) || /Could not find/i.test(error?.message || '');
+}
 
-  const orderLines = cleanPayload.items.map((item) =>
-    buildOrderLine(item.menuItemId, item.quantity, item.note, item.customization, database),
+function mapOrderResponse(savedOrder, orderLines, createdItemIds = []) {
+  return {
+    orderId: savedOrder.id,
+    orderNumber: savedOrder.order_number ?? savedOrder.id,
+    status: savedOrder.status,
+    subtotal: Number(savedOrder.subtotal),
+    deliveryFee: Number(savedOrder.delivery_fee),
+    total: Number(savedOrder.total),
+    createdAt: savedOrder.created_at,
+    items: orderLines.map((line, index) => ({
+      id: createdItemIds[index] ?? `${savedOrder.id}-${index + 1}`,
+      menuItemId: line.menuItemId,
+      name: line.itemNameSnapshot,
+      quantity: line.quantity,
+      finalUnitPrice: line.finalUnitPrice,
+      lineTotal: line.lineTotal,
+      customization: line.customization,
+    })),
+  };
+}
+
+async function loadSupabaseCreatedOrder(supabase, orderId, fallbackOrder) {
+  const primarySelection = await supabase
+    .from('orders')
+    .select('id, order_number, status, subtotal, delivery_fee, total, created_at')
+    .eq('id', orderId)
+    .single();
+
+  if (!primarySelection.error) {
+    return primarySelection.data;
+  }
+
+  if (!isMissingSupabaseResource(primarySelection.error)) {
+    throw new HttpError(
+      500,
+      'SUPABASE_QUERY_FAILED',
+      'L ordine e stato creato ma non riusciamo a rileggerlo.',
+      primarySelection.error.message,
+    );
+  }
+
+  return fallbackOrder;
+}
+
+async function createOrderSupabase(cleanPayload, orderLines, totals) {
+  const supabase = getSupabaseAdmin();
+  const now = new Date().toISOString();
+
+  const { data: insertedOrder, error: orderInsertError } = await supabase
+    .from('orders')
+    .insert({
+      customer_name: cleanPayload.customer.name,
+      customer_phone: cleanPayload.customer.phone,
+      customer_email: cleanPayload.customer.email,
+      privacy_accepted_at: now,
+      order_type: cleanPayload.order.orderType,
+      address: cleanPayload.order.orderType === 'delivery' ? cleanPayload.order.address : null,
+      preferred_time: cleanPayload.order.preferredTime,
+      notes: cleanPayload.order.notes,
+      status: 'pending',
+      subtotal: totals.subtotal,
+      delivery_fee: totals.deliveryFee,
+      total: totals.total,
+    })
+    .select('id, status, subtotal, delivery_fee, total, created_at')
+    .single();
+
+  if (orderInsertError || !insertedOrder) {
+    throw new HttpError(
+      500,
+      'SUPABASE_ORDER_CREATE_FAILED',
+      'Non siamo riusciti a registrare l ordine.',
+      orderInsertError?.message || null,
+    );
+  }
+
+  const orderItemsPayload = orderLines.map((line) => ({
+    order_id: insertedOrder.id,
+    menu_item_id: line.menuItemId || null,
+    item_name_snapshot: line.itemNameSnapshot,
+    base_price_snapshot: line.basePriceSnapshot,
+    final_unit_price: line.finalUnitPrice,
+    quantity: line.quantity,
+    line_total: line.lineTotal,
+    customization_json: line.customization,
+    notes: line.notes,
+  }));
+
+  const { data: insertedItems, error: orderItemsInsertError } = await supabase
+    .from('order_items')
+    .insert(orderItemsPayload)
+    .select('id');
+
+  if (orderItemsInsertError) {
+    await supabase.from('order_items').delete().eq('order_id', insertedOrder.id);
+    await supabase.from('orders').delete().eq('id', insertedOrder.id);
+
+    throw new HttpError(
+      500,
+      'SUPABASE_ORDER_CREATE_FAILED',
+      'Non siamo riusciti a registrare l ordine.',
+      orderItemsInsertError.message,
+    );
+  }
+
+  const savedOrder = await loadSupabaseCreatedOrder(supabase, insertedOrder.id, insertedOrder);
+
+  return mapOrderResponse(
+    savedOrder,
+    orderLines,
+    (insertedItems ?? []).map((item) => item.id),
   );
-  const totals = calculateOrderTotals(orderLines, cleanPayload.order.orderType);
+}
 
+function createOrderSqlite(cleanPayload, orderLines, totals, database) {
   const transaction = database.transaction(() => {
     const orderResult = database
       .prepare(
@@ -133,7 +254,7 @@ export function createOrder(payload, database = getDatabase()) {
     orderLines.forEach((line) => {
       insertOrderItem.run(
         orderId,
-        line.menuItemId,
+        Number(line.menuItemId),
         line.itemNameSnapshot,
         line.basePriceSnapshot,
         line.finalUnitPrice,
@@ -154,25 +275,26 @@ export function createOrder(payload, database = getDatabase()) {
       )
       .get(orderId);
 
-    return {
-      orderId: savedOrder.id,
-      orderNumber: savedOrder.id,
-      status: savedOrder.status,
-      subtotal: Number(savedOrder.subtotal),
-      deliveryFee: Number(savedOrder.delivery_fee),
-      total: Number(savedOrder.total),
-      createdAt: savedOrder.created_at,
-      items: orderLines.map((line, index) => ({
-        id: `${orderId}-${index + 1}`,
-        menuItemId: line.menuItemId,
-        name: line.itemNameSnapshot,
-        quantity: line.quantity,
-        finalUnitPrice: line.finalUnitPrice,
-        lineTotal: line.lineTotal,
-        customization: line.customization,
-      })),
-    };
+    return mapOrderResponse(savedOrder, orderLines);
   });
 
   return transaction();
+}
+
+export async function createOrder(payload, database = getDatabase()) {
+  const cleanPayload = sanitizeOrderPayload(payload);
+  validatePayload(cleanPayload);
+
+  const orderLines = await Promise.all(
+    cleanPayload.items.map((item) =>
+      buildOrderLine(item.menuItemId, item.quantity, item.note, item.customization, database),
+    ),
+  );
+  const totals = calculateOrderTotals(orderLines, cleanPayload.order.orderType);
+
+  if (hasSupabaseConfig()) {
+    return createOrderSupabase(cleanPayload, orderLines, totals);
+  }
+
+  return createOrderSqlite(cleanPayload, orderLines, totals, database);
 }

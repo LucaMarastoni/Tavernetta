@@ -1,17 +1,27 @@
-function normalizeIntegerList(value) {
+function normalizeId(value) {
+  if (value === null || value === undefined) {
+    return '';
+  }
+
+  return String(value).trim();
+}
+
+function normalizeIdList(value) {
   if (!Array.isArray(value)) {
     return [];
   }
 
-  return [...new Set(value.map((entry) => Number(entry)).filter(Number.isInteger))].sort((left, right) => left - right);
+  return [...new Set(value.map((entry) => normalizeId(entry)).filter(Boolean))].sort((left, right) =>
+    left.localeCompare(right, 'it', { numeric: true, sensitivity: 'base' }),
+  );
 }
 
 export function createCartLineIdentity({ menuItemId, selectedOptionIds = [], removedIngredientIds = [], addedExtraIds = [], note = '' }) {
   return JSON.stringify({
-    menuItemId: Number(menuItemId),
-    selectedOptionIds: normalizeIntegerList(selectedOptionIds),
-    removedIngredientIds: normalizeIntegerList(removedIngredientIds),
-    addedExtraIds: normalizeIntegerList(addedExtraIds),
+    menuItemId: normalizeId(menuItemId),
+    selectedOptionIds: normalizeIdList(selectedOptionIds),
+    removedIngredientIds: normalizeIdList(removedIngredientIds),
+    addedExtraIds: normalizeIdList(addedExtraIds),
     note: note.trim(),
   });
 }
@@ -27,17 +37,17 @@ export function createCartLine({
   finalUnitPrice,
 }) {
   const normalizedRemovedIngredients = removedIngredients.map((ingredient) => ({
-    ingredientId: Number(ingredient.ingredientId ?? ingredient.id),
+    ingredientId: normalizeId(ingredient.ingredientId ?? ingredient.id),
     name: ingredient.name,
   }));
   const normalizedAddedExtras = addedExtras.map((extra) => ({
-    extraIngredientId: Number(extra.extraIngredientId ?? extra.id),
-    ingredientId: Number(extra.ingredientId),
+    extraIngredientId: normalizeId(extra.extraIngredientId ?? extra.id),
+    ingredientId: normalizeId(extra.ingredientId),
     name: extra.name,
     extraPrice: Number(extra.extraPrice ?? extra.price ?? 0),
   }));
   const normalizedSelectedOptions = selectedOptions.map((option) => ({
-    optionId: Number(option.optionId ?? option.id),
+    optionId: normalizeId(option.optionId ?? option.id),
     groupName: option.groupName,
     groupSlug: option.groupSlug,
     optionName: option.optionName,
@@ -55,7 +65,7 @@ export function createCartLine({
 
   return {
     lineId,
-    menuItemId: Number(item.id),
+    menuItemId: normalizeId(item.id),
     name: item.name,
     slug: item.slug || '',
     categorySlug: item.categorySlug || '',
@@ -145,7 +155,7 @@ export function getCartLineSummary(line) {
 
   if (line.customization?.addedExtras?.length) {
     summary.push(
-      `Extra ${line.customization.addedExtras.map((extra) => extra.name.toLowerCase()).join(', ')}`,
+      `Ingredienti extra ${line.customization.addedExtras.map((extra) => extra.name.toLowerCase()).join(', ')}`,
     );
   }
 

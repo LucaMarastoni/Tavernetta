@@ -1,9 +1,9 @@
-import { getLocalMenuCatalog, getLocalMenuItemCustomization } from '../data/menuCatalog';
+import { apiGet } from '../lib/apiClient';
 
 export async function fetchMenuCatalog() {
-  return getLocalMenuCatalog();
+  return apiGet('/api/menu');
 }
 
 export async function fetchMenuItemCustomization(menuItemId) {
-  return getLocalMenuItemCustomization(menuItemId);
+  return apiGet(`/api/menu-items/${encodeURIComponent(String(menuItemId))}/customization`);
 }

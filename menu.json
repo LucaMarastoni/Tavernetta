@@ -1,0 +1,435 @@
+{
+  "menu": [
+    {
+      "categoria": "Le Classiche",
+      "items": [
+        {
+          "nome": "ALE",
+          "prezzo": 9.9,
+          "allergeni": [2],
+          "piccante": false,
+          "ingredienti": ["pomodoro", "mozzarella", "funghi freschi", "tastasal", "monte veronese DOP"]
+        },
+        {
+          "nome": "ANDRE'",
+          "prezzo": 9.1,
+          "allergeni": [3],
+          "piccante": false,
+          "ingredienti": ["pomodoro", "peperoni grigliati", "gorgonzola", "nduja"]
+        },
+        {
+          "nome": "BALDO",
+          "prezzo": 9.4,
+          "allergeni": [2, 3],
+          "piccante": false,
+          "ingredienti": ["pomodoro", "mozzarella", "patate cubettate al forno", "porcini", "wurstel", "scamorza affumicata"]
+        },
+        {
+          "nome": "BOSCAIOLA",
+          "prezzo": 9.2,
+          "allergeni": [2],
+          "piccante": true,
+          "ingredienti": ["pomodoro", "mozzarella", "porcini", "grana", "salamino piccante"]
+        },
+        {
+          "nome": "BRIOSA",
+          "prezzo": 10.0,
+          "allergeni": [2],
+          "piccante": false,
+          "ingredienti": ["pomodoro", "mozzarella", "pancetta affumicata", "grana", "patate cubettate al forno", "brie"]
+        },
+        {
+          "nome": "BUFALINA",
+          "prezzo": 9.4,
+          "allergeni": [2, 3],
+          "piccante": false,
+          "ingredienti": ["pomodoro", "bufala Campana DOP", "pomodorini freschi", "olive nere", "basilico", "olio extravergine"],
+          "note": "tutto fuori cottura"
+        },
+        {
+          "nome": "CALABRESE",
+          "prezzo": 9.1,
+          "allergeni": [2],
+          "piccante": true,
+          "ingredienti": ["pomodoro", "mozzarella", "olive nere", "pecorino Reggino", "nduja"]
+        },
+        {
+          "nome": "CAMPAGNOLA",
+          "prezzo": 9.2,
+          "allergeni": [2],
+          "piccante": false,
+          "ingredienti": ["pomodoro", "mozzarella", "prosciutto", "pomodorini cirio", "olive nere", "scaglie di grana"]
+        },
+        {
+          "nome": "CAPRICCIOSA",
+          "prezzo": 9.5,
+          "allergeni": [2],
+          "piccante": false,
+          "ingredienti": ["pomodoro", "mozzarella", "prosciutto", "funghi", "carciofi", "olive nere", "capperi", "acciughe", "origano siciliano"]
+        },
+        {
+          "nome": "CARETERA",
+          "prezzo": 9.4,
+          "allergeni": [2],
+          "piccante": false,
+          "ingredienti": ["pomodoro", "mozzarella", "radicchio", "gorgonzola", "tastasal", "speck Alto Adige IGP"]
+        },
+        {
+          "nome": "DELIZIOSA",
+          "prezzo": 9.3,
+          "allergeni": [2, 3],
+          "piccante": false,
+          "ingredienti": ["pomodoro", "mozzarella", "zucchine grigliate", "pomodorini cirio", "philadelphia"]
+        },
+        {
+          "nome": "ESTATE",
+          "prezzo": 8.7,
+          "allergeni": [2, 3],
+          "piccante": false,
+          "ingredienti": ["pomodoro", "mozzarella", "pomodorini cirio", "scaglie di grana", "basilico"],
+          "note": "tutto fuori cottura"
+        },
+        {
+          "nome": "FILANDA",
+          "prezzo": 9.2,
+          "allergeni": [2],
+          "piccante": false,
+          "ingredienti": ["pomodoro", "mozzarella", "radicchio", "philadelphia", "scaglie di grana"]
+        },
+        {
+          "nome": "GOLOSA",
+          "prezzo": 9.4,
+          "allergeni": [2],
+          "piccante": false,
+          "ingredienti": ["pomodoro", "mozzarella", "porcini", "crudo di Parma DOP 24/30 mesi", "gorgonzola"]
+        },
+        {
+          "nome": "INCONTRI",
+          "prezzo": 10.2,
+          "allergeni": [2, 3],
+          "piccante": false,
+          "ingredienti": ["pomodoro", "mozzarella", "crudo di Parma DOP 24/30 mesi", "stracciatella", "pesto homemade"]
+        },
+        {
+          "nome": "INFERNO",
+          "prezzo": 9.4,
+          "allergeni": [2],
+          "piccante": true,
+          "ingredienti": ["pomodoro", "mozzarella", "nduja", "salamino piccante", "peperoncino"]
+        },
+        {
+          "nome": "MARGHERITA",
+          "prezzo": 6.45,
+          "allergeni": [2],
+          "piccante": false,
+          "ingredienti": ["pomodoro", "mozzarella"]
+        },
+        {
+          "nome": "MARGHERITA 2.0",
+          "prezzo": 10.0,
+          "allergeni": [2],
+          "piccante": false,
+          "vegetariana": true,
+          "ingredienti": ["pomodoro", "bufala campana DOP bio", "pomodorino confit", "basilico"],
+          "note": "tutto in cottura"
+        },
+        {
+          "nome": "MARINARA",
+          "prezzo": 5.85,
+          "allergeni": [],
+          "piccante": false,
+          "ingredienti": ["pomodoro", "olio all aglio", "origano siciliano"]
+        },
+        {
+          "nome": "PARADISO",
+          "prezzo": 10.2,
+          "allergeni": [2],
+          "piccante": false,
+          "ingredienti": ["pomodoro", "mozzarella", "funghi freschi", "ricotta", "crudo di Parma DOP 24/30 mesi"]
+        },
+        {
+          "nome": "PARTENOPEA",
+          "prezzo": 10.6,
+          "allergeni": [2, 3],
+          "piccante": false,
+          "ingredienti": ["pomodoro", "mozzarella", "pomodorini secchi", "tonno", "bufala Campana DOP", "cipolla", "basilico"]
+        },
+        {
+          "nome": "PARMIGIANA CRUNCH",
+          "prezzo": 9.4,
+          "allergeni": [2, 3],
+          "piccante": false,
+          "ingredienti": ["pomodoro", "mozzarella", "straccetti di melanzana fritta", "grana"]
+        },
+        {
+          "nome": "PATATINE FRITTE",
+          "prezzo": 8.2,
+          "allergeni": [2, 3],
+          "piccante": false,
+          "ingredienti": ["pomodoro", "mozzarella", "patatine fritte"]
+        },
+        {
+          "nome": "PIZZA DELLA CASA",
+          "prezzo": 10.4,
+          "allergeni": [2],
+          "piccante": true,
+          "ingredienti": ["pomodoro", "mozzarella", "salamino piccante", "olive nere", "prosciutto", "funghi", "peperoni grigliati", "wurstel"]
+        },
+        {
+          "nome": "PIZZA \"SCEGLI TU\"",
+          "prezzo": 11.3,
+          "allergeni": [2],
+          "piccante": false,
+          "ingredienti": ["pomodoro", "mozzarella", "4 gusti a piacere"]
+        },
+        {
+          "nome": "PROSCIUTTO E FUNGHI",
+          "prezzo": 8.9,
+          "allergeni": [2],
+          "piccante": false,
+          "ingredienti": ["pomodoro", "mozzarella", "funghi", "prosciutto"]
+        },
+        {
+          "nome": "PUGLIESE",
+          "prezzo": 8.6,
+          "allergeni": [2],
+          "piccante": true,
+          "ingredienti": ["pomodoro", "salamino piccante", "olive nere", "scamorza affumicata"]
+        },
+        {
+          "nome": "4 FORMAGGI",
+          "prezzo": 9.1,
+          "allergeni": [2],
+          "piccante": false,
+          "ingredienti": ["pomodoro", "mozzarella", "scamorza affumicata", "emmenthal", "ricotta", "gorgonzola"]
+        },
+        {
+          "nome": "4 STAGIONI",
+          "prezzo": 9.0,
+          "allergeni": [2],
+          "piccante": false,
+          "ingredienti": ["pomodoro", "mozzarella", "prosciutto", "funghi", "carciofi", "olive nere"]
+        },
+        {
+          "nome": "RIONE",
+          "prezzo": 9.3,
+          "allergeni": [2],
+          "piccante": false,
+          "ingredienti": ["pomodoro", "mozzarella", "funghi", "scamorza affumicata", "grana", "speck Alto Adige IGP"]
+        },
+        {
+          "nome": "ROMANACCIA",
+          "prezzo": 12.0,
+          "allergeni": [2, 5],
+          "piccante": false,
+          "ingredienti": ["pomodoro", "mozzarella", "guanciale affumicato", "crema carbonara", "pecorino", "pepe", "uovo"]
+        },
+        {
+          "nome": "RUSTICHELLA",
+          "prezzo": 9.6,
+          "allergeni": [2],
+          "piccante": false,
+          "ingredienti": ["pomodoro", "mozzarella", "stracchino", "porcini", "grana", "speck Alto Adige IGP"]
+        },
+        {
+          "nome": "SOTTO BOSCO",
+          "prezzo": 11.0,
+          "allergeni": [2],
+          "piccante": false,
+          "ingredienti": ["pomodoro", "mozzarella", "cipolla caramellata", "misto bosco", "soppressa dolce della Lessinia"]
+        },
+        {
+          "nome": "SFIZIOSA",
+          "prezzo": 10.4,
+          "allergeni": [2],
+          "piccante": false,
+          "ingredienti": ["pomodoro", "melanzane grigliate", "bufala Campana DOP", "olive nere", "pomodorini cirio"],
+          "note": "fuori cottura"
+        },
+        {
+          "nome": "SICILIANA",
+          "prezzo": 8.5,
+          "allergeni": [2],
+          "piccante": true,
+          "ingredienti": ["pomodoro", "salamino piccante", "olive nere", "acciughe", "capperi", "origano siciliano"]
+        },
+        {
+          "nome": "TONNO E CIPOLLA",
+          "prezzo": 8.7,
+          "allergeni": [2],
+          "piccante": false,
+          "ingredienti": ["pomodoro", "mozzarella", "tonno", "cipolla"]
+        },
+        {
+          "nome": "VEGETARIANA",
+          "prezzo": 9.1,
+          "allergeni": [2],
+          "piccante": false,
+          "vegetariana": true,
+          "ingredienti": ["pomodoro", "mozzarella", "verdure di stagione"]
+        },
+        {
+          "nome": "VULCANO",
+          "prezzo": 13.2,
+          "allergeni": [2, 3],
+          "piccante": true,
+          "ingredienti": ["pomodoro", "guanciale affumicato", "patate cubettate al forno", "friarielli passati in padella con aglio", "burrata", "fili di peperoncino"],
+          "note": "fuori cottura"
+        }
+      ]
+    },
+    {
+      "categoria": "Le Bianche",
+      "items": [
+        {
+          "nome": "MATTEO",
+          "prezzo": 10.6,
+          "allergeni": [1, 2],
+          "piccante": false,
+          "ingredienti": ["mozzarella", "gorgonzola", "crudo di Parma DOP 24/30 mesi", "rucola", "funghi freschi", "noci"]
+        },
+        {
+          "nome": "MIK",
+          "prezzo": 9.3,
+          "allergeni": [2],
+          "piccante": true,
+          "ingredienti": ["mozzarella", "spinaci", "ricotta", "salamino piccante", "carciofi"]
+        },
+        {
+          "nome": "PEPERINA",
+          "prezzo": 10.9,
+          "allergeni": [2],
+          "piccante": true,
+          "ingredienti": ["mozzarella", "zucchine grigliate", "pancetta arrotolata piccante", "stracciatella", "peperoncini in fili sottili"]
+        },
+        {
+          "nome": "SAPORE DI AMARONE",
+          "prezzo": 12.2,
+          "allergeni": [2, 3],
+          "piccante": false,
+          "ingredienti": ["mozzarella", "gelatina di Amarone DOCG", "coppa affinata in Amarone DOCG", "radicchio", "anelli di porro"]
+        },
+        {
+          "nome": "STANCA BIANCA",
+          "prezzo": 9.4,
+          "allergeni": [2],
+          "piccante": false,
+          "ingredienti": ["mozzarella", "stracchino", "crudo di Parma DOP 24/30 mesi", "porcini"]
+        },
+        {
+          "nome": "TRIONFO",
+          "prezzo": 11.4,
+          "allergeni": [2],
+          "piccante": false,
+          "ingredienti": ["mozzarella", "funghi freschi", "pomodorini cirio", "rucola", "burrata"]
+        },
+        {
+          "nome": "TATANKA",
+          "prezzo": 9.4,
+          "allergeni": [2, 3],
+          "piccante": false,
+          "ingredienti": ["mozzarella", "patate cubettate al forno", "brie", "rosmarino", "crudo di Parma DOP 24/30 mesi"]
+        }
+      ]
+    },
+    {
+      "categoria": "Le Speciali",
+      "items": [
+        {
+          "nome": "AMATRICIANA",
+          "prezzo": 11.0,
+          "allergeni": [2],
+          "piccante": false,
+          "ingredienti": ["pomodoro", "pancetta affumicata", "misto bosco", "pepe", "caciocavallo della Piana a scaglie"]
+        },
+        {
+          "nome": "POLPO INTANATO",
+          "prezzo": 15.0,
+          "allergeni": [3, 7],
+          "piccante": false,
+          "ingredienti": ["pizza ripiena con doppia salsa di pomodoro", "tentacoli di polpo", "olive nere", "basilico"]
+        },
+        {
+          "nome": "FRUTTI DI MARE",
+          "prezzo": 11.8,
+          "allergeni": [2, 3, 6, 7, 8],
+          "piccante": false,
+          "ingredienti": ["pomodoro", "mozzarella", "cozze e frutti di mare", "prezzemolo"]
+        },
+        {
+          "nome": "NEW YORK ALE",
+          "prezzo": 12.7,
+          "allergeni": [1, 2],
+          "piccante": false,
+          "ingredienti": ["pomodoro", "mozzarella", "burrata", "mortadella Bologna DOP", "crema al pistacchio", "pomodorini freschi"]
+        },
+        {
+          "nome": "MADAME",
+          "prezzo": 11.8,
+          "allergeni": [2, 3, 8],
+          "piccante": false,
+          "ingredienti": ["pomodoro", "mozzarella", "gamberetti", "zucchine grigliate", "philadelphia", "pinoli", "burrata", "basilico"]
+        },
+        {
+          "nome": "TOSCANACCIA",
+          "prezzo": 11.7,
+          "allergeni": [2, 3],
+          "piccante": false,
+          "ingredienti": ["schiacciata", "lombo stagionato al pepe rosa", "grana", "carciofo alla griglia", "olio extravergine chianti DOP"]
+        }
+      ]
+    },
+    {
+      "categoria": "I Calzoni",
+      "items": [
+        {
+          "nome": "TRADIZIONALE",
+          "prezzo": 9.4,
+          "allergeni": [2],
+          "piccante": false,
+          "ingredienti": ["pomodoro", "mozzarella", "prosciutto", "funghi", "ricotta"]
+        },
+        {
+          "nome": "4 FORMAGGI",
+          "prezzo": 9.4,
+          "allergeni": [2],
+          "piccante": false,
+          "ingredienti": ["mozzarella", "gorgonzola", "scamorza affumicata", "monte veronese DOP"]
+        },
+        {
+          "nome": "CAPRI",
+          "prezzo": 10.8,
+          "allergeni": [2, 3],
+          "piccante": false,
+          "ingredienti": ["pomodoro", "bufala Campana DOP", "cipolla caramellata", "pomodorini cirio", "basilico"]
+        }
+      ]
+    },
+    {
+      "categoria": "Calzoni in Fritteria",
+      "items": [
+        {
+          "nome": "CARUSEDDU",
+          "prezzo": 9.1,
+          "allergeni": [2],
+          "piccante": false,
+          "ingredienti": ["pomodoro", "mozzarella", "origano"]
+        },
+        {
+          "nome": "TRADIZIONALE",
+          "prezzo": 9.7,
+          "allergeni": [2],
+          "piccante": false,
+          "ingredienti": ["pomodoro", "mozzarella", "prosciutto", "funghi"]
+        },
+        {
+          "nome": "VERONESE",
+          "prezzo": 9.7,
+          "allergeni": [2],
+          "piccante": false,
+          "ingredienti": ["pomodoro", "mozzarella", "scamorza affumicata", "tastasal"]
+        }
+      ]
+    }
+  ]
+}

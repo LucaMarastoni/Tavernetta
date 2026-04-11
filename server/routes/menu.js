@@ -3,18 +3,18 @@ import { getMenuCatalog, getMenuItemById, getMenuItemCustomization, getActiveMen
 
 const router = Router();
 
-router.get('/menu', (request, response, next) => {
+router.get('/menu', async (request, response, next) => {
   try {
-    response.json(getMenuCatalog());
+    response.json(await getMenuCatalog());
   } catch (error) {
     next(error);
   }
 });
 
-router.get('/menu-items', (request, response, next) => {
+router.get('/menu-items', async (request, response, next) => {
   try {
     response.json({
-      items: getActiveMenuItems(undefined, {
+      items: await getActiveMenuItems({
         categorySlug: request.query.category?.toString().trim() || undefined,
       }),
     });
@@ -23,19 +23,19 @@ router.get('/menu-items', (request, response, next) => {
   }
 });
 
-router.get('/menu-items/:id', (request, response, next) => {
+router.get('/menu-items/:id', async (request, response, next) => {
   try {
     response.json({
-      item: getMenuItemById(Number(request.params.id)),
+      item: await getMenuItemById(request.params.id?.toString().trim()),
     });
   } catch (error) {
     next(error);
   }
 });
 
-router.get('/menu-items/:id/customization', (request, response, next) => {
+router.get('/menu-items/:id/customization', async (request, response, next) => {
   try {
-    response.json(getMenuItemCustomization(Number(request.params.id)));
+    response.json(await getMenuItemCustomization(request.params.id?.toString().trim()));
   } catch (error) {
     next(error);
   }

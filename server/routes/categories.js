@@ -3,10 +3,10 @@ import { getActiveCategories } from '../services/menuService.js';
 
 const router = Router();
 
-router.get('/', (request, response, next) => {
+router.get('/', async (request, response, next) => {
   try {
     response.json({
-      categories: getActiveCategories(),
+      categories: await getActiveCategories(),
     });
   } catch (error) {
     next(error);

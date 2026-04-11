@@ -328,8 +328,8 @@ function CustomizationDrawer({ open, loading, error, configuration, initialLine,
                 <section className="menu-product-section-block">
                   <div className="menu-product-section-head">
                     <div>
-                      <h3>Aggiungi extra</h3>
-                      <p>Ogni extra viene calcolato sul singolo prodotto.</p>
+                      <h3>Aggiungi ingredienti</h3>
+                      <p>Ogni ingrediente aggiunto viene calcolato sul singolo prodotto.</p>
                     </div>
                     <span>Facoltativi</span>
                   </div>
