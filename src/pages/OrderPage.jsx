@@ -115,7 +115,7 @@ function OrderPage() {
             <h1>Ordina</h1>
             <p>
               Rivedi il carrello, conferma il servizio e invia un ordine pronto per la gestione sala. I prezzi finali
-              vengono sempre verificati dal server.
+              vengono ricalcolati prima del salvataggio.
             </p>
           </div>
 

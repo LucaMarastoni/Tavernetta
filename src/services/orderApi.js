@@ -1,4 +1,5 @@
 import { apiPost } from '../lib/apiClient';
+import { canUseSupabaseOrderSource, submitOrderToSupabase } from './orderSupabaseApi';
 
 const isStaticExport = import.meta.env.VITE_STATIC_EXPORT === 'true';
 
@@ -28,6 +29,18 @@ function mapOrderApiError(error) {
       return new OrderApiError('Per inviare l ordine devi accettare la privacy policy.', code);
     case 'ADDRESS_REQUIRED':
       return new OrderApiError('Per la consegna serve un indirizzo completo.', code);
+    case 'SUPABASE_NOT_CONFIGURED':
+      return new OrderApiError('Supabase non e configurato per ricevere ordini dal sito statico.', code);
+    case 'ORDER_RPC_NOT_DEPLOYED':
+      return new OrderApiError(
+        'La funzione ordini di Supabase non e ancora pubblicata. Esegui prima lo script SQL dedicato.',
+        code,
+      );
+    case 'SUPABASE_ORDER_RPC_BLOCKED':
+      return new OrderApiError(
+        'Supabase sta bloccando il salvataggio dell ordine. Controlla la funzione SQL pubblica.',
+        code,
+      );
     case 'INVALID_OPTION_SELECTION':
     case 'INVALID_EXTRA_SELECTION':
     case 'INVALID_REMOVED_INGREDIENT':
@@ -37,6 +50,8 @@ function mapOrderApiError(error) {
       return new OrderApiError('Uno o piu prodotti non sono piu disponibili.', code);
     case 'INVALID_QUANTITY':
       return new OrderApiError('Controlla le quantita presenti nel carrello.', code);
+    case 'INVALID_ORDER_TOTAL':
+      return new OrderApiError('Controlla il riepilogo ordine e riprova.', code);
     default:
       if (error.message?.includes('Failed to fetch')) {
         return new OrderApiError('Il servizio ordini non e raggiungibile in questo momento.', code);
@@ -48,10 +63,18 @@ function mapOrderApiError(error) {
 
 export async function submitOrder(payload) {
   if (isStaticExport) {
-    throw new OrderApiError(
-      'Gli ordini online non sono disponibili nella versione statica del sito. Contatta il ristorante telefonicamente per confermare la tua richiesta.',
-      'STATIC_EXPORT_NO_ORDER_API',
-    );
+    if (!canUseSupabaseOrderSource()) {
+      throw new OrderApiError(
+        'Supabase non e configurato per ricevere ordini dal sito statico.',
+        'SUPABASE_NOT_CONFIGURED',
+      );
+    }
+
+    try {
+      return await submitOrderToSupabase(payload);
+    } catch (error) {
+      throw mapOrderApiError(error);
+    }
   }
 
   try {
