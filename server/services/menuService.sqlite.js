@@ -1,5 +1,6 @@
 import { getDatabase } from '../db/database.js';
 import { HttpError } from '../utils/httpError.js';
+import { resolveOptionPriceDelta } from '../../shared/menuExtraProfiles.js';
 
 function proxyMediaUrl(url) {
   if (!url) {
@@ -81,7 +82,7 @@ function normalizeOption(row) {
     groupName: row.option_group_name,
     groupSlug: row.option_group_slug,
     optionName: row.option_name,
-    priceDelta: Number(row.price_delta),
+    priceDelta: resolveOptionPriceDelta(row.option_name, row.price_delta, row.option_group_name),
     isDefault: Boolean(row.is_default),
     sortOrder: row.sort_order ?? 0,
   };
@@ -164,6 +165,27 @@ export function getActiveCategoriesSqlite(database = getDatabase()) {
       name: row.name,
       slug: row.slug,
       sortOrder: row.sort_order ?? 0,
+    }));
+}
+
+export function getActiveIngredientsSqlite(database = getDatabase()) {
+  return database
+    .prepare(
+      `
+        select id, name, slug, allergen_info
+        from ingredients
+        where active = 1
+        order by name asc
+      `,
+    )
+    .all()
+    .map((row) => ({
+      id: row.id,
+      ingredientId: row.id,
+      name: row.name,
+      slug: row.slug,
+      allergenInfo: row.allergen_info || null,
+      sortOrder: 0,
     }));
 }
 

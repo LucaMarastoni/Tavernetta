@@ -36,16 +36,28 @@ function MenuCatalogPage() {
 
   const scrollToGroup = useCallback((groupId, behavior = 'smooth') => {
     const targetSection = sectionRefs.current[groupId];
+    const firstGroupId = menuGroups[0]?.id ?? null;
 
     if (!targetSection) {
       return;
     }
 
-    targetSection.scrollIntoView({
+    if (groupId === firstGroupId) {
+      window.scrollTo({
+        top: 0,
+        behavior,
+      });
+      return;
+    }
+
+    const stickyOffset = (subheaderRef.current?.getBoundingClientRect().height ?? 0) + 16;
+    const targetTop = window.scrollY + targetSection.getBoundingClientRect().top - stickyOffset;
+
+    window.scrollTo({
+      top: Math.max(0, targetTop),
       behavior,
-      block: 'start',
     });
-  }, []);
+  }, [menuGroups]);
 
   useEffect(() => {
     if (!menuGroups.length) {
@@ -202,10 +214,14 @@ function MenuCatalogPage() {
   const handleSelectGroup = useCallback(
     (groupId) => {
       setActiveGroupId(groupId);
-      setSearchParams({ categoria: groupId }, { replace: true });
+      if (groupId === menuGroups[0]?.id) {
+        setSearchParams({}, { replace: true });
+      } else {
+        setSearchParams({ categoria: groupId }, { replace: true });
+      }
       scrollToGroup(groupId);
     },
-    [scrollToGroup, setSearchParams],
+    [menuGroups, scrollToGroup, setSearchParams],
   );
 
   return (

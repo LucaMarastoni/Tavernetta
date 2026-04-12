@@ -1,6 +1,12 @@
 import { getSupabaseAdmin, getSupabaseStorageBucket, hasSupabaseConfig } from '../lib/supabase.js';
 import { HttpError } from '../utils/httpError.js';
 import {
+  buildAllowedExtrasFromIngredientCatalog,
+  curateAllowedExtras,
+  resolveOptionPriceDelta,
+} from '../../shared/menuExtraProfiles.js';
+import {
+  getActiveIngredientsSqlite,
   getActiveCategoriesSqlite,
   getActiveMenuItemsSqlite,
   getMenuCatalogSqlite,
@@ -230,8 +236,45 @@ function normalizeCategory(category) {
     id: normalizeId(category.id),
     name: categoryMeta.name,
     slug: categoryMeta.slug,
+    sourceSlug: cleanInlineText(category.slug),
     sortOrder: normalizeNumber(category.sort_order ?? category.sortOrder),
   };
+}
+
+function dedupeCategories(categories) {
+  const categoryBySlug = new Map();
+
+  categories.forEach((category) => {
+    const existingCategory = categoryBySlug.get(category.slug);
+
+    if (!existingCategory) {
+      categoryBySlug.set(category.slug, category);
+      return;
+    }
+
+    const currentIsCanonical = existingCategory.sourceSlug === existingCategory.slug;
+    const nextIsCanonical = category.sourceSlug === category.slug;
+
+    if (nextIsCanonical && !currentIsCanonical) {
+      categoryBySlug.set(category.slug, category);
+      return;
+    }
+
+    if (nextIsCanonical === currentIsCanonical) {
+      const shouldReplace =
+        category.sortOrder < existingCategory.sortOrder ||
+        (category.sortOrder === existingCategory.sortOrder &&
+          category.id.localeCompare(existingCategory.id, 'it', { sensitivity: 'base' }) < 0);
+
+      if (shouldReplace) {
+        categoryBySlug.set(category.slug, category);
+      }
+    }
+  });
+
+  return [...categoryBySlug.values()]
+    .map(({ sourceSlug: _ignoredSourceSlug, ...category }) => category)
+    .sort(sortByOrderThenName);
 }
 
 function normalizeIngredientLink(link, ingredientById) {
@@ -290,7 +333,7 @@ function normalizeOptionGroup(group, rawOptions) {
       groupSlug: cleanInlineText(group.slug) || slugify(name),
       optionName: cleanInlineText(option.name || option.option_name || 'Opzione'),
       description: cleanInlineText(option.description || ''),
-      priceDelta: normalizeNumber(option.price_delta),
+      priceDelta: resolveOptionPriceDelta(option.name || option.option_name || 'Opzione', option.price_delta, name),
       isDefault: Boolean(option.is_default),
       sortOrder: normalizeNumber(option.sort_order),
     }))
@@ -332,7 +375,7 @@ function buildGroupedLegacyOptions(rows) {
         groupSlug,
         optionName: cleanInlineText(row.option_name || 'Opzione'),
         description: '',
-        priceDelta: normalizeNumber(row.price_delta),
+        priceDelta: resolveOptionPriceDelta(row.option_name || 'Opzione', row.price_delta, groupName),
         isDefault: Boolean(row.is_default),
         sortOrder: normalizeNumber(row.sort_order),
       };
@@ -539,7 +582,7 @@ function normalizeSqliteCategory(category) {
   };
 }
 
-function normalizeSqliteCustomization(configuration) {
+function normalizeSqliteCustomization(configuration, ingredientCatalog = []) {
   const normalizeIngredients = (ingredients) =>
     ingredients.map((ingredient) => ({
       ...ingredient,
@@ -569,17 +612,31 @@ function normalizeSqliteCustomization(configuration) {
         optionId: normalizeId(option.optionId ?? option.id),
         groupName: cleanInlineText(option.groupName || group.name),
         groupSlug: cleanInlineText(option.groupSlug || group.slug) || slugify(group.name),
+        priceDelta: resolveOptionPriceDelta(option.optionName, option.priceDelta, option.groupName || group.name),
         sortOrder: normalizeNumber(option.sortOrder),
       })),
     }));
 
+  const defaultIngredients = normalizeIngredients(configuration.defaultIngredients ?? []);
+  const removableIngredients = normalizeIngredients(configuration.removableIngredients ?? []);
+  const optionGroups = normalizeOptionGroups(configuration.optionGroups ?? []);
+  const allowedExtras = buildAllowedExtrasFromIngredientCatalog(
+    defaultIngredients,
+    normalizeIngredients(ingredientCatalog),
+    normalizeExtras(configuration.allowedExtras ?? []),
+  );
+  const item = {
+    ...normalizeSqliteItem(configuration.item),
+    hasCustomization: Boolean(removableIngredients.length || allowedExtras.length || optionGroups.length),
+  };
+
   return {
     ...configuration,
-    item: normalizeSqliteItem(configuration.item),
-    defaultIngredients: normalizeIngredients(configuration.defaultIngredients ?? []),
-    removableIngredients: normalizeIngredients(configuration.removableIngredients ?? []),
-    allowedExtras: normalizeExtras(configuration.allowedExtras ?? []),
-    optionGroups: normalizeOptionGroups(configuration.optionGroups ?? []),
+    item,
+    defaultIngredients,
+    removableIngredients,
+    allowedExtras,
+    optionGroups,
   };
 }
 
@@ -587,7 +644,7 @@ function buildSupabaseMenuItem(row, category, client, relations) {
   const itemId = normalizeId(row.id);
   const defaultIngredients = relations.defaultIngredientsByItemId.get(itemId) ?? [];
   const removableIngredients = relations.removableIngredientsByItemId.get(itemId) ?? [];
-  const allowedExtras = relations.allowedExtrasByItemId.get(itemId) ?? [];
+  const allowedExtras = curateAllowedExtras(defaultIngredients, relations.allowedExtrasByItemId.get(itemId) ?? []);
   const optionGroups = relations.optionGroupsByItemId.get(itemId) ?? [];
 
   return {
@@ -613,7 +670,7 @@ async function getSupabaseActiveCategories(categorySlug) {
     client.from('categories').select('id, name, slug, sort_order').eq('active', true).order('sort_order').order('name'),
   );
 
-  const categories = rows.map(normalizeCategory);
+  const categories = dedupeCategories(rows.map(normalizeCategory));
 
   if (!categorySlug) {
     return categories;
@@ -704,6 +761,24 @@ async function getSupabaseMenuItemRow(menuItemId) {
   };
 }
 
+async function getSupabaseIngredientCatalog(client = getSupabaseAdmin()) {
+  const rows = await runSupabaseQuery(
+    client.from('ingredients').select('id, name, slug, active').eq('active', true).order('name'),
+  );
+
+  return rows
+    .filter((ingredient) => ingredient.active !== false)
+    .map((ingredient) => ({
+      id: normalizeId(ingredient.id),
+      ingredientId: normalizeId(ingredient.id),
+      name: cleanInlineText(ingredient.name),
+      slug: cleanInlineText(ingredient.slug),
+      allergenInfo: null,
+      sortOrder: 0,
+    }))
+    .sort(sortByOrderThenName);
+}
+
 export function getMenuDataSource() {
   return hasSupabaseConfig() ? 'supabase' : 'sqlite';
 }
@@ -776,7 +851,7 @@ export async function getMenuItemById(menuItemId) {
 
 export async function getMenuItemCustomization(menuItemId) {
   if (!hasSupabaseConfig()) {
-    return normalizeSqliteCustomization(getMenuItemCustomizationSqlite(menuItemId));
+    return normalizeSqliteCustomization(getMenuItemCustomizationSqlite(menuItemId), getActiveIngredientsSqlite());
   }
 
   const client = getSupabaseAdmin();
@@ -784,12 +859,19 @@ export async function getMenuItemCustomization(menuItemId) {
   const { category, row } = await getSupabaseMenuItemRow(normalizedMenuItemId);
   const relations = await loadSupabaseRelations(client, [normalizedMenuItemId]);
   const item = buildSupabaseMenuItem(row, category, client, relations);
+  const defaultIngredients = relations.defaultIngredientsByItemId.get(normalizedMenuItemId) ?? [];
+  const ingredientCatalog = await getSupabaseIngredientCatalog(client);
+  const allowedExtras = buildAllowedExtrasFromIngredientCatalog(
+    defaultIngredients,
+    ingredientCatalog,
+    relations.allowedExtrasByItemId.get(normalizedMenuItemId) ?? [],
+  );
 
   return {
     item,
-    defaultIngredients: relations.defaultIngredientsByItemId.get(normalizedMenuItemId) ?? [],
+    defaultIngredients,
     removableIngredients: relations.removableIngredientsByItemId.get(normalizedMenuItemId) ?? [],
-    allowedExtras: relations.allowedExtrasByItemId.get(normalizedMenuItemId) ?? [],
+    allowedExtras,
     optionGroups: relations.optionGroupsByItemId.get(normalizedMenuItemId) ?? [],
     pricing: {
       currency: 'EUR',

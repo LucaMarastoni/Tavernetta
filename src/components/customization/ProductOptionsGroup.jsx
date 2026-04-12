@@ -1,5 +1,13 @@
 import { formatPrice } from '../../utils/formatPrice';
 
+function normalizeOptionId(value) {
+  if (value === null || value === undefined) {
+    return '';
+  }
+
+  return String(value).trim();
+}
+
 function getSelectionInstruction(group) {
   if (group.description) {
     return group.description;
@@ -25,7 +33,7 @@ function getSelectionInstruction(group) {
 }
 
 function ProductOptionsGroup({ group, selectedOptionIds, onToggle }) {
-  const selectedCount = group.options.filter((option) => selectedOptionIds.includes(option.id)).length;
+  const selectedCount = group.options.filter((option) => selectedOptionIds.includes(normalizeOptionId(option.id))).length;
   const isInvalid = selectedCount < group.minSelections;
 
   return (
@@ -41,7 +49,7 @@ function ProductOptionsGroup({ group, selectedOptionIds, onToggle }) {
 
       <div className="menu-product-options-list">
         {group.options.map((option) => {
-          const isSelected = selectedOptionIds.includes(option.id);
+          const isSelected = selectedOptionIds.includes(normalizeOptionId(option.id));
 
           return (
             <button

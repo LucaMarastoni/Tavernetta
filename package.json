@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "concurrently -k \"npm:dev:server\" \"npm:dev:client\"",
     "dev:client": "vite",
-    "dev:server": "nodemon --watch server --watch database --ext js,sql --ignore \"data/**\" --exec \"node --env-file=.env server/index.js\"",
+    "dev:server": "nodemon --watch server --watch database --watch shared --ext js,sql --ignore \"data/**\" --exec \"node --env-file=.env server/index.js\"",
     "build": "vite build",
     "start": "NODE_ENV=production node --env-file=.env server/index.js",
     "preview": "vite preview",

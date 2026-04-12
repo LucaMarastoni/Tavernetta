@@ -103,8 +103,13 @@ export const buildMenuGroups = (categories) =>
 
 export const buildMenuCategoryHref = (groupId) => {
   const group = MENU_GROUPS.find((entry) => entry.id === groupId);
+  const defaultGroupId = MENU_GROUPS.find((entry) => entry.slugs?.length)?.id;
 
   if (!group?.slugs?.length) {
+    return '/menu/pizze';
+  }
+
+  if (groupId === defaultGroupId) {
     return '/menu/pizze';
   }
 

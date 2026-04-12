@@ -1,4 +1,11 @@
 import rawMenuCatalog from './menu.json?raw';
+import {
+  buildAllowedExtrasFromIngredientCatalog,
+  createDefaultAllowedExtras,
+  curateAllowedExtras,
+  CUSTOMIZABLE_CATEGORY_SLUGS,
+  resolveOptionPriceDelta,
+} from '../../shared/menuExtraProfiles.js';
 
 const CATEGORY_META_BY_KEY = {
   'le classiche': { name: 'Le Classiche', slug: 'le-pizze' },
@@ -110,7 +117,11 @@ function mapOptionGroups(rawItem, itemId) {
             groupSlug: slugify(name),
             optionName,
             description: cleanInlineText(rawOption.description ?? rawOption.sottotitolo ?? ''),
-            priceDelta: Number(rawOption.priceDelta ?? rawOption.extraPrice ?? rawOption.prezzo ?? 0),
+            priceDelta: resolveOptionPriceDelta(
+              optionName,
+              rawOption.priceDelta ?? rawOption.extraPrice ?? rawOption.prezzo ?? 0,
+              name,
+            ),
             isDefault: toBoolean(rawOption.defaultSelected ?? rawOption.isDefault ?? rawOption.predefinita),
           };
         })
@@ -188,6 +199,37 @@ function mapDefaultIngredients(ingredients, itemId) {
       sortOrder: index,
     };
   });
+}
+
+function createIngredientCatalog(menuSections) {
+  const ingredientBySlug = new Map();
+
+  menuSections.forEach((section) => {
+    (Array.isArray(section.items) ? section.items : []).forEach((item) => {
+      (Array.isArray(item.ingredienti) ? item.ingredienti : []).map(cleanInlineText).filter(Boolean).forEach((ingredientName) => {
+        const slug = slugify(ingredientName);
+
+        if (!slug || ingredientBySlug.has(slug)) {
+          return;
+        }
+
+        ingredientBySlug.set(slug, {
+          name: ingredientName,
+          slug,
+          allergenInfo: null,
+        });
+      });
+    });
+  });
+
+  return [...ingredientBySlug.values()]
+    .sort((left, right) => left.name.localeCompare(right.name, 'it', { sensitivity: 'base' }))
+    .map((ingredient, index) => ({
+      id: index + 1,
+      ingredientId: index + 1,
+      ...ingredient,
+      sortOrder: index + 1,
+    }));
 }
 
 function sanitizeBrokenJson(raw) {
@@ -288,7 +330,13 @@ function mapCategory(rawCategory, categoryIndex, itemIdRef) {
         const defaultIngredients = mapDefaultIngredients(ingredients, nextItemId);
         const removableIngredients = defaultIngredients.filter((ingredient) => ingredient.isRemovable);
         const optionGroups = mapOptionGroups(rawItem, nextItemId);
-        const allowedExtras = mapAllowedExtras(rawItem, nextItemId);
+        const explicitExtras = mapAllowedExtras(rawItem, nextItemId);
+        const allowedExtras = curateAllowedExtras(
+          defaultIngredients,
+          explicitExtras.length || !CUSTOMIZABLE_CATEGORY_SLUGS.has(categoryMeta.slug)
+            ? explicitExtras
+            : createDefaultAllowedExtras(nextItemId),
+        );
 
         return {
           item: {
@@ -335,7 +383,9 @@ function mapCategory(rawCategory, categoryIndex, itemIdRef) {
 
 function createCatalog() {
   const itemIdRef = { current: 1 };
-  const categories = parseMenuSource()
+  const menuSections = parseMenuSource();
+  const ingredientCatalog = createIngredientCatalog(menuSections);
+  const categories = menuSections
     .map((category, index) => mapCategory(category, index, itemIdRef))
     .filter((category) => category.items.length > 0);
 
@@ -350,6 +400,7 @@ function createCatalog() {
     featuredItems: allItems.slice(0, 4),
     itemsById: Object.fromEntries(allItems.map((item) => [String(item.id), item])),
     customizationByItemId,
+    ingredientCatalog,
   };
 }
 
@@ -371,7 +422,11 @@ export function getLocalMenuItemCustomization(menuItemId) {
     item,
     defaultIngredients: customization?.defaultIngredients ?? [],
     removableIngredients: customization?.removableIngredients ?? [],
-    allowedExtras: customization?.allowedExtras ?? [],
+    allowedExtras: buildAllowedExtrasFromIngredientCatalog(
+      customization?.defaultIngredients ?? [],
+      localCatalog.ingredientCatalog ?? [],
+      customization?.allowedExtras ?? [],
+    ),
     optionGroups: customization?.optionGroups ?? [],
     pricing: {
       currency: 'EUR',

@@ -1,4 +1,5 @@
 import { getBrowserSupabase, getBrowserSupabaseStorageBucket, hasBrowserSupabaseConfig } from '../lib/supabaseBrowser';
+import { buildAllowedExtrasFromIngredientCatalog, curateAllowedExtras, resolveOptionPriceDelta } from '../../shared/menuExtraProfiles.js';
 
 const CATEGORY_IMAGE_IDS = {
   'le-pizze': ['photo-1513104890138-7c749659a591', 'photo-1414235077428-338989a2e8c0'],
@@ -215,8 +216,45 @@ function normalizeCategory(category) {
     id: normalizeId(category.id),
     name: categoryMeta.name,
     slug: categoryMeta.slug,
+    sourceSlug: cleanInlineText(category.slug),
     sortOrder: normalizeNumber(category.sort_order ?? category.sortOrder),
   };
+}
+
+function dedupeCategories(categories) {
+  const categoryBySlug = new Map();
+
+  categories.forEach((category) => {
+    const existingCategory = categoryBySlug.get(category.slug);
+
+    if (!existingCategory) {
+      categoryBySlug.set(category.slug, category);
+      return;
+    }
+
+    const currentIsCanonical = existingCategory.sourceSlug === existingCategory.slug;
+    const nextIsCanonical = category.sourceSlug === category.slug;
+
+    if (nextIsCanonical && !currentIsCanonical) {
+      categoryBySlug.set(category.slug, category);
+      return;
+    }
+
+    if (nextIsCanonical === currentIsCanonical) {
+      const shouldReplace =
+        category.sortOrder < existingCategory.sortOrder ||
+        (category.sortOrder === existingCategory.sortOrder &&
+          category.id.localeCompare(existingCategory.id, 'it', { sensitivity: 'base' }) < 0);
+
+      if (shouldReplace) {
+        categoryBySlug.set(category.slug, category);
+      }
+    }
+  });
+
+  return [...categoryBySlug.values()]
+    .map(({ sourceSlug: _ignoredSourceSlug, ...category }) => category)
+    .sort(sortByOrderThenName);
 }
 
 function normalizeIngredientLink(link, ingredientById) {
@@ -275,7 +313,7 @@ function normalizeOptionGroup(group, rawOptions) {
       groupSlug: cleanInlineText(group.slug) || slugify(name),
       optionName: cleanInlineText(option.name || option.option_name || 'Opzione'),
       description: cleanInlineText(option.description || ''),
-      priceDelta: normalizeNumber(option.price_delta),
+      priceDelta: resolveOptionPriceDelta(option.name || option.option_name || 'Opzione', option.price_delta, name),
       isDefault: Boolean(option.is_default),
       sortOrder: normalizeNumber(option.sort_order),
     }))
@@ -316,7 +354,7 @@ function buildGroupedLegacyOptions(rows) {
         groupSlug,
         optionName: cleanInlineText(row.option_name || 'Opzione'),
         description: '',
-        priceDelta: normalizeNumber(row.price_delta),
+        priceDelta: resolveOptionPriceDelta(row.option_name || 'Opzione', row.price_delta, groupName),
         isDefault: Boolean(row.is_default),
         sortOrder: normalizeNumber(row.sort_order),
       };
@@ -497,7 +535,7 @@ function buildSupabaseMenuItem(row, category, client, relations) {
   const itemId = normalizeId(row.id);
   const defaultIngredients = relations.defaultIngredientsByItemId.get(itemId) ?? [];
   const removableIngredients = relations.removableIngredientsByItemId.get(itemId) ?? [];
-  const allowedExtras = relations.allowedExtrasByItemId.get(itemId) ?? [];
+  const allowedExtras = curateAllowedExtras(defaultIngredients, relations.allowedExtrasByItemId.get(itemId) ?? []);
   const optionGroups = relations.optionGroupsByItemId.get(itemId) ?? [];
 
   return {
@@ -522,7 +560,7 @@ async function getSupabaseActiveCategories(client, categorySlug) {
     client.from('categories').select('id, name, slug, sort_order').eq('active', true).order('sort_order').order('name'),
   );
 
-  const categories = rows.map(normalizeCategory);
+  const categories = dedupeCategories(rows.map(normalizeCategory));
 
   if (!categorySlug) {
     return categories;
@@ -609,6 +647,24 @@ async function getSupabaseMenuItemRow(client, menuItemId) {
   };
 }
 
+async function getSupabaseIngredientCatalog(client) {
+  const rows = await runSupabaseQuery(
+    client.from('ingredients').select('id, name, slug, active').eq('active', true).order('name'),
+  );
+
+  return rows
+    .filter((ingredient) => ingredient.active !== false)
+    .map((ingredient) => ({
+      id: normalizeId(ingredient.id),
+      ingredientId: normalizeId(ingredient.id),
+      name: cleanInlineText(ingredient.name),
+      slug: cleanInlineText(ingredient.slug),
+      allergenInfo: null,
+      sortOrder: 0,
+    }))
+    .sort(sortByOrderThenName);
+}
+
 function getConfiguredClient() {
   const client = getBrowserSupabase();
 
@@ -655,12 +711,19 @@ export async function fetchMenuItemCustomizationFromSupabase(menuItemId) {
   const { category, row } = await getSupabaseMenuItemRow(client, normalizedMenuItemId);
   const relations = await loadSupabaseRelations(client, [normalizedMenuItemId]);
   const item = buildSupabaseMenuItem(row, category, client, relations);
+  const defaultIngredients = relations.defaultIngredientsByItemId.get(normalizedMenuItemId) ?? [];
+  const ingredientCatalog = await getSupabaseIngredientCatalog(client);
+  const allowedExtras = buildAllowedExtrasFromIngredientCatalog(
+    defaultIngredients,
+    ingredientCatalog,
+    relations.allowedExtrasByItemId.get(normalizedMenuItemId) ?? [],
+  );
 
   return {
     item,
-    defaultIngredients: relations.defaultIngredientsByItemId.get(normalizedMenuItemId) ?? [],
+    defaultIngredients,
     removableIngredients: relations.removableIngredientsByItemId.get(normalizedMenuItemId) ?? [],
-    allowedExtras: relations.allowedExtrasByItemId.get(normalizedMenuItemId) ?? [],
+    allowedExtras,
     optionGroups: relations.optionGroupsByItemId.get(normalizedMenuItemId) ?? [],
     pricing: {
       currency: 'EUR',

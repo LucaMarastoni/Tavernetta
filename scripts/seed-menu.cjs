@@ -444,7 +444,7 @@ async function main() {
 
   console.log("→ Sincronizzazione menu_item_allowed_extras...");
 
-  const menuItemIdsForExtras = menuItemsForDb
+  const menuItemIdsForExtras = menuItems
     .filter((item) => CUSTOMIZABLE_CATEGORY_SLUGS.has(item.category_slug))
     .map((item) => menuItemBySlug.get(item.slug)?.id)
     .filter(Boolean);
