@@ -15,19 +15,18 @@ const ORDER_GROUPS = [
 ];
 
 const STATUS_LABELS = {
+  pending: 'Nuovo',
+  confirmed: 'Confermato',
   new: 'Nuovo',
   preparing: 'In preparazione',
+  ready: 'Pronto',
+  delivered: 'Consegnato',
   completed: 'Completato',
   cancelled: 'Annullato',
 };
 
-const TODO_ORDER_ACTIONS = [
-  { label: 'Segna come chiuso', nextStatus: 'completed', tone: 'primary' },
-  { label: 'Annulla', nextStatus: 'cancelled', tone: 'danger' },
-];
-
 function isClosedOrderStatus(status) {
-  return status === 'completed' || status === 'cancelled';
+  return status === 'delivered' || status === 'completed' || status === 'cancelled';
 }
 
 function getOrderGroup(status) {
@@ -36,20 +35,84 @@ function getOrderGroup(status) {
 
 function getStatusPriority(status) {
   switch (status) {
-    case 'new':
+    case 'pending':
       return 0;
-    case 'preparing':
+    case 'confirmed':
       return 1;
-    case 'completed':
+    case 'new':
       return 2;
-    case 'cancelled':
+    case 'preparing':
       return 3;
-    default:
+    case 'ready':
       return 4;
+    case 'delivered':
+      return 5;
+    case 'completed':
+      return 6;
+    case 'cancelled':
+      return 7;
+    default:
+      return 8;
   }
 }
 
-function OrdersPanel({ orders, onUpdateStatus }) {
+function getOrderActions(status) {
+  switch (status) {
+    case 'pending':
+    case 'confirmed':
+    case 'new':
+      return [
+        { label: 'In preparazione', nextStatus: 'preparing', tone: 'primary' },
+        { label: 'Chiudi', nextStatus: 'completed', tone: 'secondary' },
+        { label: 'Annulla', nextStatus: 'cancelled', tone: 'danger' },
+      ];
+    case 'preparing':
+      return [
+        { label: 'Pronto', nextStatus: 'ready', tone: 'primary' },
+        { label: 'Chiudi', nextStatus: 'completed', tone: 'secondary' },
+        { label: 'Annulla', nextStatus: 'cancelled', tone: 'danger' },
+      ];
+    case 'ready':
+      return [
+        { label: 'Consegnato', nextStatus: 'delivered', tone: 'primary' },
+        { label: 'Chiudi', nextStatus: 'completed', tone: 'secondary' },
+        { label: 'Annulla', nextStatus: 'cancelled', tone: 'danger' },
+      ];
+    default:
+      return [];
+  }
+}
+
+function formatOrderLabel(order) {
+  return order.orderNumber ? `#${order.orderNumber}` : order.id;
+}
+
+function formatOrderType(orderType) {
+  return orderType === 'delivery' ? 'Consegna' : 'Ritiro';
+}
+
+function formatOrderTime(order) {
+  const referenceDate = order.preferredTime || order.createdAt;
+
+  if (!referenceDate) {
+    return 'Orario non disponibile';
+  }
+
+  const parsedDate = new Date(referenceDate);
+
+  if (Number.isNaN(parsedDate.getTime())) {
+    return String(referenceDate);
+  }
+
+  return new Intl.DateTimeFormat('it-IT', {
+    day: '2-digit',
+    month: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(parsedDate);
+}
+
+function OrdersPanel({ orders, loading, error, updatingOrderId, onRefresh, onUpdateStatus }) {
   const ordersByGroup = useMemo(() => {
     const sortedOrders = [...orders].sort((left, right) => {
       const byStatus = getStatusPriority(left.status) - getStatusPriority(right.status);
@@ -58,7 +121,7 @@ function OrdersPanel({ orders, onUpdateStatus }) {
         return byStatus;
       }
 
-      return right.scheduledAt.localeCompare(left.scheduledAt, 'it');
+      return String(right.preferredTime || right.createdAt || '').localeCompare(String(left.preferredTime || left.createdAt || ''), 'it');
     });
 
     return {
@@ -90,8 +153,18 @@ function OrdersPanel({ orders, onUpdateStatus }) {
         <div className="admin-orders-summary">
           <span className="admin-status-pill is-todo">{`Da fare ${orderStats.todoCount}`}</span>
           <span className="admin-status-pill is-closed">{`Chiusi ${orderStats.closedCount}`}</span>
+          <button className="admin-secondary-button" type="button" onClick={() => onRefresh()} disabled={loading}>
+            {loading ? 'Aggiorno...' : 'Aggiorna'}
+          </button>
         </div>
       </div>
+
+      {error ? (
+        <div className="admin-empty-state">
+          <h3>Ordini non disponibili</h3>
+          <p>{error}</p>
+        </div>
+      ) : null}
 
       <div className="admin-orders-groups">
         {ORDER_GROUPS.map((group) => {
@@ -113,9 +186,15 @@ function OrdersPanel({ orders, onUpdateStatus }) {
               </div>
 
               <div className="admin-orders-list">
-                {groupOrders.length ? (
+                {loading && !orders.length ? (
+                  <div className="admin-empty-state">
+                    <h3>Caricamento ordini</h3>
+                    <p>Sto leggendo gli ordini registrati dal sistema.</p>
+                  </div>
+                ) : groupOrders.length ? (
                   groupOrders.map((order) => {
                     const isClosedOrder = getOrderGroup(order.status) === 'closed';
+                    const actions = getOrderActions(order.status);
 
                     return (
                       <article
@@ -124,7 +203,7 @@ function OrdersPanel({ orders, onUpdateStatus }) {
                       >
                         <div className="admin-order-card-head">
                           <div>
-                            <p className="admin-order-id">{order.id}</p>
+                            <p className="admin-order-id">{formatOrderLabel(order)}</p>
                             <h3>{order.customerName}</h3>
                           </div>
 
@@ -139,26 +218,35 @@ function OrdersPanel({ orders, onUpdateStatus }) {
                         </div>
 
                         <div className="admin-order-meta">
-                          <span>{order.type}</span>
-                          <span>{order.scheduledAt}</span>
+                          <span>{formatOrderType(order.orderType)}</span>
+                          <span>{formatOrderTime(order)}</span>
                         </div>
 
                         <ul className="admin-order-lines" role="list">
                           {order.items.map((item) => (
-                            <li key={item}>{item}</li>
+                            <li key={item.id || `${item.name}-${item.quantity}`}>
+                              {item.name} x{item.quantity}
+                            </li>
                           ))}
                         </ul>
 
-                        {!isClosedOrder ? (
+                        {!isClosedOrder && actions.length ? (
                           <div className="admin-row-actions">
-                            {TODO_ORDER_ACTIONS.map((action) => (
+                            {actions.map((action) => (
                               <button
                                 key={action.label}
-                                className={action.tone === 'danger' ? 'admin-danger-button' : 'admin-primary-button'}
+                                className={
+                                  action.tone === 'danger'
+                                    ? 'admin-danger-button'
+                                    : action.tone === 'secondary'
+                                      ? 'admin-secondary-button'
+                                      : 'admin-primary-button'
+                                }
                                 type="button"
+                                disabled={updatingOrderId === order.id}
                                 onClick={() => onUpdateStatus(order.id, action.nextStatus)}
                               >
-                                {action.label}
+                                {updatingOrderId === order.id ? 'Aggiorno...' : action.label}
                               </button>
                             ))}
                           </div>

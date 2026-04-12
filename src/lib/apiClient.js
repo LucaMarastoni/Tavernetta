@@ -54,3 +54,21 @@ export async function apiPost(path, body) {
 
   return payload;
 }
+
+export async function apiPatch(path, body) {
+  const response = await fetch(buildUrl(path), {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify(body),
+  });
+  const payload = await parseJson(response);
+
+  if (!response.ok) {
+    throw createApiError(response, payload);
+  }
+
+  return payload;
+}

@@ -7,6 +7,7 @@ import { hasSupabaseConfig } from './lib/supabase.js';
 import categoriesRouter from './routes/categories.js';
 import mediaRouter from './routes/media.js';
 import menuRouter from './routes/menu.js';
+import adminOrdersRouter from './routes/adminOrders.js';
 import ordersRouter from './routes/orders.js';
 import { HttpError } from './utils/httpError.js';
 
@@ -38,6 +39,7 @@ app.get('/api/health', (request, response) => {
 app.use('/api/categories', categoriesRouter);
 app.use('/api/media', mediaRouter);
 app.use('/api', menuRouter);
+app.use('/api/admin/orders', adminOrdersRouter);
 app.use('/api/orders', ordersRouter);
 
 if (fs.existsSync(path.join(distDir, 'index.html'))) {

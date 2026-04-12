@@ -1,7 +1,6 @@
 import { Outlet } from 'react-router-dom';
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import AdminSidebar from '../components/admin/AdminSidebar';
-import { adminMockOrders } from '../data/adminMockOrders';
 import {
   createAdminMenuState,
   flattenAdminMenu,
@@ -9,6 +8,12 @@ import {
   normalizeAdminText,
   slugifyAdminValue,
 } from '../data/adminMenu';
+import {
+  AdminOrdersApiError,
+  fetchAdminOrders,
+  updateAdminOrder,
+  usesStaticAdminSource,
+} from '../services/adminOrdersApi';
 import '../styles/admin.css';
 
 function sortItemsByName(items) {
@@ -16,8 +21,12 @@ function sortItemsByName(items) {
 }
 
 function AdminPage() {
+  const staticAdminEnabled = usesStaticAdminSource();
   const [menuState, setMenuState] = useState(() => createAdminMenuState());
-  const [orders, setOrders] = useState(() => adminMockOrders.map((order) => ({ ...order, items: [...order.items] })));
+  const [orders, setOrders] = useState([]);
+  const [ordersLoading, setOrdersLoading] = useState(true);
+  const [ordersError, setOrdersError] = useState('');
+  const [updatingOrderId, setUpdatingOrderId] = useState('');
 
   const items = useMemo(() => flattenAdminMenu(menuState), [menuState]);
   const categories = useMemo(
@@ -148,11 +157,97 @@ function AdminPage() {
     setMenuState((currentState) => currentState.filter((category) => category.id !== categoryId));
   };
 
-  const updateOrderStatus = (orderId, nextStatus) => {
-    setOrders((currentOrders) =>
-      currentOrders.map((order) => (order.id === orderId ? { ...order, status: nextStatus } : order)),
-    );
-  };
+  const refreshOrders = useCallback(async ({ silent = false } = {}) => {
+    if (!silent) {
+      setOrdersLoading(true);
+    }
+
+    try {
+      const nextOrders = await fetchAdminOrders();
+      setOrders(nextOrders);
+      setOrdersError('');
+    } catch (error) {
+      const message =
+        error instanceof AdminOrdersApiError
+          ? error.message
+          : 'Non siamo riusciti a leggere gli ordini ricevuti.';
+      setOrdersError(message);
+    } finally {
+      if (!silent) {
+        setOrdersLoading(false);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    let isActive = true;
+    let refreshTimerId = null;
+
+    const loadOrders = async () => {
+      setOrdersLoading(true);
+
+      try {
+        const nextOrders = await fetchAdminOrders();
+
+        if (!isActive) {
+          return;
+        }
+
+        setOrders(nextOrders);
+        setOrdersError('');
+      } catch (error) {
+        if (!isActive) {
+          return;
+        }
+
+        const message =
+          error instanceof AdminOrdersApiError
+            ? error.message
+            : 'Non siamo riusciti a leggere gli ordini ricevuti.';
+        setOrdersError(message);
+      } finally {
+        if (!isActive) {
+          return;
+        }
+
+        setOrdersLoading(false);
+      }
+    };
+
+    loadOrders();
+    refreshTimerId = window.setInterval(() => {
+      refreshOrders({ silent: true });
+    }, 15000);
+
+    return () => {
+      isActive = false;
+
+      if (refreshTimerId) {
+        window.clearInterval(refreshTimerId);
+      }
+    };
+  }, [refreshOrders]);
+
+  const updateOrderStatus = useCallback(async (orderId, nextStatus) => {
+    setUpdatingOrderId(orderId);
+    setOrdersError('');
+
+    try {
+      const updatedOrder = await updateAdminOrder(orderId, nextStatus);
+
+      setOrders((currentOrders) =>
+        currentOrders.map((order) => (order.id === orderId ? updatedOrder ?? { ...order, status: nextStatus } : order)),
+      );
+    } catch (error) {
+      const message =
+        error instanceof AdminOrdersApiError
+          ? error.message
+          : 'Non siamo riusciti ad aggiornare lo stato dell ordine.';
+      setOrdersError(message);
+    } finally {
+      setUpdatingOrderId('');
+    }
+  }, []);
 
   const contextValue = useMemo(
     () => ({
@@ -160,14 +255,30 @@ function AdminPage() {
       categories,
       allergenOptions,
       orders,
+      ordersLoading,
+      ordersError,
+      updatingOrderId,
+      staticAdminEnabled,
       savePizza,
       deletePizza,
       createCategory,
       renameCategory,
       deleteCategory,
+      refreshOrders,
       updateOrderStatus,
     }),
-    [items, categories, allergenOptions, orders],
+    [
+      items,
+      categories,
+      allergenOptions,
+      orders,
+      ordersLoading,
+      ordersError,
+      updatingOrderId,
+      staticAdminEnabled,
+      refreshOrders,
+      updateOrderStatus,
+    ],
   );
 
   return (
