@@ -255,6 +255,17 @@ function normalizeRpcError(error) {
     return createOrderError(error.message, error.message);
   }
 
+  if (
+    error?.code === '42804' ||
+    /preferred_time/i.test(error?.message || '') ||
+    /timestamp with time zone/i.test(error?.message || '')
+  ) {
+    return createOrderError(
+      'SUPABASE_ORDER_RPC_OUTDATED',
+      'La funzione ordini su Supabase e da aggiornare. Riesegui lo script SQL piu recente.',
+    );
+  }
+
   if (/row-level security policy/i.test(error?.message || '')) {
     return createOrderError(
       'SUPABASE_ORDER_RPC_BLOCKED',

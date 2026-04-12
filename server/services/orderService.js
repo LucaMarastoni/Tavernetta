@@ -83,6 +83,32 @@ function isMissingSupabaseResource(error) {
   return MISSING_RESOURCE_CODES.has(error?.code) || /Could not find/i.test(error?.message || '');
 }
 
+function normalizeSupabasePreferredTimeAndNotes(order) {
+  const preferredTime = normalizeNullableText(order.preferredTime);
+  const notes = normalizeNullableText(order.notes);
+
+  if (!preferredTime) {
+    return {
+      preferredTime: null,
+      notes,
+    };
+  }
+
+  const parsedTimestamp = Date.parse(preferredTime);
+
+  if (Number.isFinite(parsedTimestamp)) {
+    return {
+      preferredTime: new Date(parsedTimestamp).toISOString(),
+      notes,
+    };
+  }
+
+  return {
+    preferredTime: null,
+    notes: [notes, `Orario preferito: ${preferredTime}`].filter(Boolean).join('\n'),
+  };
+}
+
 function mapOrderResponse(savedOrder, orderLines, createdItemIds = []) {
   return {
     orderId: savedOrder.id,
@@ -130,6 +156,7 @@ async function loadSupabaseCreatedOrder(supabase, orderId, fallbackOrder) {
 async function createOrderSupabase(cleanPayload, orderLines, totals) {
   const supabase = getSupabaseAdmin();
   const now = new Date().toISOString();
+  const normalizedOrder = normalizeSupabasePreferredTimeAndNotes(cleanPayload.order);
 
   const { data: insertedOrder, error: orderInsertError } = await supabase
     .from('orders')
@@ -140,8 +167,8 @@ async function createOrderSupabase(cleanPayload, orderLines, totals) {
       privacy_accepted_at: now,
       order_type: cleanPayload.order.orderType,
       address: cleanPayload.order.orderType === 'delivery' ? cleanPayload.order.address : null,
-      preferred_time: cleanPayload.order.preferredTime,
-      notes: cleanPayload.order.notes,
+      preferred_time: normalizedOrder.preferredTime,
+      notes: normalizedOrder.notes,
       status: 'pending',
       subtotal: totals.subtotal,
       delivery_fee: totals.deliveryFee,

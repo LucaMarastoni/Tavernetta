@@ -36,6 +36,11 @@ function mapOrderApiError(error) {
         'La funzione ordini di Supabase non e ancora pubblicata. Esegui prima lo script SQL dedicato.',
         code,
       );
+    case 'SUPABASE_ORDER_RPC_OUTDATED':
+      return new OrderApiError(
+        'La funzione ordini di Supabase e da aggiornare. Riesegui lo script SQL piu recente.',
+        code,
+      );
     case 'SUPABASE_ORDER_RPC_BLOCKED':
       return new OrderApiError(
         'Supabase sta bloccando il salvataggio dell ordine. Controlla la funzione SQL pubblica.',
