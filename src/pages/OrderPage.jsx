@@ -6,6 +6,14 @@ import StatusPanel from '../components/StatusPanel';
 import { useCart } from '../context/CartContext';
 import { restaurant } from '../data/siteContent';
 import { OrderApiError, submitOrder } from '../services/orderApi';
+import {
+  formatDateTimeLocalValue,
+  formatPreferredTimeDateTime,
+  getLeadTimeMinutes,
+  getMinimumPreferredTime,
+  getPreferredTimeValidationCode,
+  serializePreferredTimeValue,
+} from '../../shared/orderTiming.js';
 import { formatPrice } from '../utils/formatPrice';
 import { sanitizeOrderDraft, validateOrderDraft } from '../utils/validators';
 
@@ -27,11 +35,29 @@ function OrderPage() {
   const [successOrder, setSuccessOrder] = useState(null);
 
   const sanitizedDraft = useMemo(() => sanitizeOrderDraft(orderDraft), [orderDraft]);
+  const minimumPreferredTime = useMemo(
+    () => formatDateTimeLocalValue(getMinimumPreferredTime(orderDraft.orderType)),
+    [orderDraft.orderType],
+  );
+  const preferredTimeLeadMinutes = useMemo(() => getLeadTimeMinutes(orderDraft.orderType), [orderDraft.orderType]);
 
   const handleFieldChange = (event) => {
     const { checked, name, type, value } = event.target;
+    const nextValue = type === 'checkbox' ? checked : value;
+    const nextDraft = {
+      ...orderDraft,
+      [name]: nextValue,
+    };
 
-    updateOrderDraft({ [name]: type === 'checkbox' ? checked : value });
+    if (name === 'orderType' && orderDraft.preferredTime) {
+      const validationCode = getPreferredTimeValidationCode(orderDraft.preferredTime, nextValue);
+
+      if (validationCode === 'PREFERRED_TIME_TOO_SOON') {
+        nextDraft.preferredTime = formatDateTimeLocalValue(getMinimumPreferredTime(nextValue));
+      }
+    }
+
+    updateOrderDraft(nextDraft);
     setFieldErrors((currentErrors) => ({
       ...currentErrors,
       [name]: '',
@@ -68,7 +94,7 @@ function OrderPage() {
         order: {
           orderType: sanitizedDraft.orderType,
           address: sanitizedDraft.orderType === 'delivery' ? sanitizedDraft.address : null,
-          preferredTime: sanitizedDraft.preferredTime || null,
+          preferredTime: serializePreferredTimeValue(sanitizedDraft.preferredTime),
           notes: sanitizedDraft.notes || null,
           privacyAccepted: sanitizedDraft.privacyAccepted,
         },
@@ -150,7 +176,9 @@ function OrderPage() {
               <p>{successOrder.customerPhone}</p>
               <p>{successOrder.orderType === 'delivery' ? 'Consegna' : 'Ritiro'}</p>
               {successOrder.address ? <p>{successOrder.address}</p> : null}
-              {successOrder.preferredTime ? <p>Orario preferito: {successOrder.preferredTime}</p> : null}
+              {successOrder.preferredTime ? (
+                <p>{`Orario richiesto: ${formatPreferredTimeDateTime(successOrder.preferredTime)}`}</p>
+              ) : null}
             </div>
 
             <div className="ordering-success-items">
@@ -201,11 +229,13 @@ function OrderPage() {
 
             <div className="ordering-checkout-sidebar">
               <CheckoutForm
-                draft={sanitizedDraft}
+                draft={orderDraft}
                 fieldErrors={fieldErrors}
                 submitError={submitError}
                 totals={totals}
                 submitting={isSubmitting}
+                minimumPreferredTime={minimumPreferredTime}
+                preferredTimeLeadMinutes={preferredTimeLeadMinutes}
                 onFieldChange={handleFieldChange}
                 onSubmit={handleSubmit}
               />

@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { normalizeStoredCart } from '../utils/cart';
 import { calculateCartTotals } from '../utils/pricing';
-import { initialOrderDraft, sanitizeOrderDraft } from '../utils/validators';
+import { initialOrderDraft, normalizeOrderDraft } from '../utils/validators';
 
 const CART_STORAGE_KEY = 'tavernetta-cart-v2';
 const ORDER_DRAFT_STORAGE_KEY = 'tavernetta-order-draft-v1';
@@ -31,7 +31,7 @@ function readStoredCart() {
 }
 
 function readStoredDraft() {
-  return sanitizeOrderDraft(readJsonStorage(ORDER_DRAFT_STORAGE_KEY, initialOrderDraft));
+  return normalizeOrderDraft(readJsonStorage(ORDER_DRAFT_STORAGE_KEY, initialOrderDraft));
 }
 
 export function CartProvider({ children }) {
@@ -119,7 +119,7 @@ export function CartProvider({ children }) {
   const clearCart = () => setItems([]);
 
   const updateOrderDraft = (patch) => {
-    setOrderDraftState((currentDraft) => sanitizeOrderDraft({ ...currentDraft, ...patch }));
+    setOrderDraftState((currentDraft) => normalizeOrderDraft({ ...currentDraft, ...patch }));
   };
 
   const resetOrderDraft = () => setOrderDraftState(initialOrderDraft);

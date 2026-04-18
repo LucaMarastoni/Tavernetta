@@ -1,4 +1,5 @@
 import { getBrowserSupabase, hasBrowserSupabaseConfig } from '../lib/supabaseBrowser';
+import { getPreferredTimeValidationCode, serializePreferredTimeValue } from '../../shared/orderTiming.js';
 import { DELIVERY_FEE, roundCurrency } from '../utils/pricing';
 import { fetchMenuItemCustomizationFromSupabase } from './menuSupabaseApi';
 
@@ -97,6 +98,22 @@ function validatePayload(payload) {
 
   if (payload.order.orderType === 'delivery') {
     assert(Boolean(payload.order.address), 'ADDRESS_REQUIRED');
+  }
+
+  const preferredTimeValidationCode = getPreferredTimeValidationCode(payload.order.preferredTime, payload.order.orderType);
+
+  switch (preferredTimeValidationCode) {
+    case 'PREFERRED_TIME_REQUIRED':
+      assert(false, 'PREFERRED_TIME_REQUIRED');
+      break;
+    case 'INVALID_PREFERRED_TIME':
+      assert(false, 'INVALID_PREFERRED_TIME');
+      break;
+    case 'PREFERRED_TIME_TOO_SOON':
+      assert(false, 'PREFERRED_TIME_TOO_SOON');
+      break;
+    default:
+      break;
   }
 
   payload.items.forEach((item) => {
@@ -281,7 +298,10 @@ function normalizeRpcError(error) {
 function buildRpcPayload(cleanPayload, orderLines, totals) {
   return {
     customer: cleanPayload.customer,
-    order: cleanPayload.order,
+    order: {
+      ...cleanPayload.order,
+      preferredTime: serializePreferredTimeValue(cleanPayload.order.preferredTime),
+    },
     totals,
     items: orderLines.map((line) => ({
       menuItemId: line.menuItemId,

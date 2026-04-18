@@ -19,6 +19,89 @@ function normalizeNumber(value, fallbackValue = 0) {
   return Number.isFinite(parsedValue) ? parsedValue : fallbackValue;
 }
 
+function normalizeNullableText(value) {
+  const normalizedValue = typeof value === 'string' ? value.trim() : '';
+  return normalizedValue || null;
+}
+
+function parseCustomizationValue(value) {
+  if (!value) {
+    return {};
+  }
+
+  if (typeof value === 'object') {
+    return value;
+  }
+
+  if (typeof value !== 'string') {
+    return {};
+  }
+
+  try {
+    const parsedValue = JSON.parse(value);
+    return parsedValue && typeof parsedValue === 'object' ? parsedValue : {};
+  } catch {
+    return {};
+  }
+}
+
+function normalizeCustomizationEntries(value, mapper) {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value.map(mapper).filter(Boolean);
+}
+
+function mapOrderItemCustomization(value) {
+  const customization = parseCustomizationValue(value);
+
+  return {
+    removedIngredients: normalizeCustomizationEntries(customization.removedIngredients, (ingredient) => {
+      const name = typeof ingredient?.name === 'string' ? ingredient.name.trim() : '';
+
+      if (!name) {
+        return null;
+      }
+
+      return {
+        ingredientId: normalizeId(ingredient?.ingredientId ?? ingredient?.id),
+        name,
+      };
+    }),
+    addedExtras: normalizeCustomizationEntries(customization.addedExtras, (extra) => {
+      const name = typeof extra?.name === 'string' ? extra.name.trim() : '';
+
+      if (!name) {
+        return null;
+      }
+
+      return {
+        extraIngredientId: normalizeId(extra?.extraIngredientId ?? extra?.id),
+        ingredientId: normalizeId(extra?.ingredientId),
+        name,
+        extraPrice: normalizeNumber(extra?.extraPrice),
+      };
+    }),
+    selectedOptions: normalizeCustomizationEntries(customization.selectedOptions, (option) => {
+      const optionName = typeof option?.optionName === 'string' ? option.optionName.trim() : '';
+
+      if (!optionName) {
+        return null;
+      }
+
+      return {
+        optionId: normalizeId(option?.optionId ?? option?.id),
+        groupName: (typeof option?.groupName === 'string' ? option.groupName.trim() : '') || 'Opzione',
+        groupSlug: normalizeId(option?.groupSlug),
+        optionName,
+        priceDelta: normalizeNumber(option?.priceDelta),
+      };
+    }),
+    specialNotes: normalizeNullableText(customization.specialNotes),
+  };
+}
+
 function isMissingSupabaseResource(error) {
   return (
     ['42P01', '42703', 'PGRST116', 'PGRST204', 'PGRST205'].includes(error?.code) ||
@@ -70,8 +153,10 @@ function mapOrderItemRow(row) {
     menuItemId: normalizeId(row.menu_item_id),
     name: row.item_name_snapshot,
     quantity: Number(row.quantity) || 0,
+    finalUnitPrice: normalizeNumber(row.final_unit_price),
     lineTotal: normalizeNumber(row.line_total),
     notes: row.notes,
+    customization: mapOrderItemCustomization(row.customization_json),
   };
 }
 
@@ -103,7 +188,7 @@ async function fetchAdminOrderItems(client, orderIds) {
 
   const { data, error } = await client
     .from('order_items')
-    .select('id, order_id, menu_item_id, item_name_snapshot, quantity, line_total, notes')
+    .select('id, order_id, menu_item_id, item_name_snapshot, quantity, final_unit_price, line_total, customization_json, notes')
     .in('order_id', orderIds)
     .order('created_at', { ascending: true });
 

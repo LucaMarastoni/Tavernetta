@@ -11,7 +11,6 @@ import {
 import {
   AdminOrdersApiError,
   fetchAdminOrders,
-  updateAdminOrder,
   usesStaticAdminSource,
 } from '../services/adminOrdersApi';
 import '../styles/admin.css';
@@ -26,7 +25,6 @@ function AdminPage() {
   const [orders, setOrders] = useState([]);
   const [ordersLoading, setOrdersLoading] = useState(true);
   const [ordersError, setOrdersError] = useState('');
-  const [updatingOrderId, setUpdatingOrderId] = useState('');
 
   const items = useMemo(() => flattenAdminMenu(menuState), [menuState]);
   const categories = useMemo(
@@ -228,27 +226,6 @@ function AdminPage() {
     };
   }, [refreshOrders]);
 
-  const updateOrderStatus = useCallback(async (orderId, nextStatus) => {
-    setUpdatingOrderId(orderId);
-    setOrdersError('');
-
-    try {
-      const updatedOrder = await updateAdminOrder(orderId, nextStatus);
-
-      setOrders((currentOrders) =>
-        currentOrders.map((order) => (order.id === orderId ? updatedOrder ?? { ...order, status: nextStatus } : order)),
-      );
-    } catch (error) {
-      const message =
-        error instanceof AdminOrdersApiError
-          ? error.message
-          : 'Non siamo riusciti ad aggiornare lo stato dell ordine.';
-      setOrdersError(message);
-    } finally {
-      setUpdatingOrderId('');
-    }
-  }, []);
-
   const contextValue = useMemo(
     () => ({
       items,
@@ -257,7 +234,6 @@ function AdminPage() {
       orders,
       ordersLoading,
       ordersError,
-      updatingOrderId,
       staticAdminEnabled,
       savePizza,
       deletePizza,
@@ -265,7 +241,6 @@ function AdminPage() {
       renameCategory,
       deleteCategory,
       refreshOrders,
-      updateOrderStatus,
     }),
     [
       items,
@@ -274,10 +249,8 @@ function AdminPage() {
       orders,
       ordersLoading,
       ordersError,
-      updatingOrderId,
       staticAdminEnabled,
       refreshOrders,
-      updateOrderStatus,
     ],
   );
 

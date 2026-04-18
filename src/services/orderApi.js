@@ -29,6 +29,15 @@ function mapOrderApiError(error) {
       return new OrderApiError('Per inviare l ordine devi accettare la privacy policy.', code);
     case 'ADDRESS_REQUIRED':
       return new OrderApiError('Per la consegna serve un indirizzo completo.', code);
+    case 'PREFERRED_TIME_REQUIRED':
+      return new OrderApiError('Seleziona l orario desiderato per ritiro o consegna.', code);
+    case 'INVALID_PREFERRED_TIME':
+      return new OrderApiError('L orario selezionato non e valido.', code);
+    case 'PREFERRED_TIME_TOO_SOON':
+      return new OrderApiError(
+        'L orario scelto e troppo vicino. Seleziona un orario piu avanti rispetto adesso.',
+        code,
+      );
     case 'SUPABASE_NOT_CONFIGURED':
       return new OrderApiError('Supabase non e configurato per ricevere ordini dal sito statico.', code);
     case 'ORDER_RPC_NOT_DEPLOYED':

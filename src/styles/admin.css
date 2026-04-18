@@ -552,52 +552,222 @@
   font-size: 1.35rem;
 }
 
-.admin-order-badges {
+.admin-orders-list {
+  display: grid;
+  gap: 0.95rem;
+}
+
+.order-layout-card {
+  display: grid;
+  gap: 1rem;
+  padding: 1.1rem;
+  border-radius: 1.45rem;
+  border: 1px solid rgba(61, 43, 33, 0.08);
+}
+
+.admin-order-card.is-todo {
+  background:
+    linear-gradient(180deg, rgba(255, 252, 247, 0.96), rgba(255, 248, 241, 0.9)),
+    rgba(255, 252, 247, 0.9);
+  border-color: rgba(200, 164, 125, 0.24);
+  box-shadow: inset 0 0 0 1px rgba(200, 164, 125, 0.1);
+}
+
+.admin-order-card.is-closed {
+  background: rgba(250, 245, 239, 0.82);
+  border-color: rgba(61, 43, 33, 0.06);
+}
+
+.admin-order-card-copy {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.admin-order-card-title-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 0.55rem 0.9rem;
+}
+
+.admin-order-card-copy h3 {
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 2.4vw, 2rem);
+  line-height: 0.94;
+}
+
+.admin-order-card-time {
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, 2vw, 1.7rem);
+  line-height: 0.94;
+  color: var(--color-terra);
+}
+
+.admin-order-hero-meta,
+.admin-order-modal-badges {
   display: flex;
   flex-wrap: wrap;
-  justify-content: flex-end;
+  gap: 0.55rem;
+}
+
+.admin-order-hero-total,
+.admin-order-modal-side {
+  display: grid;
+  justify-items: end;
   gap: 0.45rem;
 }
 
-.admin-order-status.is-new {
-  background: rgba(200, 164, 125, 0.18);
+.admin-order-hero-total span {
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-terra);
 }
 
-.admin-order-status.is-preparing {
-  background: rgba(184, 118, 95, 0.16);
+.admin-order-hero-total strong,
+.admin-order-modal-total {
+  font-size: clamp(1.55rem, 2.2vw, 2.2rem);
+  line-height: 0.94;
 }
 
-.admin-order-status.is-completed {
-  background: rgba(110, 137, 99, 0.18);
+.admin-order-glance-grid,
+.admin-order-detail-grid {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
 }
 
-.admin-order-status.is-cancelled {
-  background: rgba(109, 90, 79, 0.14);
+.admin-order-glance-card,
+.admin-order-detail-card {
+  display: grid;
+  gap: 0.42rem;
+  padding: 0.9rem 1rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(61, 43, 33, 0.08);
+  background: rgba(255, 250, 244, 0.84);
+}
+
+.admin-order-glance-label,
+.admin-order-detail-list dt,
+.admin-order-detail-head span {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-terra);
+}
+
+.admin-order-glance-value {
+  color: var(--color-espresso);
+  font-weight: 600;
+}
+
+.admin-order-modal {
+  width: min(980px, 100%);
+}
+
+.admin-order-modal-head {
+  align-items: start;
+}
+
+.admin-order-modal-copy {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.admin-order-modal-title-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 0.7rem 1rem;
+}
+
+.admin-order-modal-title-row h2,
+.admin-order-modal-time {
+  font-family: var(--font-display);
+  font-size: clamp(1.9rem, 3vw, 2.6rem);
+  line-height: 0.94;
+}
+
+.admin-order-modal-time {
+  color: var(--color-terra);
+}
+
+.admin-order-detail-card h3 {
+  font-size: 1.08rem;
+}
+
+.admin-order-detail-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.admin-order-detail-list div {
+  display: grid;
+  gap: 0.22rem;
+}
+
+.admin-order-detail-list dd {
+  margin: 0;
+  color: var(--color-espresso);
+}
+
+.admin-order-detail-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.8rem;
+  align-items: center;
+}
+
+.admin-order-note-stack {
+  display: grid;
+  gap: 0.5rem;
+  color: var(--color-mocha);
 }
 
 .admin-order-lines {
   display: grid;
-  gap: 0.35rem;
-  padding-left: 1.1rem;
+  gap: 0.7rem;
+  padding: 0;
+  margin: 0;
+  list-style: none;
   color: var(--color-mocha);
 }
 
-.admin-order-card.is-new {
-  border-color: rgba(200, 164, 125, 0.34);
-  box-shadow: inset 0 0 0 1px rgba(200, 164, 125, 0.18);
+.admin-order-line {
+  display: grid;
+  gap: 0.4rem;
+  padding: 0.9rem 1rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(61, 43, 33, 0.08);
+  background: rgba(255, 250, 244, 0.82);
 }
 
-.admin-order-card.is-preparing {
-  border-color: rgba(184, 118, 95, 0.22);
+.admin-order-line-head {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 0.75rem;
 }
 
-.admin-order-card.is-todo {
-  background: rgba(255, 252, 247, 0.86);
+.admin-order-line-title {
+  font-weight: 700;
+  color: var(--color-espresso);
 }
 
-.admin-order-card.is-closed {
-  background: rgba(250, 245, 239, 0.78);
-  border-color: rgba(61, 43, 33, 0.06);
+.admin-order-line-summary {
+  display: grid;
+  gap: 0.22rem;
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 0.88rem;
+  color: var(--color-mocha);
+}
+
+.admin-order-line-note {
+  font-size: 0.88rem;
+  color: var(--color-mocha);
 }
 
 .admin-fieldset {
@@ -726,8 +896,25 @@
     justify-items: start;
   }
 
-  .admin-order-badges {
-    justify-content: flex-start;
+  .admin-order-hero-total,
+  .admin-order-modal-side {
+    justify-items: start;
+  }
+
+  .admin-order-line-head {
+    flex-direction: column;
+    align-items: start;
+  }
+
+  .admin-order-card-title-row {
+    grid-template-columns: 1fr;
+    align-items: start;
+    gap: 0.3rem;
+  }
+
+  .admin-order-detail-head {
+    flex-direction: column;
+    align-items: start;
   }
 
   .admin-toolbar,
@@ -771,6 +958,17 @@
   .admin-section,
   .admin-modal-content {
     padding: 1rem;
+  }
+
+  .admin-order-modal-title-row {
+    grid-template-columns: 1fr;
+    align-items: start;
+    gap: 0.35rem;
+  }
+
+  .admin-order-glance-grid,
+  .admin-order-detail-grid {
+    grid-template-columns: 1fr;
   }
 
   .admin-allergen-grid {

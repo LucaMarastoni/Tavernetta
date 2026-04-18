@@ -1,7 +1,17 @@
 import { Link } from 'react-router-dom';
 import { formatPrice } from '../../utils/formatPrice';
 
-function CheckoutForm({ draft, fieldErrors, submitError, totals, submitting, onFieldChange, onSubmit }) {
+function CheckoutForm({
+  draft,
+  fieldErrors,
+  submitError,
+  totals,
+  submitting,
+  minimumPreferredTime,
+  preferredTimeLeadMinutes,
+  onFieldChange,
+  onSubmit,
+}) {
   return (
     <form className="ordering-checkout-card" noValidate onSubmit={onSubmit}>
       <div className="ordering-card-heading">
@@ -93,14 +103,18 @@ function CheckoutForm({ draft, fieldErrors, submitError, totals, submitting, onF
         ) : null}
 
         <label className="ordering-field">
-          <span>Orario preferito</span>
+          <span>Orario ritiro / consegna</span>
           <input
             name="preferredTime"
-            type="text"
-            placeholder="Es. 20:30"
+            type="datetime-local"
+            min={minimumPreferredTime}
+            step="300"
             value={draft.preferredTime}
             onChange={onFieldChange}
+            required
           />
+          <small>{`Seleziona almeno ${preferredTimeLeadMinutes} minuti dopo l inserimento dell ordine.`}</small>
+          {fieldErrors.preferredTime ? <small>{fieldErrors.preferredTime}</small> : null}
         </label>
 
         <label className="ordering-field ordering-field-full">

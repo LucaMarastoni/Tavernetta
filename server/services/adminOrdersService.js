@@ -1,13 +1,91 @@
 import { getDatabase } from '../db/database.js';
 import { getSupabaseAdmin, hasSupabaseConfig } from '../lib/supabase.js';
 import { HttpError } from '../utils/httpError.js';
-import { assert, normalizeIdentifier, normalizeText } from '../utils/validators.js';
+import { assert, normalizeIdentifier, normalizeNullableText, normalizeText } from '../utils/validators.js';
 
 const ORDER_STATUSES = new Set(['pending', 'confirmed', 'preparing', 'ready', 'delivered', 'completed', 'cancelled']);
 
 function normalizeNumber(value, fallbackValue = 0) {
   const parsedValue = Number(value);
   return Number.isFinite(parsedValue) ? parsedValue : fallbackValue;
+}
+
+function parseCustomizationValue(value) {
+  if (!value) {
+    return {};
+  }
+
+  if (typeof value === 'object') {
+    return value;
+  }
+
+  if (typeof value !== 'string') {
+    return {};
+  }
+
+  try {
+    const parsedValue = JSON.parse(value);
+    return parsedValue && typeof parsedValue === 'object' ? parsedValue : {};
+  } catch {
+    return {};
+  }
+}
+
+function normalizeCustomizationEntries(value, mapper) {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value.map(mapper).filter(Boolean);
+}
+
+function normalizeOrderItemCustomization(value) {
+  const customization = parseCustomizationValue(value);
+
+  return {
+    removedIngredients: normalizeCustomizationEntries(customization.removedIngredients, (ingredient) => {
+      const name = normalizeText(ingredient?.name);
+
+      if (!name) {
+        return null;
+      }
+
+      return {
+        ingredientId: normalizeIdentifier(ingredient?.ingredientId ?? ingredient?.id),
+        name,
+      };
+    }),
+    addedExtras: normalizeCustomizationEntries(customization.addedExtras, (extra) => {
+      const name = normalizeText(extra?.name);
+
+      if (!name) {
+        return null;
+      }
+
+      return {
+        extraIngredientId: normalizeIdentifier(extra?.extraIngredientId ?? extra?.id),
+        ingredientId: normalizeIdentifier(extra?.ingredientId),
+        name,
+        extraPrice: normalizeNumber(extra?.extraPrice),
+      };
+    }),
+    selectedOptions: normalizeCustomizationEntries(customization.selectedOptions, (option) => {
+      const optionName = normalizeText(option?.optionName ?? option?.name);
+
+      if (!optionName) {
+        return null;
+      }
+
+      return {
+        optionId: normalizeIdentifier(option?.optionId ?? option?.id),
+        groupName: normalizeText(option?.groupName) || 'Opzione',
+        groupSlug: normalizeIdentifier(option?.groupSlug),
+        optionName,
+        priceDelta: normalizeNumber(option?.priceDelta),
+      };
+    }),
+    specialNotes: normalizeNullableText(customization.specialNotes),
+  };
 }
 
 function normalizeOrderRow(row, items = []) {
@@ -38,8 +116,10 @@ function normalizeOrderItemRow(row) {
     menuItemId: normalizeIdentifier(row.menu_item_id),
     name: row.item_name_snapshot,
     quantity: Number(row.quantity) || 0,
+    finalUnitPrice: normalizeNumber(row.final_unit_price),
     lineTotal: normalizeNumber(row.line_total),
     notes: row.notes,
+    customization: normalizeOrderItemCustomization(row.customization_json),
   };
 }
 
@@ -71,7 +151,7 @@ async function listSupabaseOrders() {
 
   const { data: itemRows, error: itemsError } = await supabase
     .from('order_items')
-    .select('id, order_id, menu_item_id, item_name_snapshot, quantity, line_total, notes')
+    .select('id, order_id, menu_item_id, item_name_snapshot, quantity, final_unit_price, line_total, customization_json, notes')
     .in('order_id', orderIds)
     .order('created_at', { ascending: true });
 
@@ -135,7 +215,9 @@ function listSqliteOrders(database) {
           menu_item_id,
           item_name_snapshot,
           quantity,
+          final_unit_price,
           line_total,
+          customization_json,
           notes
         from order_items
         where order_id in (${placeholders})

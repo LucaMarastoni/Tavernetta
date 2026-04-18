@@ -1,5 +1,6 @@
 import { getDatabase } from '../db/database.js';
 import { getSupabaseAdmin, hasSupabaseConfig } from '../lib/supabase.js';
+import { getPreferredTimeValidationCode, serializePreferredTimeValue } from '../../shared/orderTiming.js';
 import { calculateOrderTotals, buildOrderLine } from './pricingService.js';
 import {
   assert,
@@ -68,6 +69,23 @@ function validatePayload(payload) {
     assert(payload.order.address, 400, 'ADDRESS_REQUIRED', 'Per la consegna serve un indirizzo completo.');
   }
 
+  const preferredTimeValidationCode = getPreferredTimeValidationCode(payload.order.preferredTime, payload.order.orderType);
+
+  switch (preferredTimeValidationCode) {
+    case 'PREFERRED_TIME_REQUIRED':
+      throw new HttpError(400, 'PREFERRED_TIME_REQUIRED', 'Seleziona l orario desiderato per ritiro o consegna.');
+    case 'INVALID_PREFERRED_TIME':
+      throw new HttpError(400, 'INVALID_PREFERRED_TIME', 'L orario selezionato non e valido.');
+    case 'PREFERRED_TIME_TOO_SOON':
+      throw new HttpError(
+        400,
+        'PREFERRED_TIME_TOO_SOON',
+        'L orario scelto e troppo vicino. Seleziona un orario piu avanti.',
+      );
+    default:
+      break;
+  }
+
   payload.items.forEach((item) => {
     assert(item.menuItemId, 400, 'INVALID_MENU_ITEM', 'Controlla i prodotti nel carrello.');
     assert(
@@ -84,28 +102,12 @@ function isMissingSupabaseResource(error) {
 }
 
 function normalizeSupabasePreferredTimeAndNotes(order) {
-  const preferredTime = normalizeNullableText(order.preferredTime);
+  const preferredTime = serializePreferredTimeValue(order.preferredTime);
   const notes = normalizeNullableText(order.notes);
 
-  if (!preferredTime) {
-    return {
-      preferredTime: null,
-      notes,
-    };
-  }
-
-  const parsedTimestamp = Date.parse(preferredTime);
-
-  if (Number.isFinite(parsedTimestamp)) {
-    return {
-      preferredTime: new Date(parsedTimestamp).toISOString(),
-      notes,
-    };
-  }
-
   return {
-    preferredTime: null,
-    notes: [notes, `Orario preferito: ${preferredTime}`].filter(Boolean).join('\n'),
+    preferredTime,
+    notes,
   };
 }
 
@@ -253,7 +255,7 @@ function createOrderSqlite(cleanPayload, orderLines, totals, database) {
         new Date().toISOString(),
         cleanPayload.order.orderType,
         cleanPayload.order.orderType === 'delivery' ? cleanPayload.order.address : null,
-        cleanPayload.order.preferredTime,
+        serializePreferredTimeValue(cleanPayload.order.preferredTime),
         cleanPayload.order.notes,
         totals.subtotal,
         totals.deliveryFee,
