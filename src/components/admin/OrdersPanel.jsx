@@ -20,6 +20,29 @@ const ORDER_GROUPS = [
   },
 ];
 
+const ORDER_STATUS_LABELS = {
+  pending: 'Nuovo',
+  confirmed: 'Confermato',
+  preparing: 'In forno',
+  ready: 'Pronto',
+  delivered: 'Consegnato',
+  completed: 'Completato',
+  cancelled: 'Annullato',
+};
+
+const ORDER_STATUS_ACTIONS = {
+  pending: [
+    { status: 'confirmed', label: 'Conferma' },
+    { status: 'preparing', label: 'Inizia' },
+  ],
+  confirmed: [
+    { status: 'preparing', label: 'Inizia' },
+    { status: 'ready', label: 'Pronto' },
+  ],
+  preparing: [{ status: 'ready', label: 'Pronto' }],
+  ready: [{ status: 'completed', label: 'Chiudi' }],
+};
+
 function isClosedOrderStatus(status) {
   return status === 'delivered' || status === 'completed' || status === 'cancelled';
 }
@@ -30,6 +53,14 @@ function getOrderGroup(status) {
 
 function formatOrderType(orderType) {
   return orderType === 'delivery' ? 'Consegna' : 'Ritiro';
+}
+
+function formatOrderStatus(status) {
+  return ORDER_STATUS_LABELS[status] ?? 'Da gestire';
+}
+
+function getOrderStatusActions(status) {
+  return ORDER_STATUS_ACTIONS[status] ?? [];
 }
 
 function resolveOrderDate(order) {
@@ -118,7 +149,31 @@ function getOrderItemSummary(item) {
   return summary;
 }
 
-function OrderDetailsModal({ order, onClose }) {
+function OrderStatusActions({ order, isUpdating = false, onUpdateOrderStatus }) {
+  const actions = getOrderStatusActions(order.status);
+
+  if (!actions.length || !onUpdateOrderStatus) {
+    return null;
+  }
+
+  return (
+    <div className="admin-order-action-row" aria-label={`Azioni ordine ${order.customerName}`}>
+      {actions.map((action) => (
+        <button
+          key={`${order.id}-${action.status}`}
+          className="admin-order-action-button"
+          type="button"
+          onClick={() => onUpdateOrderStatus(order, action.status)}
+          disabled={isUpdating}
+        >
+          {isUpdating ? 'Aggiorno...' : action.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function OrderDetailsModal({ order, onClose, isUpdating = false, onUpdateOrderStatus }) {
   useEffect(() => {
     if (!order) {
       return undefined;
@@ -177,6 +232,7 @@ function OrderDetailsModal({ order, onClose }) {
               <div className="admin-order-modal-badges">
                 <span className="admin-inline-badge">{formatOrderType(order.orderType)}</span>
                 <span className="admin-inline-badge">{getItemCountLabel(items)}</span>
+                <span className="admin-inline-badge is-todo">{formatOrderStatus(order.status)}</span>
               </div>
             </div>
 
@@ -187,6 +243,12 @@ function OrderDetailsModal({ order, onClose }) {
               </button>
             </div>
           </div>
+
+          <OrderStatusActions
+            order={order}
+            isUpdating={isUpdating}
+            onUpdateOrderStatus={onUpdateOrderStatus}
+          />
 
           <div className="admin-order-detail-grid">
             <section className="admin-order-detail-card">
@@ -268,8 +330,10 @@ function OrderDetailsModal({ order, onClose }) {
   );
 }
 
-function OrdersPanel({ orders, loading, error, onRefresh }) {
+function OrdersPanel({ orders, loading, error, onRefresh, onUpdateOrderStatus }) {
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [updatingOrderId, setUpdatingOrderId] = useState('');
+  const [statusError, setStatusError] = useState('');
 
   useEffect(() => {
     if (!selectedOrder) {
@@ -318,9 +382,26 @@ function OrdersPanel({ orders, loading, error, onRefresh }) {
     [ordersByGroup],
   );
 
+  const handleUpdateOrderStatus = async (order, status) => {
+    if (!onUpdateOrderStatus || updatingOrderId) {
+      return;
+    }
+
+    setUpdatingOrderId(String(order.id));
+    setStatusError('');
+
+    try {
+      await onUpdateOrderStatus(order.id, status);
+    } catch (error) {
+      setStatusError(error.message || 'Non siamo riusciti ad aggiornare lo stato dell ordine.');
+    } finally {
+      setUpdatingOrderId('');
+    }
+  };
+
   return (
     <>
-      <section className="admin-section admin-surface" aria-labelledby="admin-orders-title">
+      <section className="admin-section admin-surface admin-orders-kitchen" aria-labelledby="admin-orders-title">
         <div className="admin-section-head">
           <div>
             <p className="admin-kicker">Ordini</p>
@@ -344,6 +425,12 @@ function OrdersPanel({ orders, loading, error, onRefresh }) {
           <div className="admin-empty-state">
             <h3>Ordini non disponibili</h3>
             <p>{error}</p>
+          </div>
+        ) : null}
+
+        {statusError ? (
+          <div className="admin-order-status-error" role="alert">
+            {statusError}
           </div>
         ) : null}
 
@@ -392,6 +479,7 @@ function OrdersPanel({ orders, loading, error, onRefresh }) {
                               <div className="admin-order-hero-meta">
                                 <span className="admin-inline-badge">{formatOrderType(order.orderType)}</span>
                                 <span className="admin-inline-badge">{getItemCountLabel(orderItems)}</span>
+                                <span className="admin-inline-badge is-todo">{formatOrderStatus(order.status)}</span>
                               </div>
                             </div>
 
@@ -428,6 +516,11 @@ function OrdersPanel({ orders, loading, error, onRefresh }) {
                           </div>
 
                           <div className="admin-row-actions">
+                            <OrderStatusActions
+                              order={order}
+                              isUpdating={updatingOrderId === String(order.id)}
+                              onUpdateOrderStatus={handleUpdateOrderStatus}
+                            />
                             <button className="admin-primary-button" type="button" onClick={() => setSelectedOrder(order)}>
                               Apri ordine
                             </button>
@@ -452,7 +545,12 @@ function OrdersPanel({ orders, loading, error, onRefresh }) {
         </div>
       </section>
 
-      <OrderDetailsModal order={selectedOrder} onClose={() => setSelectedOrder(null)} />
+      <OrderDetailsModal
+        order={selectedOrder}
+        onClose={() => setSelectedOrder(null)}
+        isUpdating={selectedOrder ? updatingOrderId === String(selectedOrder.id) : false}
+        onUpdateOrderStatus={handleUpdateOrderStatus}
+      />
     </>
   );
 }

@@ -149,7 +149,7 @@ function buildSeedData(menuSections) {
         description: description || null,
         base_price: Number(item.prezzo || 0),
         image_path: null,
-        active: true,
+        active: item.active !== false,
         featured: false,
         sort_order: itemIndex + 1,
         spicy: Boolean(item.piccante),
@@ -159,6 +159,7 @@ function buildSeedData(menuSections) {
 
       ingredientList.forEach((ingredientName, ingredientIndex) => {
         const ingredientSlug = slugify(ingredientName);
+        const isCustomizableCategory = CUSTOMIZABLE_CATEGORY_SLUGS.has(categorySlug);
 
         if (!ingredientsMap.has(ingredientSlug)) {
           ingredientsMap.set(ingredientSlug, {
@@ -171,7 +172,7 @@ function buildSeedData(menuSections) {
         menuItemIngredients.push({
           menu_item_slug: itemSlug,
           ingredient_slug: ingredientSlug,
-          is_removable: true,
+          is_removable: isCustomizableCategory,
           sort_order: ingredientIndex + 1,
         });
       });

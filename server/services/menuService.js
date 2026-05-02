@@ -3,6 +3,7 @@ import { HttpError } from '../utils/httpError.js';
 import {
   buildAllowedExtrasFromIngredientCatalog,
   curateAllowedExtras,
+  CUSTOMIZABLE_CATEGORY_SLUGS,
   resolveOptionPriceDelta,
 } from '../../shared/menuExtraProfiles.js';
 import {
@@ -643,9 +644,14 @@ function normalizeSqliteCustomization(configuration, ingredientCatalog = []) {
 function buildSupabaseMenuItem(row, category, client, relations) {
   const itemId = normalizeId(row.id);
   const defaultIngredients = relations.defaultIngredientsByItemId.get(itemId) ?? [];
-  const removableIngredients = relations.removableIngredientsByItemId.get(itemId) ?? [];
-  const allowedExtras = curateAllowedExtras(defaultIngredients, relations.allowedExtrasByItemId.get(itemId) ?? []);
-  const optionGroups = relations.optionGroupsByItemId.get(itemId) ?? [];
+  const isCustomizableCategory = CUSTOMIZABLE_CATEGORY_SLUGS.has(category.slug);
+  const removableIngredients = isCustomizableCategory
+    ? relations.removableIngredientsByItemId.get(itemId) ?? []
+    : [];
+  const allowedExtras = isCustomizableCategory
+    ? curateAllowedExtras(defaultIngredients, relations.allowedExtrasByItemId.get(itemId) ?? [])
+    : [];
+  const optionGroups = isCustomizableCategory ? relations.optionGroupsByItemId.get(itemId) ?? [] : [];
 
   return {
     id: itemId,
@@ -861,18 +867,23 @@ export async function getMenuItemCustomization(menuItemId) {
   const item = buildSupabaseMenuItem(row, category, client, relations);
   const defaultIngredients = relations.defaultIngredientsByItemId.get(normalizedMenuItemId) ?? [];
   const ingredientCatalog = await getSupabaseIngredientCatalog(client);
-  const allowedExtras = buildAllowedExtrasFromIngredientCatalog(
-    defaultIngredients,
-    ingredientCatalog,
-    relations.allowedExtrasByItemId.get(normalizedMenuItemId) ?? [],
-  );
+  const isCustomizableCategory = CUSTOMIZABLE_CATEGORY_SLUGS.has(category.slug);
+  const allowedExtras = isCustomizableCategory
+    ? buildAllowedExtrasFromIngredientCatalog(
+        defaultIngredients,
+        ingredientCatalog,
+        relations.allowedExtrasByItemId.get(normalizedMenuItemId) ?? [],
+      )
+    : [];
 
   return {
     item,
     defaultIngredients,
-    removableIngredients: relations.removableIngredientsByItemId.get(normalizedMenuItemId) ?? [],
+    removableIngredients: isCustomizableCategory
+      ? relations.removableIngredientsByItemId.get(normalizedMenuItemId) ?? []
+      : [],
     allowedExtras,
-    optionGroups: relations.optionGroupsByItemId.get(normalizedMenuItemId) ?? [],
+    optionGroups: isCustomizableCategory ? relations.optionGroupsByItemId.get(normalizedMenuItemId) ?? [] : [],
     pricing: {
       currency: 'EUR',
       basePrice: item.basePrice,

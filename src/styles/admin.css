@@ -495,6 +495,37 @@
   gap: 0.55rem;
 }
 
+.admin-orders-kitchen {
+  gap: 1.35rem;
+}
+
+.admin-orders-kitchen .admin-section-head h2 {
+  font-size: clamp(2.35rem, 4vw, 3.8rem);
+  line-height: 0.92;
+}
+
+.admin-orders-kitchen .admin-section-intro {
+  max-width: 54rem;
+  font-size: clamp(1.05rem, 1.35vw, 1.22rem);
+  line-height: 1.55;
+}
+
+.admin-orders-kitchen .admin-status-pill,
+.admin-orders-kitchen .admin-secondary-button {
+  min-height: 3.4rem;
+  padding-inline: 1.25rem;
+  font-size: 0.95rem;
+}
+
+.admin-order-status-error {
+  padding: 1rem 1.15rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(184, 118, 95, 0.24);
+  background: rgba(184, 118, 95, 0.12);
+  color: var(--color-espresso);
+  font-weight: 700;
+}
+
 .admin-status-pill.is-todo,
 .admin-inline-badge.is-todo {
   background: rgba(200, 164, 125, 0.18);
@@ -509,14 +540,14 @@
 
 .admin-orders-groups {
   display: grid;
-  gap: 1rem;
+  gap: 1.35rem;
 }
 
 .admin-orders-group {
   display: grid;
-  gap: 1rem;
-  padding: 1rem;
-  border-radius: 1.45rem;
+  gap: 1.2rem;
+  padding: 1.25rem;
+  border-radius: 1.25rem;
   border: 1px solid rgba(61, 43, 33, 0.08);
 }
 
@@ -545,23 +576,24 @@
 
 .admin-orders-group-copy p:last-child {
   color: var(--color-mocha);
-  font-size: 0.94rem;
+  font-size: 1.04rem;
 }
 
 .admin-orders-group-copy h3 {
-  font-size: 1.35rem;
+  font-size: clamp(1.8rem, 3vw, 2.7rem);
+  line-height: 0.95;
 }
 
 .admin-orders-list {
   display: grid;
-  gap: 0.95rem;
+  gap: 1.15rem;
 }
 
 .order-layout-card {
   display: grid;
-  gap: 1rem;
-  padding: 1.1rem;
-  border-radius: 1.45rem;
+  gap: 1.15rem;
+  padding: clamp(1.15rem, 2vw, 1.6rem);
+  border-radius: 1.15rem;
   border: 1px solid rgba(61, 43, 33, 0.08);
 }
 
@@ -580,7 +612,7 @@
 
 .admin-order-card-copy {
   display: grid;
-  gap: 0.7rem;
+  gap: 0.85rem;
 }
 
 .admin-order-card-title-row {
@@ -592,14 +624,14 @@
 
 .admin-order-card-copy h3 {
   font-family: var(--font-display);
-  font-size: clamp(1.4rem, 2.4vw, 2rem);
-  line-height: 0.94;
+  font-size: clamp(2.15rem, 4vw, 3.8rem);
+  line-height: 0.9;
 }
 
 .admin-order-card-time {
   font-family: var(--font-display);
-  font-size: clamp(1.25rem, 2vw, 1.7rem);
-  line-height: 0.94;
+  font-size: clamp(2.15rem, 4vw, 3.7rem);
+  line-height: 0.9;
   color: var(--color-terra);
 }
 
@@ -607,7 +639,13 @@
 .admin-order-modal-badges {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.55rem;
+  gap: 0.65rem;
+}
+
+.admin-orders-kitchen .admin-inline-badge {
+  min-height: 2.45rem;
+  padding: 0.55rem 0.95rem;
+  font-size: 0.82rem;
 }
 
 .admin-order-hero-total,
@@ -627,23 +665,23 @@
 
 .admin-order-hero-total strong,
 .admin-order-modal-total {
-  font-size: clamp(1.55rem, 2.2vw, 2.2rem);
+  font-size: clamp(2rem, 3vw, 3rem);
   line-height: 0.94;
 }
 
 .admin-order-glance-grid,
 .admin-order-detail-grid {
   display: grid;
-  gap: 0.75rem;
-  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 0.9rem;
+  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
 }
 
 .admin-order-glance-card,
 .admin-order-detail-card {
   display: grid;
-  gap: 0.42rem;
-  padding: 0.9rem 1rem;
-  border-radius: 1rem;
+  gap: 0.55rem;
+  padding: 1.05rem 1.15rem;
+  border-radius: 0.95rem;
   border: 1px solid rgba(61, 43, 33, 0.08);
   background: rgba(255, 250, 244, 0.84);
 }
@@ -651,7 +689,7 @@
 .admin-order-glance-label,
 .admin-order-detail-list dt,
 .admin-order-detail-head span {
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -660,11 +698,54 @@
 
 .admin-order-glance-value {
   color: var(--color-espresso);
+  font-size: clamp(1.08rem, 1.6vw, 1.35rem);
   font-weight: 600;
+  line-height: 1.35;
+}
+
+.admin-order-action-row {
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.admin-order-action-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 4rem;
+  min-width: min(100%, 11rem);
+  padding: 0.95rem 1.3rem;
+  border: 1px solid rgba(61, 43, 33, 0.16);
+  border-radius: 0.9rem;
+  background: var(--color-terra);
+  color: var(--color-shell);
+  font-size: clamp(1.05rem, 1.7vw, 1.28rem);
+  font-weight: 800;
+  line-height: 1;
+}
+
+.admin-order-action-button:disabled {
+  cursor: progress;
+  opacity: 0.62;
+}
+
+.admin-order-card .admin-row-actions {
+  align-items: stretch;
+}
+
+.admin-order-card .admin-primary-button,
+.admin-order-modal .admin-ghost-button {
+  min-height: 4rem;
+  padding-inline: 1.35rem;
+  border-radius: 0.9rem;
+  font-size: 1.05rem;
+  font-weight: 800;
 }
 
 .admin-order-modal {
-  width: min(980px, 100%);
+  width: min(1120px, 100%);
 }
 
 .admin-order-modal-head {
@@ -695,7 +776,7 @@
 }
 
 .admin-order-detail-card h3 {
-  font-size: 1.08rem;
+  font-size: 1.28rem;
 }
 
 .admin-order-detail-list {
@@ -711,6 +792,8 @@
 .admin-order-detail-list dd {
   margin: 0;
   color: var(--color-espresso);
+  font-size: 1.08rem;
+  font-weight: 650;
 }
 
 .admin-order-detail-head {
@@ -724,6 +807,7 @@
   display: grid;
   gap: 0.5rem;
   color: var(--color-mocha);
+  font-size: 1.08rem;
 }
 
 .admin-order-lines {
@@ -737,9 +821,9 @@
 
 .admin-order-line {
   display: grid;
-  gap: 0.4rem;
-  padding: 0.9rem 1rem;
-  border-radius: 1rem;
+  gap: 0.55rem;
+  padding: 1.05rem 1.15rem;
+  border-radius: 0.95rem;
   border: 1px solid rgba(61, 43, 33, 0.08);
   background: rgba(255, 250, 244, 0.82);
 }
@@ -751,22 +835,32 @@
   gap: 0.75rem;
 }
 
+.admin-order-line-head strong {
+  font-size: clamp(1.25rem, 2vw, 1.6rem);
+  line-height: 1.05;
+  color: var(--color-espresso);
+}
+
 .admin-order-line-title {
+  font-size: clamp(1.35rem, 2.2vw, 1.8rem);
+  line-height: 1.08;
   font-weight: 700;
   color: var(--color-espresso);
 }
 
 .admin-order-line-summary {
   display: grid;
-  gap: 0.22rem;
+  gap: 0.48rem;
   margin: 0;
-  padding-left: 1.1rem;
-  font-size: 0.88rem;
+  padding-left: 1.35rem;
+  font-size: clamp(1.18rem, 1.75vw, 1.45rem);
+  line-height: 1.32;
   color: var(--color-mocha);
 }
 
 .admin-order-line-note {
-  font-size: 0.88rem;
+  font-size: clamp(1.18rem, 1.75vw, 1.45rem);
+  line-height: 1.32;
   color: var(--color-mocha);
 }
 
@@ -912,6 +1006,16 @@
     gap: 0.3rem;
   }
 
+  .admin-order-card .admin-row-actions,
+  .admin-order-action-row {
+    width: 100%;
+  }
+
+  .admin-order-action-button,
+  .admin-order-card .admin-primary-button {
+    flex: 1 1 12rem;
+  }
+
   .admin-order-detail-head {
     flex-direction: column;
     align-items: start;
@@ -969,6 +1073,14 @@
   .admin-order-glance-grid,
   .admin-order-detail-grid {
     grid-template-columns: 1fr;
+  }
+
+  .admin-orders-kitchen .admin-status-pill,
+  .admin-orders-kitchen .admin-secondary-button,
+  .admin-order-action-button,
+  .admin-order-card .admin-primary-button,
+  .admin-order-modal .admin-ghost-button {
+    width: 100%;
   }
 
   .admin-allergen-grid {

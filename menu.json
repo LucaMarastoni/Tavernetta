@@ -430,6 +430,180 @@
           "ingredienti": ["pomodoro", "mozzarella", "scamorza affumicata", "tastasal"]
         }
       ]
+    },
+    {
+      "categoria": "Le Birre",
+      "items": [
+        {
+          "nome": "SICILIAN PILS",
+          "prezzo": 6.5,
+          "allergeni": [4],
+          "piccante": false,
+          "ingredienti": ["Birrificio Bruno Ribadi", "5%", "grani antichi di Sicilia Timilia, Rusello e Perciasacchi", "stile: birra chiara e leggera da tutto pasto"]
+        },
+        {
+          "nome": "INDIA PALE ALE",
+          "prezzo": 6.5,
+          "allergeni": [4],
+          "piccante": false,
+          "ingredienti": ["Birrificio Bruno Ribadi", "6,5%", "foglie di agrumi di Sicilia", "stile: amara e luppolata, tipico stile IPA"]
+        },
+        {
+          "nome": "SPECIAL ALE",
+          "prezzo": 7.0,
+          "allergeni": [4],
+          "piccante": false,
+          "ingredienti": ["Birrificio Bruno Ribadi", "7%", "uva passa di Pantelleria e carruba", "stile: rotonda, dolce e profumata da fine pasto"]
+        },
+        {
+          "nome": "PALERMO ALE",
+          "prezzo": 6.5,
+          "allergeni": [4],
+          "piccante": false,
+          "ingredienti": ["Birrificio Bruno Ribadi", "4,5%", "bionda al pompelmo rosa", "stile: leggera e agrumata, ottima con le fritture"]
+        },
+        {
+          "nome": "RED ETNA",
+          "prezzo": 7.0,
+          "allergeni": [4],
+          "piccante": false,
+          "ingredienti": ["Birrificio Bruno Ribadi", "8%", "rossa doppio malto al ficodindia dell'Etna DOP", "stile: amaro delicato, dolce al palato, da meditazione"]
+        },
+        {
+          "nome": "BIANCA",
+          "prezzo": 6.5,
+          "allergeni": [4],
+          "piccante": false,
+          "ingredienti": ["Birrificio Bruno Ribadi", "5,5%", "grano Biancolilla e scorze di mandarino di Ciaculli", "stile: fresca e profumata, ottima con pesce crudo"]
+        }
+      ]
+    },
+    {
+      "categoria": "I Dolci",
+      "items": [
+        {
+          "nome": "BABA' AL RUM",
+          "prezzo": 4.3,
+          "allergeni": [4, 5],
+          "piccante": false,
+          "ingredienti": ["tipico dolce napoletano con inzuppatura profumata al rum", "restrizioni d'eta: +18"],
+          "note": "18+"
+        },
+        {
+          "nome": "CANNOLO MIGNON AL PISTACCHIO",
+          "prezzo": 4.2,
+          "allergeni": [1, 2, 4],
+          "piccante": false,
+          "ingredienti": ["croccante cialda farcita a momento", "crema ricotta", "granella al pistacchio"]
+        },
+        {
+          "nome": "CHEESECAKE CARAMEL",
+          "prezzo": 4.8,
+          "allergeni": [2, 4],
+          "piccante": false,
+          "ingredienti": ["crema al formaggio", "base di biscotto al burro", "caramello"]
+        },
+        {
+          "nome": "CHEESECAKE FRUTTI ROSSI",
+          "prezzo": 4.8,
+          "allergeni": [2, 4],
+          "piccante": false,
+          "ingredienti": ["crema al formaggio", "base di biscotto al burro", "frutti rossi"]
+        },
+        {
+          "nome": "CHEESECAKE AI FRUTTI ROSSI GLUTEN FREE",
+          "prezzo": 4.9,
+          "allergeni": [2],
+          "piccante": false,
+          "ingredienti": ["ricotta senza lattosio", "panna", "frutti rossi"]
+        },
+        {
+          "nome": "CREMA CATALANA",
+          "prezzo": 5.6,
+          "allergeni": [2, 5],
+          "piccante": false,
+          "ingredienti": ["crema catalana servita in coccio di ceramica", "zucchero caramellizzato a momento"]
+        },
+        {
+          "nome": "LAMPONE PASSION FRUIT",
+          "prezzo": 4.8,
+          "allergeni": [2, 4, 5],
+          "piccante": false,
+          "ingredienti": ["pan di Spagna", "crema al frutto della passione", "salsa ai lamponi", "glassa al cioccolato bianco", "lamponi"]
+        },
+        {
+          "nome": "MERINGA",
+          "prezzo": 4.5,
+          "allergeni": [2, 5],
+          "piccante": false,
+          "ingredienti": ["crema alla vaniglia", "granella alla meringa", "75g"]
+        },
+        {
+          "nome": "PIZZA CON NUTELLA",
+          "prezzo": 5.7,
+          "allergeni": [1, 2, 4],
+          "piccante": false,
+          "ingredienti": ["schiacciata", "nutella", "granella alla nocciola"]
+        },
+        {
+          "nome": "PROFITEROLES GRAN BIGNE' CIOCCOLATO",
+          "prezzo": 4.2,
+          "allergeni": [2, 4, 5],
+          "piccante": false,
+          "ingredienti": ["gran bigne", "cioccolato"]
+        },
+        {
+          "nome": "PROFITEROLES GRAN BIGNE' PISTACCHIO",
+          "prezzo": 4.5,
+          "allergeni": [1, 2, 4, 5],
+          "piccante": false,
+          "ingredienti": ["gran bigne", "pistacchio"]
+        },
+        {
+          "nome": "TIRAMISU'",
+          "prezzo": 4.5,
+          "allergeni": [2, 4, 5],
+          "piccante": false,
+          "ingredienti": ["mascarpone", "panna", "caffe"]
+        },
+        {
+          "nome": "TIRAMISU' GLUTEN FREE",
+          "prezzo": 4.8,
+          "allergeni": [2],
+          "piccante": false,
+          "ingredienti": ["mascarpone senza lattosio", "panna vegetale", "caffe"]
+        },
+        {
+          "nome": "TORTA DELLA NONNA",
+          "prezzo": 4.5,
+          "allergeni": [1, 2, 4, 5],
+          "piccante": false,
+          "ingredienti": ["pasta frolla", "crema pasticcera al profumo di limone", "pinoli", "mandorle", "zucchero a velo"]
+        },
+        {
+          "nome": "TORTA TRILOGY",
+          "prezzo": 4.8,
+          "allergeni": [2, 4, 5],
+          "piccante": false,
+          "ingredienti": ["creme al cioccolato fondente, bianco e al latte", "pan di Spagna al cacao", "riccioli di cioccolato"]
+        },
+        {
+          "nome": "TORTA PARADISO",
+          "prezzo": 4.7,
+          "allergeni": [1, 2, 4],
+          "piccante": false,
+          "ingredienti": ["biscotti alla nocciola", "crema al gusto vaniglia e cocco", "crunch al cioccolato", "cocco grattugiato"]
+        },
+        {
+          "nome": "CANNOLO SICILIANO",
+          "prezzo": 0,
+          "allergeni": [2, 4],
+          "piccante": false,
+          "active": false,
+          "ingredienti": ["croccante cialda al cacao", "crema ricotta", "scorze d'arancia candite", "120g"],
+          "note": "Non disponibile"
+        }
+      ]
     }
   ]
 }

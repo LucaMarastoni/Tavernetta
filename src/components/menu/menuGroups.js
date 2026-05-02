@@ -52,7 +52,16 @@ export const MENU_GROUPS = [
     title: 'Birre',
     description: 'Una selezione dedicata alle spine e alle etichette artigianali da abbinare alla tavola.',
     ctaLabel: 'Vai alla carta',
+    slugs: ['le-birre'],
     patterns: [/birr/i, /beer/i, /lager/i, /ipa/i],
+  },
+  {
+    id: 'dolci',
+    title: 'Dolci',
+    description: 'Dessert, monoporzioni e specialita dolci per chiudere il pasto.',
+    ctaLabel: 'Apri sezione',
+    slugs: ['i-dolci'],
+    patterns: [/dolc/i, /dessert/i, /tiramisu/i, /cheesecake/i, /cannol/i],
   },
   {
     id: 'vini',
@@ -77,8 +86,9 @@ const summarizeCategoryNames = (categories) => {
   return `${names.slice(0, 2).join(' • ')} • +${names.length - 2} sezioni`;
 };
 
-export const buildMenuGroups = (categories) =>
-  MENU_GROUPS.map((group) => {
+export const buildMenuGroups = (categories) => {
+  const matchedCategoryIds = new Set();
+  const declaredGroups = MENU_GROUPS.map((group) => {
     const matchedCategories = categories.filter((category) => {
       const normalizedName = normalizeText(category.name);
       const normalizedSlug = normalizeText(category.slug ?? '');
@@ -92,6 +102,10 @@ export const buildMenuGroups = (categories) =>
       return (group.patterns ?? []).some((pattern) => pattern.test(haystack));
     });
 
+    matchedCategories.forEach((category) => {
+      matchedCategoryIds.add(String(category.id));
+    });
+
     return {
       ...group,
       categories: matchedCategories,
@@ -100,6 +114,22 @@ export const buildMenuGroups = (categories) =>
       isAvailable: matchedCategories.length > 0,
     };
   });
+
+  const fallbackGroups = categories
+    .filter((category) => !matchedCategoryIds.has(String(category.id)))
+    .map((category) => ({
+      id: category.slug || `categoria-${category.id}`,
+      title: category.name,
+      description: 'Sezione della carta disponibile online.',
+      ctaLabel: 'Apri sezione',
+      categories: [category],
+      itemCount: category.items.length,
+      categorySummary: category.name,
+      isAvailable: category.items.length > 0,
+    }));
+
+  return [...declaredGroups, ...fallbackGroups];
+};
 
 export const buildMenuCategoryHref = (groupId) => {
   const group = MENU_GROUPS.find((entry) => entry.id === groupId);

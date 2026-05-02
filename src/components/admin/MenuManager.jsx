@@ -1,3 +1,4 @@
+import { formatAllergenList } from '../../utils/allergens';
 import { formatPrice } from '../../utils/formatPrice';
 
 function MenuManager({
@@ -122,7 +123,9 @@ function MenuManager({
                 </p>
 
                 <div className="admin-menu-row-meta">
-                  <span>{item.allergens.length ? `Allergeni ${item.allergens.join(', ')}` : 'Senza allergeni indicati'}</span>
+                  <span>
+                    {item.allergens.length ? `Allergeni: ${formatAllergenList(item.allergens)}` : 'Senza allergeni indicati'}
+                  </span>
                   {item.note ? <span>Nota: {item.note}</span> : null}
                 </div>
               </div>

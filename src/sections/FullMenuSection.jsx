@@ -3,6 +3,7 @@ import Reveal from '../components/Reveal';
 import SectionTitle from '../components/SectionTitle';
 import StatusPanel from '../components/StatusPanel';
 import { restaurant } from '../data/siteContent';
+import { formatAllergenList } from '../utils/allergens';
 import { formatPrice } from '../utils/formatPrice';
 
 function FullMenuSection({ compact = false, categories = [], loading = false, error = '', onRetry }) {
@@ -111,7 +112,7 @@ function FullMenuSection({ compact = false, categories = [], loading = false, er
                             ) : null}
 
                             {item.allergens.length ? (
-                              <p className="menu-item-allergens">Allergeni: {item.allergens.join(', ')}</p>
+                              <p className="menu-item-allergens">Allergeni: {formatAllergenList(item.allergens)}</p>
                             ) : null}
                           </div>
                         </article>
@@ -155,7 +156,7 @@ function FullMenuSection({ compact = false, categories = [], loading = false, er
                             ) : null}
 
                             {item.allergens.length ? (
-                              <p className="menu-item-allergens">Allergeni: {item.allergens.join(', ')}</p>
+                              <p className="menu-item-allergens">Allergeni: {formatAllergenList(item.allergens)}</p>
                             ) : null}
                           </div>
                         </article>

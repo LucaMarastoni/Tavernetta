@@ -328,7 +328,10 @@ function mapCategory(rawCategory, categoryIndex, itemIdRef) {
           ? rawItem.ingredienti.map(cleanInlineText).filter(Boolean)
           : [];
         const defaultIngredients = mapDefaultIngredients(ingredients, nextItemId);
-        const removableIngredients = defaultIngredients.filter((ingredient) => ingredient.isRemovable);
+        const isCustomizableCategory = CUSTOMIZABLE_CATEGORY_SLUGS.has(categoryMeta.slug);
+        const removableIngredients = isCustomizableCategory
+          ? defaultIngredients.filter((ingredient) => ingredient.isRemovable)
+          : [];
         const optionGroups = mapOptionGroups(rawItem, nextItemId);
         const explicitExtras = mapAllowedExtras(rawItem, nextItemId);
         const allowedExtras = curateAllowedExtras(
@@ -351,11 +354,11 @@ function mapCategory(rawCategory, categoryIndex, itemIdRef) {
             imageUrl: resolveItemImage(categoryMeta.slug, itemIndex),
             tags: mapTags(rawItem),
             allergens: Array.isArray(rawItem.allergeni) ? rawItem.allergeni.map((entry) => String(entry)) : [],
-            active: true,
+            active: rawItem.active !== false,
             featured: false,
             sortOrder: itemIndex,
             hasCustomization:
-              defaultIngredients.length > 0 || removableIngredients.length > 0 || allowedExtras.length > 0 || optionGroups.length > 0,
+              removableIngredients.length > 0 || allowedExtras.length > 0 || optionGroups.length > 0,
             ingredients,
             note: cleanInlineText(rawItem.note || ''),
           },
@@ -369,7 +372,7 @@ function mapCategory(rawCategory, categoryIndex, itemIdRef) {
       })
     : [];
 
-  const items = itemsWithCustomization.map((entry) => entry.item);
+  const items = itemsWithCustomization.map((entry) => entry.item).filter((item) => item.active);
 
   return {
     id: categoryId,

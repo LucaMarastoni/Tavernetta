@@ -11,6 +11,7 @@ import {
 import {
   AdminOrdersApiError,
   fetchAdminOrders,
+  updateAdminOrder,
   usesStaticAdminSource,
 } from '../services/adminOrdersApi';
 import '../styles/admin.css';
@@ -177,6 +178,20 @@ function AdminPage() {
     }
   }, []);
 
+  const changeOrderStatus = useCallback(async (orderId, status) => {
+    const updatedOrder = await updateAdminOrder(orderId, status);
+
+    if (updatedOrder) {
+      setOrders((currentOrders) =>
+        currentOrders.map((order) => (String(order.id) === String(orderId) ? updatedOrder : order)),
+      );
+    } else {
+      await refreshOrders({ silent: true });
+    }
+
+    return updatedOrder;
+  }, [refreshOrders]);
+
   useEffect(() => {
     let isActive = true;
     let refreshTimerId = null;
@@ -241,6 +256,7 @@ function AdminPage() {
       renameCategory,
       deleteCategory,
       refreshOrders,
+      changeOrderStatus,
     }),
     [
       items,
@@ -251,6 +267,7 @@ function AdminPage() {
       ordersError,
       staticAdminEnabled,
       refreshOrders,
+      changeOrderStatus,
     ],
   );
 

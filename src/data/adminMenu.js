@@ -1,4 +1,5 @@
 import rawMenuSource from './menu.json?raw';
+import { formatAllergenLabel } from '../utils/allergens';
 
 export function normalizeAdminText(value = '') {
   return value
@@ -129,7 +130,7 @@ export function getAdminAllergenOptions(menuState) {
     .sort((left, right) => left - right)
     .map((code) => ({
       code,
-      label: `Allergene ${code}`,
+      label: formatAllergenLabel(code),
     }));
 }
 
