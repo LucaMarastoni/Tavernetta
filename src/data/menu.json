@@ -479,6 +479,60 @@
       ]
     },
     {
+      "categoria": "Vini",
+      "items": [
+        {
+          "nome": "CHAMPAGNE PREMIUM CRU RESERVE",
+          "prezzo": 85.0,
+          "allergeni": [],
+          "piccante": false,
+          "ingredienti": []
+        },
+        {
+          "nome": "OPERE AMALIA MORETTI",
+          "prezzo": 80.0,
+          "allergeni": [],
+          "piccante": false,
+          "ingredienti": []
+        },
+        {
+          "nome": "OPERE MILLESIMATO 60 MESI",
+          "prezzo": 45.0,
+          "allergeni": [],
+          "piccante": false,
+          "ingredienti": []
+        },
+        {
+          "nome": "FRANCIACORTA SATEN",
+          "prezzo": 40.0,
+          "allergeni": [],
+          "piccante": false,
+          "ingredienti": []
+        },
+        {
+          "nome": "FRANCIACORTA DOSAGE ZERO",
+          "prezzo": 40.0,
+          "allergeni": [],
+          "piccante": false,
+          "ingredienti": []
+        },
+        {
+          "nome": "TRENTO DOC BRUT",
+          "prezzo": 39.0,
+          "allergeni": [],
+          "piccante": false,
+          "ingredienti": []
+        },
+        {
+          "nome": "VALDOBBIADENE DOCG 120 LA RIVETTA",
+          "prezzo": 31.0,
+          "allergeni": [],
+          "piccante": false,
+          "ingredienti": []
+        }
+      ]
+    },
+    {
       "categoria": "I Dolci",
       "items": [
         {
