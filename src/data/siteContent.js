@@ -198,10 +198,10 @@ export const restaurant = {
       'Tavernetta e un ristorante italiano contemporaneo, nato per unire cucina, forno e ospitalita in un ambiente raccolto, caldo e curato.',
     scrollLabel: 'Scorri',
     story: {
-      eyebrow: 'Il ristorante',
-      title: 'Un luogo raccolto, pensato per stare bene a tavola.',
+      eyebrow: 'Chi siamo',
+      title: 'Sforniamo pizza con amore e dedizione per questo lavoro.',
       intro:
-        'Tavernetta unisce cucina, forno e sala in un esperienza semplice, curata e naturale.',
+        'Con gesti misurati riportiamo sulle tavole il legame con la nostra tradizione radicata al Sud, e con la consapevolezza dell immenso valore del territorio locale. Ogni giorno, sperimentiamo e raccontiamo tutto questo attraverso le nostre pizze, per un esperienza che non si dimentica.',
       details: [
         { label: 'Dove', value: 'San Giovanni Lupatoto' },
         { label: 'Cucina', value: 'italiana contemporanea' },
