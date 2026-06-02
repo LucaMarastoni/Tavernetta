@@ -1,11 +1,8 @@
 import { getLeadTimeMinutes, getMinimumPreferredTime, getPreferredTimeValidationCode } from '../../shared/orderTiming.js';
 
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
 export const initialOrderDraft = {
   customerName: '',
   customerPhone: '',
-  customerEmail: '',
   orderType: 'pickup',
   address: '',
   preferredTime: '',
@@ -17,7 +14,6 @@ export function normalizeOrderDraft(draft = {}) {
   return {
     customerName: typeof draft.customerName === 'string' ? draft.customerName : '',
     customerPhone: typeof draft.customerPhone === 'string' ? draft.customerPhone : '',
-    customerEmail: typeof draft.customerEmail === 'string' ? draft.customerEmail : '',
     orderType: draft.orderType === 'delivery' ? 'delivery' : 'pickup',
     address: typeof draft.address === 'string' ? draft.address : '',
     preferredTime: typeof draft.preferredTime === 'string' ? draft.preferredTime : '',
@@ -32,7 +28,6 @@ export function sanitizeOrderDraft(draft = {}) {
   return {
     customerName: normalizedDraft.customerName.trim(),
     customerPhone: normalizedDraft.customerPhone.replace(/\s+/g, ' ').trim(),
-    customerEmail: normalizedDraft.customerEmail.trim(),
     orderType: normalizedDraft.orderType,
     address: normalizedDraft.address.trim(),
     preferredTime: normalizedDraft.preferredTime.trim(),
@@ -61,10 +56,6 @@ export function validateOrderDraft({ draft, items }) {
     errors.customerPhone = 'Inserisci un numero di telefono.';
   } else if (normalizedPhone.length < 7) {
     errors.customerPhone = 'Inserisci un numero di telefono valido.';
-  }
-
-  if (draft.customerEmail && !EMAIL_PATTERN.test(draft.customerEmail)) {
-    errors.customerEmail = 'L email non sembra valida.';
   }
 
   if (draft.orderType === 'delivery' && !draft.address) {

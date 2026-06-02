@@ -129,6 +129,10 @@ function normalizeAdminSupabaseError(error) {
     return createAdminSupabaseError('ADMIN_SUPABASE_FAILED');
   }
 
+  if (error.code === 'P0001' && error.message) {
+    return createAdminSupabaseError(error.message, error.message);
+  }
+
   if (isMissingSupabaseResource(error)) {
     return createAdminSupabaseError(
       'ADMIN_PUBLIC_POLICIES_MISSING',
@@ -235,17 +239,29 @@ export async function fetchAdminOrdersFromSupabase() {
 
 export async function updateAdminOrderFromSupabase(orderId, status) {
   const client = ensureClient();
-  const { error } = await client
-    .from('orders')
-    .update({ status })
-    .eq('id', normalizeId(orderId))
-    .select('id')
-    .single();
+  const normalizedOrderId = normalizeId(orderId);
+  const rpcResult = await client.rpc('update_public_order_status', {
+    p_order_id: normalizedOrderId,
+    p_status: status,
+  });
 
-  if (error) {
-    throw normalizeAdminSupabaseError(error);
+  if (rpcResult.error && !isMissingSupabaseResource(rpcResult.error)) {
+    throw normalizeAdminSupabaseError(rpcResult.error);
+  }
+
+  if (rpcResult.error) {
+    const { error } = await client
+      .from('orders')
+      .update({ status })
+      .eq('id', normalizedOrderId)
+      .select('id')
+      .single();
+
+    if (error) {
+      throw normalizeAdminSupabaseError(error);
+    }
   }
 
   const orders = await loadAdminOrders(client);
-  return orders.find((order) => order.id === normalizeId(orderId)) ?? null;
+  return orders.find((order) => order.id === normalizedOrderId) ?? null;
 }

@@ -148,6 +148,15 @@ Le tabelle principali sono:
 
 Questo mantiene gli ordini storici coerenti anche se il menu cambia nel tempo.
 
+### Admin statico su Supabase
+
+Se il frontend e pubblicato come export statico (`VITE_STATIC_EXPORT=true`), la pagina `/admin/ordini`
+legge e aggiorna gli ordini tramite la anon key Supabase. Dopo aver creato le tabelle Supabase, apri
+`database/supabase-public-admin.sql` e incollalo nel SQL editor di Supabase.
+
+Lo script abilita le policy pubbliche di lettura per `orders` e `order_items`, espone la funzione
+`update_public_order_status` e concede l update della sola colonna `orders.status` per il fallback legacy.
+
 ## API
 
 - `GET /api/health`

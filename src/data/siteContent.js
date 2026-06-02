@@ -161,7 +161,7 @@ export const restaurant = {
     eyebrow: 'Carta disponibile oggi',
     title: 'Scegli con calma, aggiungi al carrello, conferma in pochi passaggi.',
     intro:
-      'La selezione online segue la disponibilita reale del servizio serale. Ogni richiesta entra subito nel flusso di cucina con stato iniziale pending, pronta per la conferma della sala.',
+      'La selezione online segue la disponibilita reale del servizio serale. Ogni richiesta entra subito nel flusso operativo, pronta per la conferma della sala.',
     pickupEstimate: 'Ritiro indicativo: 25-35 minuti dal momento della conferma.',
     deliveryEstimate: 'Consegna indicativa: 35-45 minuti, in base alla fascia e alla zona.',
     emptyCartTitle: 'Il carrello e ancora vuoto.',
@@ -169,7 +169,7 @@ export const restaurant = {
     successEyebrow: 'Ordine ricevuto',
     successTitle: 'La richiesta e stata registrata correttamente.',
     successBody:
-      'Ti ricontatteremo se serviranno dettagli aggiuntivi. Lo stato iniziale dell ordine e pending, in attesa della conferma da parte della sala.',
+      'Ti ricontatteremo se serviranno dettagli aggiuntivi o conferme sull orario richiesto.',
   },
   aboutPage: {
     eyebrow: 'Chi siamo',

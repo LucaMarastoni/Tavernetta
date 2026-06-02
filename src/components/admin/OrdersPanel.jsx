@@ -12,11 +12,25 @@ const ORDER_GROUPS = [
     id: 'todo',
     title: 'Da fare',
     intro: 'Ordini attivi da gestire adesso, con una lettura piu immediata delle priorita.',
+    kicker: 'Operativo',
+    emptyTitle: 'Nessun ordine di oggi da fare',
+    emptyBody: 'Quando arrivano ordini nella giornata corrente, li trovi subito qui ordinati per orario.',
+  },
+  {
+    id: 'working',
+    title: 'In lavorazione',
+    intro: 'Ordini gia in forno, separati dal flusso iniziale per seguire meglio la preparazione.',
+    kicker: 'Cucina',
+    emptyTitle: 'Nessun ordine in lavorazione',
+    emptyBody: 'Quando un ordine passa a In forno, viene spostato qui fino a quando sara pronto.',
   },
   {
     id: 'closed',
     title: 'Chiusi',
     intro: 'Storico degli ordini gia conclusi, consultabile in una vista separata e piu discreta.',
+    kicker: 'Archivio',
+    emptyTitle: 'Nessun ordine di oggi chiuso',
+    emptyBody: 'Gli ordini chiusi della giornata corrente restano qui come storico rapido.',
   },
 ];
 
@@ -48,6 +62,10 @@ function isClosedOrderStatus(status) {
 }
 
 function getOrderGroup(status) {
+  if (status === 'preparing') {
+    return 'working';
+  }
+
   return isClosedOrderStatus(status) ? 'closed' : 'todo';
 }
 
@@ -201,6 +219,7 @@ function OrderDetailsModal({ order, onClose, isUpdating = false, onUpdateOrderSt
   }
 
   const items = getOrderItems(order);
+  const orderGroup = getOrderGroup(order.status);
   const orderNotes = uniqueNotes([order.notes]);
   const primaryDetails = [
     { label: 'Telefono', value: formatFieldValue(order.customerPhone) },
@@ -232,7 +251,7 @@ function OrderDetailsModal({ order, onClose, isUpdating = false, onUpdateOrderSt
               <div className="admin-order-modal-badges">
                 <span className="admin-inline-badge">{formatOrderType(order.orderType)}</span>
                 <span className="admin-inline-badge">{getItemCountLabel(items)}</span>
-                <span className="admin-inline-badge is-todo">{formatOrderStatus(order.status)}</span>
+                <span className={`admin-inline-badge is-${orderGroup}`}>{formatOrderStatus(order.status)}</span>
               </div>
             </div>
 
@@ -370,6 +389,7 @@ function OrdersPanel({ orders, loading, error, onRefresh, onUpdateOrderStatus })
 
     return {
       todo: sortedOrders.filter((order) => getOrderGroup(order.status) === 'todo'),
+      working: sortedOrders.filter((order) => getOrderGroup(order.status) === 'working'),
       closed: sortedOrders.filter((order) => getOrderGroup(order.status) === 'closed'),
     };
   }, [orders]);
@@ -377,6 +397,7 @@ function OrdersPanel({ orders, loading, error, onRefresh, onUpdateOrderStatus })
   const orderStats = useMemo(
     () => ({
       todoCount: ordersByGroup.todo.length,
+      workingCount: ordersByGroup.working.length,
       closedCount: ordersByGroup.closed.length,
     }),
     [ordersByGroup],
@@ -414,6 +435,7 @@ function OrdersPanel({ orders, loading, error, onRefresh, onUpdateOrderStatus })
 
           <div className="admin-orders-summary">
             <span className="admin-status-pill is-todo">{`Da fare ${orderStats.todoCount}`}</span>
+            <span className="admin-status-pill is-working">{`In lavorazione ${orderStats.workingCount}`}</span>
             <span className="admin-status-pill is-closed">{`Chiusi ${orderStats.closedCount}`}</span>
             <button className="admin-secondary-button" type="button" onClick={() => onRefresh()} disabled={loading}>
               {loading ? 'Aggiorno...' : 'Aggiorna'}
@@ -442,12 +464,12 @@ function OrdersPanel({ orders, loading, error, onRefresh, onUpdateOrderStatus })
             return (
               <section
                 key={group.id}
-                className={`admin-orders-group ${isPrimaryGroup ? 'is-primary' : 'is-secondary'}`}
+                className={`admin-orders-group is-${group.id} ${isPrimaryGroup ? 'is-primary' : 'is-secondary'}`}
                 aria-labelledby={`admin-orders-group-${group.id}`}
               >
                 <div className="admin-orders-group-head">
                   <div className="admin-orders-group-copy">
-                    <p className="admin-kicker">{isPrimaryGroup ? 'Operativo' : 'Archivio'}</p>
+                    <p className="admin-kicker">{group.kicker}</p>
                     <h3 id={`admin-orders-group-${group.id}`}>{group.title}</h3>
                     <p>{group.intro}</p>
                   </div>
@@ -468,7 +490,7 @@ function OrdersPanel({ orders, loading, error, onRefresh, onUpdateOrderStatus })
                       return (
                         <article
                           key={order.id}
-                          className={`admin-order-card ${isPrimaryGroup ? 'is-todo' : 'is-closed'} order-layout-card`}
+                          className={`admin-order-card is-${group.id} order-layout-card`}
                         >
                           <div className="admin-order-card-head">
                             <div className="admin-order-card-copy">
@@ -479,7 +501,7 @@ function OrdersPanel({ orders, loading, error, onRefresh, onUpdateOrderStatus })
                               <div className="admin-order-hero-meta">
                                 <span className="admin-inline-badge">{formatOrderType(order.orderType)}</span>
                                 <span className="admin-inline-badge">{getItemCountLabel(orderItems)}</span>
-                                <span className="admin-inline-badge is-todo">{formatOrderStatus(order.status)}</span>
+                                <span className={`admin-inline-badge is-${group.id}`}>{formatOrderStatus(order.status)}</span>
                               </div>
                             </div>
 
@@ -530,12 +552,8 @@ function OrdersPanel({ orders, loading, error, onRefresh, onUpdateOrderStatus })
                     })
                   ) : (
                     <div className="admin-empty-state">
-                      <h3>{isPrimaryGroup ? 'Nessun ordine di oggi da fare' : 'Nessun ordine di oggi chiuso'}</h3>
-                      <p>
-                        {isPrimaryGroup
-                          ? 'Quando arrivano ordini nella giornata corrente, li trovi subito qui ordinati per orario.'
-                          : 'Gli ordini chiusi della giornata corrente restano qui come storico rapido.'}
-                      </p>
+                      <h3>{group.emptyTitle}</h3>
+                      <p>{group.emptyBody}</p>
                     </div>
                   )}
                 </div>

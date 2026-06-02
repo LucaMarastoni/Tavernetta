@@ -532,6 +532,12 @@
   border-color: rgba(200, 164, 125, 0.24);
 }
 
+.admin-status-pill.is-working,
+.admin-inline-badge.is-working {
+  background: rgba(184, 118, 95, 0.16);
+  border-color: rgba(184, 118, 95, 0.26);
+}
+
 .admin-status-pill.is-closed,
 .admin-inline-badge.is-closed {
   background: rgba(109, 90, 79, 0.1);
@@ -562,6 +568,14 @@
 .admin-orders-group.is-secondary {
   background: rgba(247, 241, 233, 0.62);
   border-color: rgba(61, 43, 33, 0.06);
+}
+
+.admin-orders-group.is-working {
+  background:
+    linear-gradient(180deg, rgba(255, 249, 243, 0.95), rgba(253, 241, 232, 0.88)),
+    rgba(255, 248, 241, 0.84);
+  border-color: rgba(184, 118, 95, 0.18);
+  box-shadow: inset 0 0 0 1px rgba(184, 118, 95, 0.07);
 }
 
 .admin-orders-group-head {
@@ -603,6 +617,14 @@
     rgba(255, 252, 247, 0.9);
   border-color: rgba(200, 164, 125, 0.24);
   box-shadow: inset 0 0 0 1px rgba(200, 164, 125, 0.1);
+}
+
+.admin-order-card.is-working {
+  background:
+    linear-gradient(180deg, rgba(255, 250, 245, 0.96), rgba(253, 242, 233, 0.9)),
+    rgba(255, 249, 244, 0.9);
+  border-color: rgba(184, 118, 95, 0.24);
+  box-shadow: inset 0 0 0 1px rgba(184, 118, 95, 0.1);
 }
 
 .admin-order-card.is-closed {

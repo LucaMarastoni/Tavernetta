@@ -47,18 +47,6 @@ function CheckoutForm({
           {fieldErrors.customerPhone ? <small>{fieldErrors.customerPhone}</small> : null}
         </label>
 
-        <label className="ordering-field">
-          <span>Email</span>
-          <input
-            name="customerEmail"
-            type="email"
-            placeholder="Facoltativa"
-            value={draft.customerEmail}
-            onChange={onFieldChange}
-          />
-          {fieldErrors.customerEmail ? <small>{fieldErrors.customerEmail}</small> : null}
-        </label>
-
         <div className="ordering-field">
           <span>Servizio</span>
           <div className="ordering-choice-grid">

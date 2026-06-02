@@ -89,7 +89,6 @@ function OrderPage() {
         customer: {
           customerName: sanitizedDraft.customerName,
           customerPhone: sanitizedDraft.customerPhone,
-          customerEmail: sanitizedDraft.customerEmail || null,
         },
         order: {
           orderType: sanitizedDraft.orderType,
@@ -157,14 +156,6 @@ function OrderPage() {
             <p>{restaurant.ordering.successBody}</p>
 
             <div className="ordering-success-summary">
-              <div>
-                <span>Ordine</span>
-                <strong>#{successOrder.orderNumber}</strong>
-              </div>
-              <div>
-                <span>Stato</span>
-                <strong>{successOrder.status}</strong>
-              </div>
               <div>
                 <span>Totale</span>
                 <strong>{formatPrice(successOrder.total)}</strong>
