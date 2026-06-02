@@ -559,7 +559,7 @@
 
 .menu-product-sheet-hero {
   position: relative;
-  min-height: clamp(13rem, 42vh, 18rem);
+  height: clamp(7rem, 22vh, 10rem);
   background:
     radial-gradient(circle at top left, rgba(255, 255, 255, 0.32), transparent 38%),
     linear-gradient(145deg, rgba(200, 164, 125, 0.34), rgba(184, 118, 95, 0.18)),
@@ -1377,6 +1377,6 @@
   }
 
   .menu-product-sheet-hero {
-    min-height: 18rem;
+    height: 11rem;
   }
 }

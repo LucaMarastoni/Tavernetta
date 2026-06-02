@@ -14,6 +14,39 @@
   margin: 0 auto;
 }
 
+.admin-login-page {
+  display: grid;
+  place-items: center;
+}
+
+.admin-login-card {
+  display: grid;
+  gap: 1.15rem;
+  width: min(28rem, 100%);
+  padding: clamp(1.25rem, 3vw, 1.8rem);
+}
+
+.admin-login-copy {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.admin-login-copy h1 {
+  font-family: var(--font-display);
+  font-size: clamp(2.2rem, 5vw, 3.7rem);
+  line-height: 0.92;
+}
+
+.admin-login-copy p:last-child {
+  color: var(--color-mocha);
+}
+
+.admin-login-error {
+  margin: 0;
+  color: var(--color-terra);
+  font-weight: 800;
+}
+
 .admin-main {
   min-width: 0;
   display: grid;

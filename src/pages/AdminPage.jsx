@@ -16,15 +16,78 @@ import {
 } from '../services/adminOrdersApi';
 import '../styles/admin.css';
 
+const ADMIN_AUTH_STORAGE_KEY = 'tavernetta-admin-auth-v1';
+const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD?.trim() || 'Tavernetta2027!';
+
 function sortItemsByName(items) {
   return [...items].sort((left, right) => left.name.localeCompare(right.name, 'it', { sensitivity: 'base' }));
 }
 
+function readAdminAuthSession() {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+
+  return window.sessionStorage.getItem(ADMIN_AUTH_STORAGE_KEY) === 'authenticated';
+}
+
+function AdminLogin({ onLogin }) {
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+
+    if (password === ADMIN_PASSWORD) {
+      setError('');
+      onLogin();
+      return;
+    }
+
+    setPassword('');
+    setError('Password non corretta.');
+  };
+
+  return (
+    <div className="admin-page admin-login-page">
+      <form className="admin-login-card admin-surface" onSubmit={handleSubmit}>
+        <div className="admin-login-copy">
+          <p className="admin-kicker">Admin</p>
+          <h1>Accesso area gestione</h1>
+          <p>Inserisci la password per aprire il pannello operativo.</p>
+        </div>
+
+        <label className="admin-field">
+          <span>Password</span>
+          <input
+            autoComplete="current-password"
+            autoFocus
+            name="adminPassword"
+            type="password"
+            value={password}
+            onChange={(event) => {
+              setPassword(event.target.value);
+              setError('');
+            }}
+          />
+        </label>
+
+        {error ? <p className="admin-login-error" role="alert">{error}</p> : null}
+
+        <button className="admin-primary-button" type="submit">
+          Entra
+        </button>
+      </form>
+    </div>
+  );
+}
+
 function AdminPage() {
   const staticAdminEnabled = usesStaticAdminSource();
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(readAdminAuthSession);
   const [menuState, setMenuState] = useState(() => createAdminMenuState());
   const [orders, setOrders] = useState([]);
-  const [ordersLoading, setOrdersLoading] = useState(true);
+  const [ordersLoading, setOrdersLoading] = useState(false);
   const [ordersError, setOrdersError] = useState('');
 
   const items = useMemo(() => flattenAdminMenu(menuState), [menuState]);
@@ -157,6 +220,10 @@ function AdminPage() {
   };
 
   const refreshOrders = useCallback(async ({ silent = false } = {}) => {
+    if (!isAdminAuthenticated) {
+      return;
+    }
+
     if (!silent) {
       setOrdersLoading(true);
     }
@@ -176,7 +243,7 @@ function AdminPage() {
         setOrdersLoading(false);
       }
     }
-  }, []);
+  }, [isAdminAuthenticated]);
 
   const changeOrderStatus = useCallback(async (orderId, status) => {
     const updatedOrder = await updateAdminOrder(orderId, status);
@@ -193,6 +260,13 @@ function AdminPage() {
   }, [refreshOrders]);
 
   useEffect(() => {
+    if (!isAdminAuthenticated) {
+      setOrders([]);
+      setOrdersError('');
+      setOrdersLoading(false);
+      return undefined;
+    }
+
     let isActive = true;
     let refreshTimerId = null;
 
@@ -239,7 +313,23 @@ function AdminPage() {
         window.clearInterval(refreshTimerId);
       }
     };
-  }, [refreshOrders]);
+  }, [isAdminAuthenticated, refreshOrders]);
+
+  const handleAdminLogin = useCallback(() => {
+    if (typeof window !== 'undefined') {
+      window.sessionStorage.setItem(ADMIN_AUTH_STORAGE_KEY, 'authenticated');
+    }
+
+    setIsAdminAuthenticated(true);
+  }, []);
+
+  const handleAdminSignOut = useCallback(() => {
+    if (typeof window !== 'undefined') {
+      window.sessionStorage.removeItem(ADMIN_AUTH_STORAGE_KEY);
+    }
+
+    setIsAdminAuthenticated(false);
+  }, []);
 
   const contextValue = useMemo(
     () => ({
@@ -271,10 +361,14 @@ function AdminPage() {
     ],
   );
 
+  if (!isAdminAuthenticated) {
+    return <AdminLogin onLogin={handleAdminLogin} />;
+  }
+
   return (
     <div className="admin-page">
       <div className="admin-shell">
-        <AdminSidebar />
+        <AdminSidebar onSignOut={handleAdminSignOut} usesStaticAuth />
 
         <main className="admin-main">
           <Outlet context={contextValue} />
