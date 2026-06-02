@@ -4,24 +4,21 @@ import { MENU_GROUPS, buildMenuCategoryHref } from '../components/menu/menuGroup
 import { restaurant } from '../data/siteContent';
 
 const MENU_HERO_SLIDES = [
-  restaurant.preview.image,
   restaurant.about.image,
-  restaurant.philosophy.image,
-  restaurant.aboutPage.team.image,
 ];
 
 const MENU_LANDING_GROUPS = MENU_GROUPS.filter((group) => group.id !== 'degustazione');
 
 const MENU_LANDING_MARQUEE_IMAGES = {
-  pizze: restaurant.preview.image.src,
-  classiche: restaurant.preview.image.src,
-  bianche: restaurant.philosophy.image.src,
-  speciali: restaurant.aboutPage.team.image.src,
-  calzoni: restaurant.aboutPage.story.image.src,
-  fritteria: restaurant.aboutPage.philosophy.image.src,
+  pizze: restaurant.about.image.src,
+  classiche: restaurant.about.image.src,
+  bianche: restaurant.about.image.src,
+  speciali: restaurant.about.image.src,
+  calzoni: restaurant.about.image.src,
+  fritteria: restaurant.about.image.src,
   birre: restaurant.about.image.src,
-  dolci: restaurant.aboutPage.team.image.src,
-  vini: restaurant.story.image.src,
+  dolci: restaurant.about.image.src,
+  vini: restaurant.about.image.src,
 };
 
 const MENU_FLOW_ITEMS = MENU_LANDING_GROUPS.map((group) => ({

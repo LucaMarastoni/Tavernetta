@@ -1,15 +1,18 @@
 import { formatPrice } from '../../utils/formatPrice';
 
+const temporaryMenuImageUrl = `${import.meta.env.BASE_URL}images/editorial/impasto-pizza-ingredienti.jpg`;
+
 function MenuItemCard({ item, onSelect }) {
   const kicker = item.tags?.slice(0, 2).join(' / ');
   const description = item.description || 'Preparazione della casa.';
+  const imageUrl = temporaryMenuImageUrl;
 
   return (
     <article className="menu-catalog-item">
       <button className="menu-catalog-item-trigger" type="button" onClick={() => onSelect(item)}>
-        <div className={`menu-catalog-item-media ${item.imageUrl ? '' : 'is-placeholder'}`}>
-          {item.imageUrl ? (
-            <img alt={item.name} loading="lazy" decoding="async" src={item.imageUrl} />
+        <div className={`menu-catalog-item-media ${imageUrl ? '' : 'is-placeholder'}`}>
+          {imageUrl ? (
+            <img alt={item.name} loading="lazy" decoding="async" src={imageUrl} />
           ) : (
             <div className="menu-catalog-item-placeholder" aria-hidden="true">
               <span>{item.name.charAt(0)}</span>

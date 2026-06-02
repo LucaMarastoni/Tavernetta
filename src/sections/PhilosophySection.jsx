@@ -33,15 +33,7 @@ function PhilosophySection({ content = restaurant.philosophy }) {
             tone="light"
           />
 
-          <div className="philosophy-card philosophy-card-minimal">
-            <div className="philosophy-pillars philosophy-pillars-minimal">
-              {content.pillars.map((pillar) => (
-                <article key={pillar.title} className="philosophy-pillar">
-                  <h3>{pillar.title}</h3>
-                </article>
-              ))}
-            </div>
-          </div>
+          {content.intro ? <p className="section-intro">{content.intro}</p> : null}
         </Reveal>
       </div>
     </section>

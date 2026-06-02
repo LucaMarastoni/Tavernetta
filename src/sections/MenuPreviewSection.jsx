@@ -49,7 +49,7 @@ function MenuPreviewSection() {
                     <h3>{category.title}</h3>
                   </div>
 
-                  <span className="preview-price">Da {category.price}</span>
+                  {category.price ? <span className="preview-price">Da {category.price}</span> : null}
                 </Reveal>
               ))}
             </div>

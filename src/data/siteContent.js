@@ -1,14 +1,21 @@
 const localEditorialPhotoIds = new Set([
-  'photo-1414235077428-338989a2e8c0',
-  'photo-1470337458703-46ad1756a187',
-  'photo-1498654896293-37aacf113fd9',
-  'photo-1504674900247-0877df9cc836',
-  'photo-1513104890138-7c749659a591',
-  'photo-1514933651103-005eec06c04b',
-  'photo-1517248135467-4c7edcad34c4',
-  'photo-1544025162-d76694265947',
-  'photo-1552566626-52f8b828add9',
-  'photo-1559339352-11d035aa65de',
+  'brindisi-squadra-tavernetta',
+  'chi-siamo-squadra',
+  'cocktail-ambrato',
+  'dettaglio-pizza-pomodoro-basilico',
+  'fritto-della-casa',
+  'impasto-pizza-ingredienti',
+  'pizza-affettata-editoriale',
+  'pizza-forno-crosta',
+  'pizza-forno-margherita',
+  'pizza-speciale-bottiglie-vertical',
+  'pizza-speciale-lattine-tavolo',
+  'pizza-speciale-lattine-vertical',
+  'preparazione-impasto-pizza',
+  'preparazione-pizza-mozzarella',
+  'preparazione-pizze-mani',
+  'squadra-tavernetta-tavolo',
+  'tavolo-staff-pizza-vertical',
 ]);
 
 const withBase = (path) => `${import.meta.env.BASE_URL}${path.replace(/^\/+/, '')}`;
@@ -29,35 +36,23 @@ export const pageNavigation = [
 
 export const heroSlides = [
   {
-    src: photo('photo-1517248135467-4c7edcad34c4', 2400),
-    alt: 'Sala di ristorante elegante con luce calda e tavoli ben distanziati',
+    src: photo('pizza-speciale-lattine-tavolo', 2400),
+    alt: 'Pizza speciale servita su tavolo scuro con dettagli colorati',
   },
   {
-    src: photo('photo-1414235077428-338989a2e8c0', 2400),
-    alt: 'Tavolo apparecchiato in un ambiente italiano raffinato e luminoso',
+    src: photo('preparazione-pizze-mani', 2400),
+    alt: 'Mani al lavoro durante la preparazione di pizze in pizzeria',
   },
   {
-    src: photo('photo-1470337458703-46ad1756a187', 2400),
-    alt: 'Calici e dettagli di sala in una luce serale ambrata',
-  },
-  {
-    src: photo('photo-1498654896293-37aacf113fd9', 2400),
-    alt: 'Piatto curato con impiattamento minimale su tavolo materico',
+    src: photo('preparazione-impasto-pizza', 2400),
+    alt: 'Impasto sollevato durante la preparazione di una pizza',
   },
 ];
 
 export const aboutPageSlides = [
   {
-    src: photo('photo-1552566626-52f8b828add9', 2400),
-    alt: 'Interno caldo di ristorante con tavoli ben distanziati e luce serale morbida',
-  },
-  {
-    src: photo('photo-1514933651103-005eec06c04b', 2400),
-    alt: 'Dettaglio di sala elegante con tavolo apparecchiato e riflessi ambrati',
-  },
-  {
-    src: photo('photo-1559339352-11d035aa65de', 2400),
-    alt: 'Gestualita di cucina e cura artigianale nella rifinitura di un piatto',
+    src: photo('squadra-tavernetta-tavolo', 2400),
+    alt: 'Squadra Tavernetta raccolta attorno a pizze e bottiglie in sala',
   },
 ];
 
@@ -74,7 +69,7 @@ export const restaurant = {
   },
   about: {
     eyebrow: 'Atmosfera',
-    title: 'Luce morbida, tavoli larghi, una sala raccolta.',
+    title: 'Ambiente moderno, accogliente, un lato industrial retro.',
     intro:
       "Tavernetta nasce come un rifugio urbano di luce morbida, superfici naturali e gesti misurati. Il tono e intimo ma aperto, curato senza rigidita, costruito per accogliere con calma.",
     body: [
@@ -92,38 +87,23 @@ export const restaurant = {
     },
     note: 'Milano, sera, forno acceso.',
     image: {
-      src: photo('photo-1504674900247-0877df9cc836', 1600),
-      alt: 'Ingredienti e piccoli piatti preparati con sensibilita contemporanea',
+      src: photo('impasto-pizza-ingredienti', 1600),
+      alt: 'Impasto pizza steso al banco con ingredienti freschi sullo sfondo',
     },
   },
   philosophy: {
     eyebrow: 'Filosofia',
-    title: 'Forno vivo, materia precisa, gesto misurato.',
-    intro:
-      "La cucina di Tavernetta non cerca effetti. Preferisce nettezza, temperatura giusta, condimenti essenziali e un ritmo di servizio che lascia respirare il tavolo.",
+    title: "Forno a legna, impasti lenti, vini selezionati e serate con musica per un'esperienza autentica.",
     quote:
       '"Vogliamo che ogni piatto lasci una traccia precisa, non un rumore in piu."',
     body: [
       "Gli impasti maturano lentamente, i topping si costruiscono con pochi elementi leggibili, i piatti stagionali seguono la disponibilita vera degli ingredienti e la cantina accompagna senza sovraccaricare.",
       "Anche l'esperienza in sala nasce dalla stessa idea: eleganza composta, accoglienza naturale, cura continua e nessun gesto superfluo.",
     ],
-    pillars: [
-      {
-        title: 'Impasti lenti',
-        description: 'Idratazione alta, leggerezza in morso e una cottura sempre asciutta.',
-      },
-      {
-        title: 'Materia nitida',
-        description: 'Pochi ingredienti, stagionalita vera e sapori leggibili fino in fondo.',
-      },
-      {
-        title: 'Sala misurata',
-        description: 'Presenza discreta, passo quieto e attenzione costante ai dettagli.',
-      },
-    ],
+    pillars: [],
     image: {
-      src: photo('photo-1544025162-d76694265947', 1600),
-      alt: 'Dettaglio di una preparazione raffinata in cucina con gesto preciso',
+      src: photo('preparazione-pizza-mozzarella', 1600),
+      alt: 'Pizza in preparazione con mozzarella e condimenti sul banco',
     },
   },
   story: {
@@ -141,8 +121,8 @@ export const restaurant = {
       { label: 'Accoglienza', value: 'misurata, calda, continua' },
     ],
     image: {
-      src: photo('photo-1414235077428-338989a2e8c0', 1600),
-      alt: 'Sala elegante con tavolo apparecchiato e luce soffusa',
+      src: photo('squadra-tavernetta-tavolo', 1600),
+      alt: 'Squadra Tavernetta riunita attorno a un tavolo con pizze',
     },
   },
   preview: {
@@ -155,7 +135,7 @@ export const restaurant = {
       to: '/menu',
     },
     image: {
-      src: photo('photo-1513104890138-7c749659a591', 1600),
+      src: photo('pizza-affettata-editoriale', 1600),
       alt: 'Pizza artigianale appena sfornata con luce calda e taglio editoriale',
     },
   },
@@ -208,8 +188,8 @@ export const restaurant = {
         { label: 'Stile', value: 'accoglienza misurata' },
       ],
       image: {
-        src: photo('photo-1414235077428-338989a2e8c0', 1600),
-        alt: 'Sala elegante con tavolo apparecchiato e luce soffusa',
+        src: photo('chi-siamo-squadra', 1600),
+        alt: 'La squadra Tavernetta riunita attorno al tavolo',
       },
     },
     philosophy: {
@@ -221,8 +201,8 @@ export const restaurant = {
         { title: 'Ospitalita curata' },
       ],
       image: {
-        src: photo('photo-1544025162-d76694265947', 1600),
-        alt: 'Dettaglio di una preparazione raffinata in cucina con gesto preciso',
+        src: photo('preparazione-impasto-pizza', 1600),
+        alt: 'Impasto pizza sollevato al banco durante la preparazione',
       },
     },
     team: {
@@ -236,8 +216,8 @@ export const restaurant = {
         { label: 'Selezione', value: 'vini e pairing in equilibrio' },
       ],
       image: {
-        src: photo('photo-1559339352-11d035aa65de', 1600),
-        alt: 'Mani in cucina durante la finitura di un piatto con gesto misurato',
+        src: photo('brindisi-squadra-tavernetta', 1600),
+        alt: 'La squadra Tavernetta brinda attorno al tavolo',
       },
     },
   },
@@ -262,8 +242,8 @@ export const restaurant = {
       { label: 'Servizio di sala', value: 'discreto e continuo' },
     ],
     image: {
-      src: photo('photo-1559339352-11d035aa65de', 1600),
-      alt: 'Mani in cucina durante la finitura di un piatto con gesto misurato',
+      src: photo('preparazione-pizze-mani', 1600),
+      alt: 'Mani al banco durante la preparazione di pizze',
     },
   },
   reservation: {
@@ -304,49 +284,30 @@ export const restaurant = {
 export const previewCategories = [
   {
     index: '01',
-    title: 'Le Pizze',
-    description:
-      'Le rosse della casa, dai grandi classici alle combinazioni piu personali e identitarie.',
-    price: '5,85',
+    title: 'Starter',
   },
   {
     index: '02',
-    title: 'Le Bianche',
-    description:
-      'Pizze senza pomodoro, piu cremose e avvolgenti, con una lettura netta degli ingredienti.',
-    price: '9,30',
+    title: 'Le Pizze',
   },
   {
     index: '03',
-    title: 'Le Speciali',
-    description:
-      'Le proposte piu distintive di Tavernetta, tra ripiene, mare, mortadella e richiami di territorio.',
-    price: '11,00',
+    title: 'I Calzoni',
   },
   {
     index: '04',
-    title: 'I Calzoni',
-    description:
-      'Versioni chiuse, piu golose e sostanziose, pensate per chi cerca una pizza dal carattere pieno.',
-    price: '9,40',
-  },
-  {
-    index: '05',
-    title: 'Fritteria',
-    description:
-      'Calzoni fritti con anima popolare e gusto deciso, da scegliere quando vuoi qualcosa di piu sfizioso.',
-    price: '9,10',
+    title: 'In Fritteria',
   },
 ];
 
 export const galleryItems = [
   {
-    title: 'Sala serale',
-    caption: 'Tavoli larghi, luce soffusa, vetro sottile e un ritmo di sala molto quieto.',
+    title: 'Squadra',
+    caption: 'La squadra riunita attorno al tavolo, tra pizze, bottiglie e servizio condiviso.',
     layout: 'large',
     image: {
-      src: photo('photo-1414235077428-338989a2e8c0', 1600),
-      alt: 'Tavolo apparecchiato in una sala ristorante elegante',
+      src: photo('chi-siamo-squadra', 1600),
+      alt: 'Squadra Tavernetta riunita attorno al tavolo',
     },
   },
   {
@@ -354,35 +315,17 @@ export const galleryItems = [
     caption: 'Temperatura controllata, bordo arioso, cotture nitide e una struttura sempre leggera.',
     layout: 'tall',
     image: {
-      src: photo('photo-1513104890138-7c749659a591', 1200),
-      alt: 'Pizza artigianale appena sfornata su tavolo scuro',
+      src: photo('pizza-forno-margherita', 1200),
+      alt: 'Pizza margherita in cottura nel forno',
     },
   },
   {
-    title: 'Piatti di stagione',
-    caption: 'Verdure, fondi leggeri e una costruzione che lascia spazio a ogni ingrediente.',
-    layout: 'wide',
-    image: {
-      src: photo('photo-1498654896293-37aacf113fd9', 1600),
-      alt: 'Piatto raffinato con ingredienti stagionali su tavolo in legno',
-    },
-  },
-  {
-    title: 'Vetri e riflessi',
-    caption: 'Calici, ombre e superfici ambrate compongono una scena volutamente silenziosa.',
+    title: 'Gesto al banco',
+    caption: 'La mano resta visibile, dal pomodoro al basilico, fino alla cottura finale.',
     layout: 'standard',
     image: {
-      src: photo('photo-1470337458703-46ad1756a187', 1200),
-      alt: 'Calici e luce calda in un ambiente ristorante contemporaneo',
-    },
-  },
-  {
-    title: 'Gesto in cucina',
-    caption: 'La mano resta visibile, ma il segno finale rimane sempre pulito e misurato.',
-    layout: 'standard',
-    image: {
-      src: photo('photo-1559339352-11d035aa65de', 1200),
-      alt: 'Cucina professionale con preparazione artigianale di un piatto',
+      src: photo('dettaglio-pizza-pomodoro-basilico', 1200),
+      alt: 'Mano che aggiunge pomodorini e basilico su una pizza',
     },
   },
 ];

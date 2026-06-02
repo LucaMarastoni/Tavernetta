@@ -7,12 +7,12 @@ import {
 } from '../../shared/menuExtraProfiles.js';
 
 const CATEGORY_IMAGE_IDS = {
-  'le-pizze': ['photo-1513104890138-7c749659a591', 'photo-1414235077428-338989a2e8c0'],
-  'le-bianche': ['photo-1504674900247-0877df9cc836', 'photo-1498654896293-37aacf113fd9'],
-  'le-speciali': ['photo-1544025162-d76694265947', 'photo-1559339352-11d035aa65de'],
-  'i-calzoni': ['photo-1514933651103-005eec06c04b', 'photo-1513104890138-7c749659a591'],
-  'calzoni-in-fritteria': ['photo-1414235077428-338989a2e8c0', 'photo-1498654896293-37aacf113fd9'],
-  fallback: ['photo-1414235077428-338989a2e8c0'],
+  'le-pizze': ['impasto-pizza-ingredienti'],
+  'le-bianche': ['impasto-pizza-ingredienti'],
+  'le-speciali': ['impasto-pizza-ingredienti'],
+  'i-calzoni': ['impasto-pizza-ingredienti'],
+  'calzoni-in-fritteria': ['impasto-pizza-ingredienti'],
+  fallback: ['impasto-pizza-ingredienti'],
 };
 
 const CATEGORY_META_BY_KEY = {
