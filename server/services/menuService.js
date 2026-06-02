@@ -215,6 +215,43 @@ function createMapById(rows) {
   return new Map(rows.map((row) => [normalizeId(row.id), row]));
 }
 
+function isMissingIngredientAllergenInfo(error) {
+  const message = `${error?.message || ''} ${error?.details || ''}`;
+  return error?.code === '42703' && /allergen_info/i.test(message);
+}
+
+async function runIngredientQueryWithFallback(client, applyFilters) {
+  const primaryQuery = applyFilters(client.from('ingredients').select('id, name, slug, allergen_info, active'));
+  const primaryResult = await primaryQuery;
+
+  if (!primaryResult.error) {
+    return primaryResult.data ?? [];
+  }
+
+  if (!isMissingIngredientAllergenInfo(primaryResult.error)) {
+    throw new HttpError(
+      500,
+      'SUPABASE_QUERY_FAILED',
+      'Non riusciamo a leggere i dati del menu.',
+      primaryResult.error.message,
+    );
+  }
+
+  const fallbackQuery = applyFilters(client.from('ingredients').select('id, name, slug, active'));
+  const fallbackResult = await fallbackQuery;
+
+  if (fallbackResult.error) {
+    throw new HttpError(
+      500,
+      'SUPABASE_QUERY_FAILED',
+      'Non riusciamo a leggere i dati del menu.',
+      fallbackResult.error.message,
+    );
+  }
+
+  return fallbackResult.data ?? [];
+}
+
 function resolveCategoryMeta(name, slug = '') {
   const cleanedName = cleanInlineText(name);
   const cleanedSlug = cleanInlineText(slug);
@@ -292,7 +329,7 @@ function normalizeIngredientLink(link, ingredientById) {
     ingredientId: normalizeId(ingredient.id),
     name: cleanInlineText(ingredient.name),
     slug: cleanInlineText(ingredient.slug),
-    allergenInfo: null,
+    allergenInfo: cleanInlineText(ingredient.allergen_info || ''),
     isRemovable: link.is_removable === null ? null : Boolean(link.is_removable),
     sortOrder: normalizeNumber(link.sort_order),
   };
@@ -317,7 +354,7 @@ function normalizeAllowedExtra(extraLink, extraById, ingredientById) {
     ingredientId: normalizeId(ingredient.id),
     name: cleanInlineText(ingredient.name),
     slug: cleanInlineText(ingredient.slug),
-    allergenInfo: null,
+    allergenInfo: cleanInlineText(ingredient.allergen_info || ''),
     extraPrice: normalizeNumber(extra.extra_price),
     sortOrder: normalizeNumber(extra.sort_order),
   };
@@ -460,7 +497,7 @@ async function loadSupabaseRelations(client, menuItemIds) {
   ];
 
   const ingredients = ingredientIds.length
-    ? await runSupabaseQuery(client.from('ingredients').select('id, name, slug, active').in('id', ingredientIds))
+    ? await runIngredientQueryWithFallback(client, (query) => query.in('id', ingredientIds))
     : [];
 
   const ingredientById = createMapById(ingredients);
@@ -768,8 +805,9 @@ async function getSupabaseMenuItemRow(menuItemId) {
 }
 
 async function getSupabaseIngredientCatalog(client = getSupabaseAdmin()) {
-  const rows = await runSupabaseQuery(
-    client.from('ingredients').select('id, name, slug, active').eq('active', true).order('name'),
+  const rows = await runIngredientQueryWithFallback(
+    client,
+    (query) => query.eq('active', true).order('name'),
   );
 
   return rows
@@ -779,7 +817,7 @@ async function getSupabaseIngredientCatalog(client = getSupabaseAdmin()) {
       ingredientId: normalizeId(ingredient.id),
       name: cleanInlineText(ingredient.name),
       slug: cleanInlineText(ingredient.slug),
-      allergenInfo: null,
+      allergenInfo: cleanInlineText(ingredient.allergen_info || ''),
       sortOrder: 0,
     }))
     .sort(sortByOrderThenName);

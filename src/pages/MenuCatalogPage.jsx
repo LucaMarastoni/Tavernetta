@@ -14,12 +14,65 @@ import { useMenuCatalog } from '../hooks/useMenuCatalog';
 import { fetchMenuItemCustomization } from '../services/menuApi';
 import '../styles/menu-catalog.css';
 
+function normalizeSearchText(value = '') {
+  return String(value)
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function itemMatchesSearch(item, normalizedQuery) {
+  if (!normalizedQuery) {
+    return true;
+  }
+
+  const haystack = normalizeSearchText(
+    [
+      item.name,
+      item.description,
+      Array.isArray(item.ingredients) ? item.ingredients.join(' ') : '',
+      Array.isArray(item.tags) ? item.tags.join(' ') : '',
+    ].join(' '),
+  );
+
+  return haystack.includes(normalizedQuery);
+}
+
+function filterMenuGroups(groups, searchQuery) {
+  const normalizedQuery = normalizeSearchText(searchQuery);
+
+  if (!normalizedQuery) {
+    return groups;
+  }
+
+  return groups
+    .map((group) => {
+      const filteredCategories = group.categories
+        .map((category) => ({
+          ...category,
+          items: category.items.filter((item) => itemMatchesSearch(item, normalizedQuery)),
+        }))
+        .filter((category) => category.items.length > 0);
+
+      return {
+        ...group,
+        categories: filteredCategories,
+        itemCount: filteredCategories.reduce((total, category) => total + category.items.length, 0),
+        isAvailable: filteredCategories.length > 0,
+      };
+    })
+    .filter((group) => group.isAvailable);
+}
+
 function MenuCatalogPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const requestedCollectionId = searchParams.get('categoria');
   const { categories, itemsById, loading, error, refetch } = useMenuCatalog();
   const { addConfiguredItem, itemCount, items, removeItem, replaceConfiguredItem, totals, updateQuantity } = useCart();
   const [activeGroupId, setActiveGroupId] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const customizationRequestRef = useRef(0);
   const sectionRefs = useRef({});
   const subheaderRef = useRef(null);
@@ -32,7 +85,13 @@ function MenuCatalogPage() {
     initialLine: null,
   });
 
-  const menuGroups = useMemo(() => buildMenuGroups(categories).filter((group) => group.isAvailable), [categories]);
+  const allMenuGroups = useMemo(() => buildMenuGroups(categories).filter((group) => group.isAvailable), [categories]);
+  const menuGroups = useMemo(() => filterMenuGroups(allMenuGroups, searchQuery), [allMenuGroups, searchQuery]);
+  const isSearching = Boolean(normalizeSearchText(searchQuery));
+  const visibleSearchResultCount = useMemo(
+    () => menuGroups.reduce((total, group) => total + group.itemCount, 0),
+    [menuGroups],
+  );
 
   const scrollToGroup = useCallback((groupId, behavior = 'smooth') => {
     const targetSection = sectionRefs.current[groupId];
@@ -224,10 +283,18 @@ function MenuCatalogPage() {
     [menuGroups, scrollToGroup, setSearchParams],
   );
 
+  const handleSearchChange = (event) => {
+    setSearchQuery(event.target.value);
+  };
+
+  const clearSearch = () => {
+    setSearchQuery('');
+  };
+
   return (
     <>
       <section className="section ordering-page menu-catalog-page" data-header-tone="dark">
-        {!loading && !error && menuGroups.length ? (
+        {!loading && !error && allMenuGroups.length ? (
           <div ref={subheaderRef} className="menu-catalog-subheader-shell">
             <div className="section-inner menu-catalog-subheader-inner">
               <section className="menu-catalog-page-header" aria-label="Navigazione della carta">
@@ -251,6 +318,33 @@ function MenuCatalogPage() {
                   activeGroupId={activeGroupId}
                   onSelect={handleSelectGroup}
                 />
+
+                <div className="menu-catalog-search" role="search">
+                  <label className="menu-catalog-search-field">
+                    <span className="sr-only">Cerca pizza o ingrediente</span>
+                    <input
+                      type="search"
+                      value={searchQuery}
+                      onChange={handleSearchChange}
+                      placeholder="Cerca pizza o ingrediente"
+                      autoComplete="off"
+                    />
+                  </label>
+
+                  {searchQuery ? (
+                    <button className="menu-catalog-search-clear" type="button" onClick={clearSearch}>
+                      Cancella
+                    </button>
+                  ) : null}
+
+                  {isSearching ? (
+                    <p className="menu-catalog-search-meta" aria-live="polite">
+                      {visibleSearchResultCount
+                        ? `${visibleSearchResultCount} ${visibleSearchResultCount === 1 ? 'risultato' : 'risultati'}`
+                        : 'Nessun risultato'}
+                    </p>
+                  ) : null}
+                </div>
               </section>
             </div>
           </div>
@@ -285,8 +379,12 @@ function MenuCatalogPage() {
 
           {!loading && !error && categories.length > 0 && !menuGroups.length ? (
             <StatusPanel
-              title="Nessuna sezione disponibile."
-              message="La carta online non contiene ancora una sezione navigabile."
+              title={isSearching ? 'Nessuna pizza trovata.' : 'Nessuna sezione disponibile.'}
+              message={
+                isSearching
+                  ? 'Prova con un altro nome o ingrediente.'
+                  : 'La carta online non contiene ancora una sezione navigabile.'
+              }
             />
           ) : null}
 

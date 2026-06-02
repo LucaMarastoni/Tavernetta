@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import QuantityControl from '../QuantityControl';
 import ProductOptionsGroup from './ProductOptionsGroup';
 import { createCartLine } from '../../utils/cart';
+import { formatAllergenLabel } from '../../utils/allergens';
 import { formatPrice } from '../../utils/formatPrice';
 import { calculateConfiguredUnitPrice } from '../../utils/pricing';
 
@@ -106,6 +107,88 @@ function getMissingGroups(configuration, selectedOptionIds) {
     const selectedCount = getSelectedOptionIdsForGroup(group, selectedOptionIds).length;
     return selectedCount < group.minSelections;
   });
+}
+
+function formatTagLabel(tag) {
+  const normalizedTag = String(tag || '').trim();
+
+  if (/^piccante$/i.test(normalizedTag)) {
+    return 'Piccante';
+  }
+
+  if (/^vegetariana$/i.test(normalizedTag)) {
+    return 'Vegetariana';
+  }
+
+  return normalizedTag;
+}
+
+function formatAllergenInfoLabel(value) {
+  return String(value || '')
+    .trim()
+    .replace(/\s+/g, ' ')
+    .replace(/^./, (letter) => letter.toUpperCase());
+}
+
+function getProductTags(item) {
+  if (!Array.isArray(item?.tags)) {
+    return [];
+  }
+
+  return [...new Set(item.tags.map(formatTagLabel).filter(Boolean))];
+}
+
+function getProductAllergens(configuration) {
+  const explicitAllergens = Array.isArray(configuration?.item?.allergens)
+    ? configuration.item.allergens.map(formatAllergenLabel)
+    : [];
+
+  const ingredientAllergens = Array.isArray(configuration?.defaultIngredients)
+    ? configuration.defaultIngredients.flatMap((ingredient) =>
+        String(ingredient.allergenInfo || '')
+          .split(',')
+          .map(formatAllergenInfoLabel)
+          .filter(Boolean),
+      )
+    : [];
+
+  return [...new Set([...explicitAllergens, ...ingredientAllergens].filter(Boolean))];
+}
+
+function ProductInfoChips({ configuration }) {
+  const tags = getProductTags(configuration?.item);
+  const allergens = getProductAllergens(configuration);
+
+  if (!tags.length && !allergens.length) {
+    return null;
+  }
+
+  return (
+    <>
+      {tags.length ? (
+        <div className="menu-product-info-chip-list">
+          {tags.map((tag) => (
+            <span key={tag} className="menu-product-info-chip">
+              {tag}
+            </span>
+          ))}
+        </div>
+      ) : null}
+
+      {allergens.length ? (
+        <div className="menu-product-info-panel">
+          <span>Allergeni</span>
+          <div className="menu-product-info-chip-list">
+            {allergens.map((allergen) => (
+              <span key={allergen} className="menu-product-info-chip">
+                {allergen}
+              </span>
+            ))}
+          </div>
+        </div>
+      ) : null}
+    </>
+  );
 }
 
 function CustomizationDrawerSkeleton() {
@@ -381,6 +464,8 @@ function CustomizationDrawer({ open, loading, error, configuration, initialLine,
               <p className="menu-product-sheet-description">
                 {configuration?.item.description ?? 'Stiamo caricando il dettaglio del prodotto.'}
               </p>
+
+              <ProductInfoChips configuration={configuration} />
             </div>
           )}
 
