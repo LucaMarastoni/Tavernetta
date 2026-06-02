@@ -24,6 +24,21 @@ const CATEGORY_META_BY_KEY = {
   'calzoni in fritteria': { name: 'Calzoni in Fritteria', slug: 'calzoni-in-fritteria' },
 };
 
+const MENU_ITEM_BASE_SELECT = 'id, category_id, name, slug, description, base_price, image_path, active, featured, sort_order, spicy, vegetarian, note';
+const MENU_ITEM_ALLERGEN_SELECT =
+  'allergen_nuts, allergen_milk, allergen_frozen, allergen_gluten, allergen_eggs, allergen_fish, allergen_mollusks, allergen_crustaceans';
+const MENU_ITEM_SELECT = `${MENU_ITEM_BASE_SELECT}, ${MENU_ITEM_ALLERGEN_SELECT}`;
+const MENU_ITEM_ALLERGEN_FIELDS = [
+  ['allergen_nuts', '1'],
+  ['allergen_milk', '2'],
+  ['allergen_frozen', '3'],
+  ['allergen_gluten', '4'],
+  ['allergen_eggs', '5'],
+  ['allergen_fish', '6'],
+  ['allergen_mollusks', '7'],
+  ['allergen_crustaceans', '8'],
+];
+
 function normalizeId(value) {
   if (value === null || value === undefined) {
     return '';
@@ -145,6 +160,10 @@ function mapTags(row) {
   return tags;
 }
 
+function mapAllergens(row) {
+  return MENU_ITEM_ALLERGEN_FIELDS.filter(([field]) => Boolean(row[field])).map(([, code]) => code);
+}
+
 function buildMenuItemDescription(row, defaultIngredients = []) {
   if (cleanInlineText(row.description)) {
     return cleanInlineText(row.description);
@@ -197,6 +216,31 @@ async function runSupabaseQuery(promise, { optional = false, fallbackValue = [] 
 
 function createMapById(rows) {
   return new Map(rows.map((row) => [normalizeId(row.id), row]));
+}
+
+function isMissingMenuItemAllergenColumn(error) {
+  const message = `${error?.message || ''} ${error?.details || ''}`;
+  return error?.code === '42703' && /allergen_/i.test(message);
+}
+
+async function runMenuItemQueryWithAllergenFallback(client, applyFilters) {
+  const primaryResult = await applyFilters(client.from('menu_items').select(MENU_ITEM_SELECT));
+
+  if (!primaryResult.error) {
+    return primaryResult.data ?? [];
+  }
+
+  if (!isMissingMenuItemAllergenColumn(primaryResult.error)) {
+    throw createSupabaseError(primaryResult.error, 'Non riusciamo a leggere i dati del menu.');
+  }
+
+  const fallbackResult = await applyFilters(client.from('menu_items').select(MENU_ITEM_BASE_SELECT));
+
+  if (fallbackResult.error) {
+    throw createSupabaseError(fallbackResult.error, 'Non riusciamo a leggere i dati del menu.');
+  }
+
+  return fallbackResult.data ?? [];
 }
 
 function isMissingIngredientAllergenInfo(error) {
@@ -585,6 +629,7 @@ function buildSupabaseMenuItem(row, category, client, relations) {
     basePrice: normalizeNumber(row.base_price),
     imageUrl: resolveSupabaseImageUrl(client, row.image_path, category.slug, row.sort_order),
     tags: mapTags(row),
+    allergens: mapAllergens(row),
     active: Boolean(row.active),
     featured: Boolean(row.featured),
     sortOrder: normalizeNumber(row.sort_order),
@@ -611,12 +656,9 @@ async function getSupabaseItemRows(client, categoryIds) {
     return [];
   }
 
-  return runSupabaseQuery(
-    client
-      .from('menu_items')
-      .select('id, category_id, name, slug, description, base_price, image_path, active, featured, sort_order, spicy, vegetarian, note')
-      .eq('active', true)
-      .in('category_id', categoryIds),
+  return runMenuItemQueryWithAllergenFallback(
+    client,
+    (query) => query.eq('active', true).in('category_id', categoryIds),
   );
 }
 
@@ -656,16 +698,11 @@ async function getSupabaseCatalogData(client, { categorySlug } = {}) {
 }
 
 async function getSupabaseMenuItemRow(client, menuItemId) {
-  const { data, error } = await client
-    .from('menu_items')
-    .select('id, category_id, name, slug, description, base_price, image_path, active, featured, sort_order, spicy, vegetarian, note')
-    .eq('id', menuItemId)
-    .eq('active', true)
-    .maybeSingle();
-
-  if (error) {
-    throw createSupabaseError(error, 'Non riusciamo a leggere i dati del menu.');
-  }
+  const rows = await runMenuItemQueryWithAllergenFallback(
+    client,
+    (query) => query.eq('id', menuItemId).eq('active', true).limit(1),
+  );
+  const data = rows[0] ?? null;
 
   if (!data) {
     throw new Error('Questo prodotto non e disponibile.');

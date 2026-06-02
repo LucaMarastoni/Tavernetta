@@ -2,12 +2,14 @@ import { Outlet } from 'react-router-dom';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import AdminSidebar from '../components/admin/AdminSidebar';
 import {
-  createAdminMenuState,
+  createAdminMenuStateFromCatalog,
+  createEmptyAdminMenuState,
   flattenAdminMenu,
   getAdminAllergenOptions,
   normalizeAdminText,
   slugifyAdminValue,
 } from '../data/adminMenu';
+import { fetchMenuCatalog } from '../services/menuApi';
 import {
   AdminOrdersApiError,
   fetchAdminOrders,
@@ -85,7 +87,9 @@ function AdminLogin({ onLogin }) {
 function AdminPage() {
   const staticAdminEnabled = usesStaticAdminSource();
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(readAdminAuthSession);
-  const [menuState, setMenuState] = useState(() => createAdminMenuState());
+  const [menuState, setMenuState] = useState(createEmptyAdminMenuState);
+  const [menuLoading, setMenuLoading] = useState(false);
+  const [menuError, setMenuError] = useState('');
   const [orders, setOrders] = useState([]);
   const [ordersLoading, setOrdersLoading] = useState(false);
   const [ordersError, setOrdersError] = useState('');
@@ -138,6 +142,7 @@ function AdminPage() {
       const nextItem = {
         id: previousPizza?.id ?? `pizza-${targetCategory.slug}-${itemSlug}-${Date.now()}`,
         name: draft.name.trim(),
+        slug: previousPizza?.slug ?? itemSlug,
         price: draft.price,
         allergens: draft.allergens,
         spicy: draft.spicy,
@@ -219,6 +224,25 @@ function AdminPage() {
     setMenuState((currentState) => currentState.filter((category) => category.id !== categoryId));
   };
 
+  const refreshMenu = useCallback(async () => {
+    if (!isAdminAuthenticated) {
+      return;
+    }
+
+    setMenuLoading(true);
+
+    try {
+      const catalog = await fetchMenuCatalog();
+      setMenuState(createAdminMenuStateFromCatalog(catalog));
+      setMenuError('');
+    } catch (error) {
+      setMenuState(createEmptyAdminMenuState());
+      setMenuError(error.message || 'Non riusciamo a leggere il menu da Supabase.');
+    } finally {
+      setMenuLoading(false);
+    }
+  }, [isAdminAuthenticated]);
+
   const refreshOrders = useCallback(async ({ silent = false } = {}) => {
     if (!isAdminAuthenticated) {
       return;
@@ -258,6 +282,17 @@ function AdminPage() {
 
     return updatedOrder;
   }, [refreshOrders]);
+
+  useEffect(() => {
+    if (!isAdminAuthenticated) {
+      setMenuState(createEmptyAdminMenuState());
+      setMenuError('');
+      setMenuLoading(false);
+      return;
+    }
+
+    refreshMenu();
+  }, [isAdminAuthenticated, refreshMenu]);
 
   useEffect(() => {
     if (!isAdminAuthenticated) {
@@ -336,6 +371,8 @@ function AdminPage() {
       items,
       categories,
       allergenOptions,
+      menuLoading,
+      menuError,
       orders,
       ordersLoading,
       ordersError,
@@ -345,6 +382,7 @@ function AdminPage() {
       createCategory,
       renameCategory,
       deleteCategory,
+      refreshMenu,
       refreshOrders,
       changeOrderStatus,
     }),
@@ -352,10 +390,13 @@ function AdminPage() {
       items,
       categories,
       allergenOptions,
+      menuLoading,
+      menuError,
       orders,
       ordersLoading,
       ordersError,
       staticAdminEnabled,
+      refreshMenu,
       refreshOrders,
       changeOrderStatus,
     ],

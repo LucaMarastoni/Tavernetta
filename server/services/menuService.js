@@ -6,14 +6,6 @@ import {
   CUSTOMIZABLE_CATEGORY_SLUGS,
   resolveOptionPriceDelta,
 } from '../../shared/menuExtraProfiles.js';
-import {
-  getActiveIngredientsSqlite,
-  getActiveCategoriesSqlite,
-  getActiveMenuItemsSqlite,
-  getMenuCatalogSqlite,
-  getMenuItemByIdSqlite,
-  getMenuItemCustomizationSqlite,
-} from './menuService.sqlite.js';
 
 const CATEGORY_IMAGE_IDS = {
   'le-pizze': ['photo-1513104890138-7c749659a591', 'photo-1414235077428-338989a2e8c0'],
@@ -32,6 +24,21 @@ const CATEGORY_META_BY_KEY = {
   'i calzoni': { name: 'I Calzoni', slug: 'i-calzoni' },
   'calzoni in fritteria': { name: 'Calzoni in Fritteria', slug: 'calzoni-in-fritteria' },
 };
+
+const MENU_ITEM_BASE_SELECT = 'id, category_id, name, slug, description, base_price, image_path, active, featured, sort_order, spicy, vegetarian, note';
+const MENU_ITEM_ALLERGEN_SELECT =
+  'allergen_nuts, allergen_milk, allergen_frozen, allergen_gluten, allergen_eggs, allergen_fish, allergen_mollusks, allergen_crustaceans';
+const MENU_ITEM_SELECT = `${MENU_ITEM_BASE_SELECT}, ${MENU_ITEM_ALLERGEN_SELECT}`;
+const MENU_ITEM_ALLERGEN_FIELDS = [
+  ['allergen_nuts', '1'],
+  ['allergen_milk', '2'],
+  ['allergen_frozen', '3'],
+  ['allergen_gluten', '4'],
+  ['allergen_eggs', '5'],
+  ['allergen_fish', '6'],
+  ['allergen_mollusks', '7'],
+  ['allergen_crustaceans', '8'],
+];
 
 function normalizeId(value) {
   if (value === null || value === undefined) {
@@ -168,6 +175,10 @@ function mapTags(row) {
   return tags;
 }
 
+function mapAllergens(row) {
+  return MENU_ITEM_ALLERGEN_FIELDS.filter(([field]) => Boolean(row[field])).map(([, code]) => code);
+}
+
 function buildMenuItemDescription(row, defaultIngredients = []) {
   if (cleanInlineText(row.description)) {
     return cleanInlineText(row.description);
@@ -213,6 +224,52 @@ async function runSupabaseQuery(promise, { optional = false, fallbackValue = [] 
 
 function createMapById(rows) {
   return new Map(rows.map((row) => [normalizeId(row.id), row]));
+}
+
+function isMissingMenuItemAllergenColumn(error) {
+  const message = `${error?.message || ''} ${error?.details || ''}`;
+  return error?.code === '42703' && /allergen_/i.test(message);
+}
+
+function assertSupabaseMenuConfig() {
+  if (!hasSupabaseConfig()) {
+    throw new HttpError(
+      500,
+      'SUPABASE_MENU_NOT_CONFIGURED',
+      'Supabase non e configurato per leggere il menu.',
+      'Configura SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY sul server.',
+    );
+  }
+}
+
+async function runMenuItemQueryWithAllergenFallback(client, applyFilters) {
+  const primaryResult = await applyFilters(client.from('menu_items').select(MENU_ITEM_SELECT));
+
+  if (!primaryResult.error) {
+    return primaryResult.data ?? [];
+  }
+
+  if (!isMissingMenuItemAllergenColumn(primaryResult.error)) {
+    throw new HttpError(
+      500,
+      'SUPABASE_QUERY_FAILED',
+      'Non riusciamo a leggere i dati del menu.',
+      primaryResult.error.message,
+    );
+  }
+
+  const fallbackResult = await applyFilters(client.from('menu_items').select(MENU_ITEM_BASE_SELECT));
+
+  if (fallbackResult.error) {
+    throw new HttpError(
+      500,
+      'SUPABASE_QUERY_FAILED',
+      'Non riusciamo a leggere i dati del menu.',
+      fallbackResult.error.message,
+    );
+  }
+
+  return fallbackResult.data ?? [];
 }
 
 function isMissingIngredientAllergenInfo(error) {
@@ -594,90 +651,6 @@ async function loadSupabaseRelations(client, menuItemIds) {
   };
 }
 
-function normalizeSqliteItem(item) {
-  return {
-    ...item,
-    id: normalizeId(item.id),
-    categoryId: normalizeId(item.categoryId),
-    name: cleanInlineText(item.name),
-    slug: cleanInlineText(item.slug),
-    categorySlug: cleanInlineText(item.categorySlug),
-    description: cleanInlineText(item.description),
-    sortOrder: normalizeNumber(item.sortOrder),
-    imageUrl: cleanInlineText(item.imageUrl),
-    tags: Array.isArray(item.tags) ? item.tags : [],
-  };
-}
-
-function normalizeSqliteCategory(category) {
-  return {
-    ...category,
-    id: normalizeId(category.id),
-    name: cleanInlineText(category.name),
-    slug: cleanInlineText(category.slug),
-    sortOrder: normalizeNumber(category.sortOrder),
-    items: Array.isArray(category.items) ? category.items.map(normalizeSqliteItem) : [],
-  };
-}
-
-function normalizeSqliteCustomization(configuration, ingredientCatalog = []) {
-  const normalizeIngredients = (ingredients) =>
-    ingredients.map((ingredient) => ({
-      ...ingredient,
-      id: normalizeId(ingredient.id),
-      ingredientId: normalizeId(ingredient.ingredientId),
-      sortOrder: normalizeNumber(ingredient.sortOrder),
-    }));
-
-  const normalizeExtras = (extras) =>
-    extras.map((extra) => ({
-      ...extra,
-      id: normalizeId(extra.id),
-      extraIngredientId: normalizeId(extra.extraIngredientId ?? extra.id),
-      ingredientId: normalizeId(extra.ingredientId),
-      sortOrder: normalizeNumber(extra.sortOrder),
-    }));
-
-  const normalizeOptionGroups = (groups) =>
-    groups.map((group) => ({
-      ...group,
-      id: normalizeId(group.id ?? group.slug),
-      slug: cleanInlineText(group.slug) || slugify(group.name),
-      sortOrder: normalizeNumber(group.sortOrder),
-      options: (group.options ?? []).map((option) => ({
-        ...option,
-        id: normalizeId(option.id),
-        optionId: normalizeId(option.optionId ?? option.id),
-        groupName: cleanInlineText(option.groupName || group.name),
-        groupSlug: cleanInlineText(option.groupSlug || group.slug) || slugify(group.name),
-        priceDelta: resolveOptionPriceDelta(option.optionName, option.priceDelta, option.groupName || group.name),
-        sortOrder: normalizeNumber(option.sortOrder),
-      })),
-    }));
-
-  const defaultIngredients = normalizeIngredients(configuration.defaultIngredients ?? []);
-  const removableIngredients = normalizeIngredients(configuration.removableIngredients ?? []);
-  const optionGroups = normalizeOptionGroups(configuration.optionGroups ?? []);
-  const allowedExtras = buildAllowedExtrasFromIngredientCatalog(
-    defaultIngredients,
-    normalizeIngredients(ingredientCatalog),
-    normalizeExtras(configuration.allowedExtras ?? []),
-  );
-  const item = {
-    ...normalizeSqliteItem(configuration.item),
-    hasCustomization: Boolean(removableIngredients.length || allowedExtras.length || optionGroups.length),
-  };
-
-  return {
-    ...configuration,
-    item,
-    defaultIngredients,
-    removableIngredients,
-    allowedExtras,
-    optionGroups,
-  };
-}
-
 function buildSupabaseMenuItem(row, category, client, relations) {
   const itemId = normalizeId(row.id);
   const defaultIngredients = relations.defaultIngredientsByItemId.get(itemId) ?? [];
@@ -700,6 +673,7 @@ function buildSupabaseMenuItem(row, category, client, relations) {
     basePrice: normalizeNumber(row.base_price),
     imageUrl: resolveSupabaseImageUrl(client, row.image_path, category.slug, row.sort_order),
     tags: mapTags(row),
+    allergens: mapAllergens(row),
     active: Boolean(row.active),
     featured: Boolean(row.featured),
     sortOrder: normalizeNumber(row.sort_order),
@@ -728,12 +702,9 @@ async function getSupabaseItemRows(categoryIds) {
   }
 
   const client = getSupabaseAdmin();
-  return runSupabaseQuery(
-    client
-      .from('menu_items')
-      .select('id, category_id, name, slug, description, base_price, image_path, active, featured, sort_order, spicy, vegetarian, note')
-      .eq('active', true)
-      .in('category_id', categoryIds),
+  return runMenuItemQueryWithAllergenFallback(
+    client,
+    (query) => query.eq('active', true).in('category_id', categoryIds),
   );
 }
 
@@ -776,16 +747,11 @@ async function getSupabaseCatalogData({ categorySlug } = {}) {
 
 async function getSupabaseMenuItemRow(menuItemId) {
   const client = getSupabaseAdmin();
-  const { data, error } = await client
-    .from('menu_items')
-    .select('id, category_id, name, slug, description, base_price, image_path, active, featured, sort_order, spicy, vegetarian, note')
-    .eq('id', menuItemId)
-    .eq('active', true)
-    .maybeSingle();
-
-  if (error) {
-    throw new HttpError(500, 'SUPABASE_QUERY_FAILED', 'Non riusciamo a leggere i dati del menu.', error.message);
-  }
+  const rows = await runMenuItemQueryWithAllergenFallback(
+    client,
+    (query) => query.eq('id', menuItemId).eq('active', true).limit(1),
+  );
+  const data = rows[0] ?? null;
 
   if (!data) {
     throw new HttpError(404, 'MENU_ITEM_NOT_FOUND', 'Questo prodotto non e disponibile.');
@@ -824,39 +790,22 @@ async function getSupabaseIngredientCatalog(client = getSupabaseAdmin()) {
 }
 
 export function getMenuDataSource() {
-  return hasSupabaseConfig() ? 'supabase' : 'sqlite';
+  return 'supabase';
 }
 
 export async function getActiveCategories() {
-  if (!hasSupabaseConfig()) {
-    return getActiveCategoriesSqlite().map(normalizeSqliteCategory);
-  }
-
+  assertSupabaseMenuConfig();
   return getSupabaseActiveCategories();
 }
 
 export async function getActiveMenuItems({ categorySlug } = {}) {
-  if (!hasSupabaseConfig()) {
-    return getActiveMenuItemsSqlite({ categorySlug }).map(normalizeSqliteItem);
-  }
-
+  assertSupabaseMenuConfig();
   const { items } = await getSupabaseCatalogData({ categorySlug });
   return items;
 }
 
 export async function getMenuCatalog() {
-  if (!hasSupabaseConfig()) {
-    const catalog = getMenuCatalogSqlite();
-    const normalizedCategories = catalog.categories.map(normalizeSqliteCategory);
-    const normalizedItems = normalizedCategories.flatMap((category) => category.items);
-
-    return {
-      categories: normalizedCategories,
-      featuredItems: catalog.featuredItems.map(normalizeSqliteItem),
-      itemsById: Object.fromEntries(normalizedItems.map((item) => [String(item.id), item])),
-    };
-  }
-
+  assertSupabaseMenuConfig();
   const { categories, items } = await getSupabaseCatalogData();
   const itemsByCategoryId = new Map();
 
@@ -882,10 +831,7 @@ export async function getMenuCatalog() {
 }
 
 export async function getMenuItemById(menuItemId) {
-  if (!hasSupabaseConfig()) {
-    return normalizeSqliteItem(getMenuItemByIdSqlite(menuItemId));
-  }
-
+  assertSupabaseMenuConfig();
   const client = getSupabaseAdmin();
   const normalizedMenuItemId = normalizeId(menuItemId);
   const { category, row } = await getSupabaseMenuItemRow(normalizedMenuItemId);
@@ -894,10 +840,7 @@ export async function getMenuItemById(menuItemId) {
 }
 
 export async function getMenuItemCustomization(menuItemId) {
-  if (!hasSupabaseConfig()) {
-    return normalizeSqliteCustomization(getMenuItemCustomizationSqlite(menuItemId), getActiveIngredientsSqlite());
-  }
-
+  assertSupabaseMenuConfig();
   const client = getSupabaseAdmin();
   const normalizedMenuItemId = normalizeId(menuItemId);
   const { category, row } = await getSupabaseMenuItemRow(normalizedMenuItemId);

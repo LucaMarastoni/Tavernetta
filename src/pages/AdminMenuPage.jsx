@@ -4,12 +4,19 @@ import CategoriesPanel from '../components/admin/CategoriesPanel';
 import ConfirmDialog from '../components/admin/ConfirmDialog';
 import MenuManager from '../components/admin/MenuManager';
 import PizzaEditorModal from '../components/admin/PizzaEditorModal';
+import {
+  canUseSupabaseAdminMenu,
+  fetchSupabaseMenuItemFlags,
+  updateSupabaseMenuItemFlags,
+} from '../services/adminMenuSupabaseApi';
 
 function AdminMenuPage() {
   const {
     items,
     categories,
     allergenOptions,
+    menuLoading,
+    menuError,
     savePizza,
     deletePizza,
     createCategory,
@@ -28,6 +35,11 @@ function AdminMenuPage() {
     open: false,
     mode: 'create',
     pizza: null,
+  });
+  const [editorStatus, setEditorStatus] = useState({
+    loading: false,
+    saving: false,
+    error: '',
   });
   const [confirmState, setConfirmState] = useState({
     open: false,
@@ -113,14 +125,41 @@ function AdminMenuPage() {
 
   const closeEditor = () => {
     setEditorState({ open: false, mode: 'create', pizza: null });
+    setEditorStatus({ loading: false, saving: false, error: '' });
   };
 
   const openCreatePizza = () => {
     setEditorState({ open: true, mode: 'create', pizza: null });
+    setEditorStatus({ loading: false, saving: false, error: 'Le nuove pizze vengono create solo nella sessione locale dell admin.' });
   };
 
-  const openEditPizza = (pizza) => {
+  const openEditPizza = async (pizza) => {
     setEditorState({ open: true, mode: 'edit', pizza });
+    setEditorStatus({ loading: canUseSupabaseAdminMenu(), saving: false, error: '' });
+
+    if (!canUseSupabaseAdminMenu()) {
+      setEditorStatus({
+        loading: false,
+        saving: false,
+        error: 'Supabase non e configurato: i checkbox verranno modificati solo nella sessione locale.',
+      });
+      return;
+    }
+
+    try {
+      const flags = await fetchSupabaseMenuItemFlags(pizza);
+      setEditorState((currentState) => ({
+        ...currentState,
+        pizza: currentState.pizza?.id === pizza.id ? { ...currentState.pizza, ...flags } : currentState.pizza,
+      }));
+      setEditorStatus({ loading: false, saving: false, error: '' });
+    } catch (error) {
+      setEditorStatus({
+        loading: false,
+        saving: false,
+        error: error.message || 'Non riusciamo a leggere i checkbox da Supabase.',
+      });
+    }
   };
 
   const openDeletePizzaDialog = (pizza) => {
@@ -171,35 +210,72 @@ function AdminMenuPage() {
     closeConfirm();
   };
 
-  const handleSavePizza = (draft) => {
-    savePizza(draft, editorState.mode === 'edit' ? editorState.pizza : null);
-    closeEditor();
+  const handleSavePizza = async (draft) => {
+    const previousPizza = editorState.mode === 'edit' ? editorState.pizza : null;
+
+    setEditorStatus((currentStatus) => ({ ...currentStatus, saving: true, error: '' }));
+
+    try {
+      if (previousPizza && canUseSupabaseAdminMenu()) {
+        await updateSupabaseMenuItemFlags(previousPizza, {
+          spicy: draft.spicy,
+          vegetarian: draft.vegetarian,
+          allergens: draft.allergens,
+        });
+      }
+
+      savePizza(draft, previousPizza);
+      closeEditor();
+    } catch (error) {
+      setEditorStatus({
+        loading: false,
+        saving: false,
+        error: error.message || 'Non riusciamo ad aggiornare i checkbox su Supabase.',
+      });
+    }
   };
 
   return (
     <>
-      <MenuManager
-        categories={categories}
-        items={filteredItems}
-        filters={filters}
-        summary={{
-          visibleCount: filteredItems.length,
-          totalCount: items.length,
-          categoryCount: categories.length,
-          activeFilterCount,
-        }}
-        onFilterChange={updateFilters}
-        onCreatePizza={openCreatePizza}
-        onEditPizza={openEditPizza}
-        onDeletePizza={openDeletePizzaDialog}
-      />
+      {menuError ? (
+        <div className="admin-order-status-error" role="alert">
+          {menuError}
+        </div>
+      ) : null}
 
-      <CategoriesPanel
-        categories={categories}
-        onCreateCategory={createCategory}
-        onRenameCategory={renameCategory}
-        onRemoveCategory={openDeleteCategoryDialog}
-      />
+      {menuLoading ? (
+        <div className="admin-empty-state">
+          <h3>Caricamento menu</h3>
+          <p>Leggo categorie e pizze da Supabase.</p>
+        </div>
+      ) : null}
+
+      {!menuLoading ? (
+        <>
+          <MenuManager
+            categories={categories}
+            items={filteredItems}
+            filters={filters}
+            summary={{
+              visibleCount: filteredItems.length,
+              totalCount: items.length,
+              categoryCount: categories.length,
+              activeFilterCount,
+            }}
+            onFilterChange={updateFilters}
+            onCreatePizza={openCreatePizza}
+            onEditPizza={openEditPizza}
+            onDeletePizza={openDeletePizzaDialog}
+          />
+
+          <CategoriesPanel
+            categories={categories}
+            onCreateCategory={createCategory}
+            onRenameCategory={renameCategory}
+            onRemoveCategory={openDeleteCategoryDialog}
+          />
+        </>
+      ) : null}
 
       <PizzaEditorModal
         open={editorState.open}
@@ -207,6 +283,9 @@ function AdminMenuPage() {
         pizza={editorState.pizza}
         categories={categories}
         allergenOptions={allergenOptions}
+        loadingFlags={editorStatus.loading}
+        saving={editorStatus.saving}
+        statusMessage={editorStatus.error}
         onClose={closeEditor}
         onSave={handleSavePizza}
       />

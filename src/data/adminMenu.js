@@ -1,5 +1,4 @@
-import rawMenuSource from './menu.json?raw';
-import { formatAllergenLabel } from '../utils/allergens';
+import { ALLERGEN_LABELS, formatAllergenLabel } from '../utils/allergens';
 
 export function normalizeAdminText(value = '') {
   return value
@@ -15,41 +14,6 @@ export function slugifyAdminValue(value = '') {
   return normalizeAdminText(value)
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');
-}
-
-function sanitizeBrokenJson(raw) {
-  let output = '';
-  let inString = false;
-  let escaped = false;
-
-  for (const char of raw) {
-    if (escaped) {
-      output += char;
-      escaped = false;
-      continue;
-    }
-
-    if (char === '\\') {
-      output += char;
-      escaped = true;
-      continue;
-    }
-
-    if (char === '"') {
-      inString = !inString;
-      output += char;
-      continue;
-    }
-
-    if (inString && (char === '\n' || char === '\r' || char === '\t')) {
-      output += ' ';
-      continue;
-    }
-
-    output += char;
-  }
-
-  return output;
 }
 
 function cleanInlineText(value = '') {
@@ -70,39 +34,57 @@ function createItemId(categorySlug, itemName, index) {
   return `pizza-${categorySlug}-${itemSlug}-${index + 1}`;
 }
 
-function parseMenuSource() {
-  const parsed = JSON.parse(sanitizeBrokenJson(rawMenuSource));
-  return Array.isArray(parsed?.menu) ? parsed.menu : [];
+function readCatalogItemTags(item) {
+  return Array.isArray(item?.tags) ? item.tags.map(normalizeAdminText) : [];
 }
 
-export function createAdminMenuState() {
-  return parseMenuSource().map((rawCategory, categoryIndex) => {
-    const name = cleanInlineText(rawCategory.categoria || `Categoria ${categoryIndex + 1}`);
-    const slug = slugifyAdminValue(name) || `categoria-${categoryIndex + 1}`;
+function readCatalogItemIngredients(item) {
+  if (Array.isArray(item?.ingredients)) {
+    return item.ingredients.map(cleanInlineText).filter(Boolean);
+  }
+
+  return cleanInlineText(item?.description || '')
+    .split(',')
+    .map(cleanInlineText)
+    .filter(Boolean);
+}
+
+function mapCatalogItemToAdminItem(item, categorySlug, itemIndex) {
+  const itemName = cleanInlineText(item?.name || `Pizza ${itemIndex + 1}`);
+  const tags = readCatalogItemTags(item);
+
+  return {
+    id: item?.id ? String(item.id) : createItemId(categorySlug, itemName, itemIndex),
+    name: itemName,
+    slug: cleanInlineText(item?.slug) || slugifyAdminValue(itemName),
+    price: Number(item?.basePrice ?? item?.price ?? 0),
+    allergens: Array.isArray(item?.allergens)
+      ? item.allergens.map((entry) => Number(entry)).filter((entry) => Number.isFinite(entry))
+      : [],
+    spicy: Boolean(item?.spicy) || tags.includes('piccante'),
+    vegetarian: Boolean(item?.vegetarian) || tags.includes('vegetariana'),
+    ingredients: readCatalogItemIngredients(item),
+    note: cleanInlineText(item?.note || ''),
+  };
+}
+
+export function createEmptyAdminMenuState() {
+  return [];
+}
+
+export function createAdminMenuStateFromCatalog(catalog) {
+  const categories = Array.isArray(catalog?.categories) ? catalog.categories : [];
+
+  return categories.map((category, categoryIndex) => {
+    const name = cleanInlineText(category?.name || `Categoria ${categoryIndex + 1}`);
+    const slug = cleanInlineText(category?.slug) || slugifyAdminValue(name) || `categoria-${categoryIndex + 1}`;
 
     return {
-      id: createCategoryId(name, categoryIndex),
+      id: category?.id ? String(category.id) : createCategoryId(name, categoryIndex),
       name,
       slug,
-      items: Array.isArray(rawCategory.items)
-        ? rawCategory.items.map((rawItem, itemIndex) => {
-            const itemName = cleanInlineText(rawItem.nome || `Pizza ${itemIndex + 1}`);
-
-            return {
-              id: createItemId(slug, itemName, itemIndex),
-              name: itemName,
-              price: Number(rawItem.prezzo ?? 0),
-              allergens: Array.isArray(rawItem.allergeni)
-                ? rawItem.allergeni.map((entry) => Number(entry)).filter((entry) => Number.isFinite(entry))
-                : [],
-              spicy: Boolean(rawItem.piccante),
-              vegetarian: Boolean(rawItem.vegetariana),
-              ingredients: Array.isArray(rawItem.ingredienti)
-                ? rawItem.ingredienti.map(cleanInlineText).filter(Boolean)
-                : [],
-              note: cleanInlineText(rawItem.note || ''),
-            };
-          })
+      items: Array.isArray(category?.items)
+        ? category.items.map((item, itemIndex) => mapCatalogItemToAdminItem(item, slug, itemIndex))
         : [],
     };
   });
@@ -120,13 +102,9 @@ export function flattenAdminMenu(menuState) {
 }
 
 export function getAdminAllergenOptions(menuState) {
-  return Array.from(
-    new Set(
-      flattenAdminMenu(menuState).flatMap((item) =>
-        item.allergens.filter((entry) => Number.isFinite(Number(entry))).map((entry) => Number(entry)),
-      ),
-    ),
-  )
+  return Object.keys(ALLERGEN_LABELS)
+    .map((entry) => Number(entry))
+    .filter((entry) => Number.isFinite(entry))
     .sort((left, right) => left - right)
     .map((code) => ({
       code,

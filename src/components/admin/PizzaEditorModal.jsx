@@ -1,7 +1,18 @@
 import { useEffect, useMemo, useState } from 'react';
 import { buildPizzaFormState } from '../../data/adminMenu';
 
-function PizzaEditorModal({ open, mode, pizza, categories, allergenOptions, onClose, onSave }) {
+function PizzaEditorModal({
+  open,
+  mode,
+  pizza,
+  categories,
+  allergenOptions,
+  loadingFlags = false,
+  saving = false,
+  statusMessage = '',
+  onClose,
+  onSave,
+}) {
   const [formState, setFormState] = useState(buildPizzaFormState(pizza));
 
   useEffect(() => {
@@ -87,6 +98,12 @@ function PizzaEditorModal({ open, mode, pizza, categories, allergenOptions, onCl
           </div>
 
           <div className="admin-editor-grid">
+            {loadingFlags || statusMessage ? (
+              <div className="admin-order-status-error admin-field-wide" role={statusMessage ? 'alert' : 'status'}>
+                {loadingFlags ? 'Carico i checkbox da Supabase...' : statusMessage}
+              </div>
+            ) : null}
+
             <label className="admin-field">
               <span>Nome</span>
               <input
@@ -185,8 +202,8 @@ function PizzaEditorModal({ open, mode, pizza, categories, allergenOptions, onCl
             <button className="admin-secondary-button" type="button" onClick={onClose}>
               Annulla
             </button>
-            <button className="admin-primary-button" type="submit" disabled={!canSubmit}>
-              Salva modifiche
+            <button className="admin-primary-button" type="submit" disabled={!canSubmit || saving || loadingFlags}>
+              {saving ? 'Salvataggio...' : 'Salva modifiche'}
             </button>
           </div>
         </form>
