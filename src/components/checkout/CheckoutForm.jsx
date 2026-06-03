@@ -17,7 +17,6 @@ function CheckoutForm({
       <div className="ordering-card-heading">
         <p className="ordering-eyebrow">Checkout</p>
         <h2>Dati ordine</h2>
-        <p>Conferma i dettagli del servizio e lascia al server il ricalcolo finale dell ordine.</p>
       </div>
 
       {submitError ? <p className="ordering-form-banner">{submitError}</p> : null}
