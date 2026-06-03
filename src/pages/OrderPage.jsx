@@ -134,21 +134,6 @@ function OrderPage() {
   return (
     <section className="section ordering-page ordering-page-checkout" data-header-tone="dark">
       <div className="section-inner ordering-page-inner">
-        <header className="ordering-hero ordering-hero-checkout">
-          <div className="ordering-hero-copy">
-            <p className="ordering-eyebrow">{restaurant.orderPage.eyebrow}</p>
-            <h1>Ordina</h1>
-            <p>
-              Rivedi il carrello, conferma il servizio e invia un ordine pronto per la gestione sala. I prezzi finali
-              vengono ricalcolati prima del salvataggio.
-            </p>
-          </div>
-
-          <Link className="ordering-secondary-cta" to="/menu" viewTransition>
-            Torna al menu
-          </Link>
-        </header>
-
         {successOrder ? (
           <article className="ordering-success-card">
             <p className="ordering-eyebrow">{restaurant.ordering.successEyebrow}</p>
@@ -202,7 +187,6 @@ function OrderPage() {
               <CartSummary
                 eyebrow="Riepilogo"
                 title="Il tuo ordine"
-                subtitle="Le varianti restano separate per riga, cosi due pizze simili ma configurate in modo diverso non vengono mai fuse."
                 items={items}
                 totals={totals}
                 emptyTitle="Il carrello e vuoto."

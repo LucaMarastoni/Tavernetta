@@ -910,6 +910,7 @@
 .menu-product-extra {
   border: 1px solid rgba(61, 43, 33, 0.12);
   background: rgba(255, 250, 244, 0.9);
+  color: var(--color-espresso);
   transition:
     transform 0.24s var(--ease),
     border-color 0.24s var(--ease),
@@ -929,7 +930,14 @@
 .menu-product-ingredient span,
 .menu-product-option-copy strong,
 .menu-product-extra-copy strong {
+  color: var(--color-espresso);
   font-weight: 700;
+}
+
+.menu-product-option-copy small,
+.menu-product-extra-copy small,
+.menu-product-ingredient small {
+  color: var(--color-mocha);
 }
 
 .menu-product-ingredient.is-locked {
