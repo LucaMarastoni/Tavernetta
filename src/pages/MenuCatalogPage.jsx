@@ -93,6 +93,33 @@ function MenuCatalogPage() {
     [menuGroups],
   );
 
+  useEffect(() => {
+    const subheader = subheaderRef.current;
+
+    if (!subheader) {
+      return undefined;
+    }
+
+    const updateSubheaderHeight = () => {
+      document.documentElement.style.setProperty(
+        '--menu-catalog-measured-subheader-height',
+        `${Math.ceil(subheader.getBoundingClientRect().height)}px`,
+      );
+    };
+
+    updateSubheaderHeight();
+
+    const resizeObserver = new ResizeObserver(updateSubheaderHeight);
+    resizeObserver.observe(subheader);
+    window.addEventListener('resize', updateSubheaderHeight);
+
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener('resize', updateSubheaderHeight);
+      document.documentElement.style.removeProperty('--menu-catalog-measured-subheader-height');
+    };
+  }, [allMenuGroups.length]);
+
   const scrollToGroup = useCallback((groupId, behavior = 'smooth') => {
     const targetSection = sectionRefs.current[groupId];
     const firstGroupId = menuGroups[0]?.id ?? null;
@@ -413,7 +440,6 @@ function MenuCatalogPage() {
                 <CartSummary
                   eyebrow="Ordine"
                   title="Il tuo carrello"
-                  subtitle="Su desktop resta sempre visibile; su mobile lo richiami dalla barra fissa in basso."
                   items={items}
                   totals={totals}
                   emptyTitle="Il carrello e ancora vuoto."
