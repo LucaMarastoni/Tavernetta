@@ -3,6 +3,7 @@ import CookiePolicy from './pages/CookiePolicy';
 import AdminPage from './pages/AdminPage';
 import AdminMenuPage from './pages/AdminMenuPage';
 import AdminOrdersPage from './pages/AdminOrdersPage';
+import SeoManager from './components/SeoManager';
 import SiteLayout from './components/SiteLayout';
 import ChiSiamoPage from './pages/ChiSiamoPage';
 import HomePage from './pages/HomePage';
@@ -16,6 +17,7 @@ function App() {
 
   return (
     <BrowserRouter basename={basename}>
+      <SeoManager />
       <Routes>
         <Route path="/admin" element={<AdminPage />}>
           <Route index element={<Navigate replace to="menu" />} />
