@@ -442,6 +442,7 @@
   min-width: 0;
   border: none;
   background: transparent;
+  color: var(--color-espresso);
   text-align: left;
   transition: transform 0.28s var(--ease);
 }
@@ -529,6 +530,7 @@
   line-height: 0.96;
   letter-spacing: 0.04em;
   font-weight: 400;
+  color: var(--color-espresso);
   overflow-wrap: anywhere;
 }
 
@@ -763,6 +765,7 @@
   line-height: 0.95;
   letter-spacing: 0.05em;
   font-weight: 400;
+  color: var(--color-espresso);
 }
 
 .menu-product-sheet-title-row strong {
