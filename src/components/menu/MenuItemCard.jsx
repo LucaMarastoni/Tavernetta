@@ -5,7 +5,7 @@ const temporaryMenuImageUrl = `${import.meta.env.BASE_URL}images/editorial/impas
 function MenuItemCard({ item, onSelect }) {
   const kicker = item.tags?.slice(0, 2).join(' / ');
   const description = item.description || 'Preparazione della casa.';
-  const imageUrl = temporaryMenuImageUrl;
+  const imageUrl = item.imageUrl || temporaryMenuImageUrl;
 
   return (
     <article className="menu-catalog-item">

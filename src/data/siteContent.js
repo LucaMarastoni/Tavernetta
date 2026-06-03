@@ -5,7 +5,6 @@ const localEditorialPhotoIds = new Set([
   'dettaglio-pizza-pomodoro-basilico',
   'fritto-della-casa',
   'impasto-pizza-ingredienti',
-  'pizza-affettata-editoriale',
   'pizza-forno-crosta',
   'pizza-forno-margherita',
   'pizza-speciale-bottiglie-vertical',
@@ -135,8 +134,8 @@ export const restaurant = {
       to: '/menu',
     },
     image: {
-      src: photo('pizza-affettata-editoriale', 1600),
-      alt: 'Pizza artigianale appena sfornata con luce calda e taglio editoriale',
+      src: photo('tavolo-staff-pizza-vertical', 1600),
+      alt: 'Tavolo con pizza servita e atmosfera conviviale verticale',
     },
   },
   menu: {

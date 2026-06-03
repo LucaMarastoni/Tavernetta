@@ -6,14 +6,7 @@ import {
   resolveOptionPriceDelta,
 } from '../../shared/menuExtraProfiles.js';
 
-const CATEGORY_IMAGE_IDS = {
-  'le-pizze': ['impasto-pizza-ingredienti'],
-  'le-bianche': ['impasto-pizza-ingredienti'],
-  'le-speciali': ['impasto-pizza-ingredienti'],
-  'i-calzoni': ['impasto-pizza-ingredienti'],
-  'calzoni-in-fritteria': ['impasto-pizza-ingredienti'],
-  fallback: ['impasto-pizza-ingredienti'],
-};
+const MENU_PLACEHOLDER_IMAGE_PATH = 'images/editorial/impasto-pizza-ingredienti.jpg';
 
 const CATEGORY_META_BY_KEY = {
   'le classiche': { name: 'Le Classiche', slug: 'le-pizze' },
@@ -107,18 +100,15 @@ function withBase(path) {
   return `${import.meta.env.BASE_URL}${path.replace(/^\/+/, '')}`;
 }
 
-function resolveFallbackImageUrl(categorySlug, itemSortOrder = 0) {
-  const imageIds = CATEGORY_IMAGE_IDS[categorySlug] ?? CATEGORY_IMAGE_IDS.fallback;
-  const normalizedIndex = Math.max(0, normalizePositiveInteger(itemSortOrder, 1) - 1);
-  const imageId = imageIds[normalizedIndex % imageIds.length];
-  return withBase(`images/editorial/${imageId}.jpg`);
+function resolveFallbackImageUrl() {
+  return withBase(MENU_PLACEHOLDER_IMAGE_PATH);
 }
 
-function resolveSupabaseImageUrl(client, imagePath, categorySlug, itemSortOrder) {
+function resolveSupabaseImageUrl(client, imagePath) {
   const cleanedPath = cleanInlineText(imagePath);
 
   if (!cleanedPath) {
-    return resolveFallbackImageUrl(categorySlug, itemSortOrder);
+    return resolveFallbackImageUrl();
   }
 
   if (/^https?:\/\//i.test(cleanedPath)) {
@@ -627,7 +617,7 @@ function buildSupabaseMenuItem(row, category, client, relations) {
     slug: cleanInlineText(row.slug),
     description: buildMenuItemDescription(row, defaultIngredients),
     basePrice: normalizeNumber(row.base_price),
-    imageUrl: resolveSupabaseImageUrl(client, row.image_path, category.slug, row.sort_order),
+    imageUrl: resolveSupabaseImageUrl(client, row.image_path),
     tags: mapTags(row),
     allergens: mapAllergens(row),
     active: Boolean(row.active),

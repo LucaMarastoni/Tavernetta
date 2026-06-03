@@ -1,4 +1,5 @@
 import { getBrowserSupabase, hasBrowserSupabaseConfig } from '../lib/supabaseBrowser';
+import { apiDelete, apiGet, apiPatch, apiPost } from '../lib/apiClient';
 
 const ALLERGEN_FIELD_BY_CODE = {
   1: 'allergen_nuts',
@@ -13,6 +14,7 @@ const ALLERGEN_FIELD_BY_CODE = {
 
 const ALLERGEN_FIELDS = Object.values(ALLERGEN_FIELD_BY_CODE);
 const MENU_ITEM_FLAGS_SELECT = `id, slug, name, spicy, vegetarian, ${ALLERGEN_FIELDS.join(', ')}`;
+const isStaticExport = import.meta.env.VITE_STATIC_EXPORT === 'true';
 
 function createAdminMenuError(code, message = code) {
   const error = new Error(message);
@@ -37,6 +39,22 @@ function getClient() {
 function isMissingMenuItemAllergenColumn(error) {
   const message = `${error?.message || ''} ${error?.details || ''}`;
   return error?.code === '42703' && /allergen_/i.test(message);
+}
+
+function assertMenuItemQuerySuccess(result, fallbackCode = 'MENU_FLAGS_LOAD_FAILED') {
+  if (result.error && isMissingMenuItemAllergenColumn(result.error)) {
+    throw createAdminMenuError(
+      'MENU_ALLERGEN_COLUMNS_MISSING',
+      'Le colonne allergeni non esistono ancora su Supabase.',
+    );
+  }
+
+  if (result.error) {
+    throw createAdminMenuError(
+      result.error.code || fallbackCode,
+      result.error.message || 'Non riusciamo a leggere la pizza da Supabase.',
+    );
+  }
 }
 
 function normalizeFlags(row = {}) {
@@ -65,18 +83,34 @@ function buildFlagsPayload(flags) {
 }
 
 export function canUseSupabaseAdminMenu() {
-  return hasBrowserSupabaseConfig();
+  return !isStaticExport || hasBrowserSupabaseConfig();
 }
 
 async function fetchMenuItemFlagRow(identifier) {
+  const normalizedId = normalizeText(identifier?.id);
   const normalizedSlug = normalizeText(identifier?.slug ?? identifier);
   const normalizedName = normalizeText(identifier?.name);
 
-  if (!normalizedSlug && !normalizedName) {
+  if (!normalizedId && !normalizedSlug && !normalizedName) {
     throw createAdminMenuError('INVALID_MENU_ITEM', 'Pizza non valida.');
   }
 
   const client = getClient();
+
+  const queryById = normalizedId
+    ? await client
+        .from('menu_items')
+        .select(MENU_ITEM_FLAGS_SELECT)
+        .eq('id', normalizedId)
+        .limit(1)
+    : { data: [], error: null };
+
+  assertMenuItemQuerySuccess(queryById);
+
+  if (queryById.data?.[0]) {
+    return queryById.data[0];
+  }
+
   const queryBySlug = normalizedSlug
     ? await client
         .from('menu_items')
@@ -85,16 +119,7 @@ async function fetchMenuItemFlagRow(identifier) {
         .limit(1)
     : { data: [], error: null };
 
-  if (queryBySlug.error && isMissingMenuItemAllergenColumn(queryBySlug.error)) {
-    throw createAdminMenuError(
-      'MENU_ALLERGEN_COLUMNS_MISSING',
-      'Le colonne allergeni non esistono ancora su Supabase.',
-    );
-  }
-
-  if (queryBySlug.error) {
-    throw createAdminMenuError(queryBySlug.error.code || 'MENU_FLAGS_LOAD_FAILED', queryBySlug.error.message || 'Non riusciamo a leggere la pizza da Supabase.');
-  }
+  assertMenuItemQuerySuccess(queryBySlug);
 
   if (queryBySlug.data?.[0]) {
     return queryBySlug.data[0];
@@ -108,16 +133,7 @@ async function fetchMenuItemFlagRow(identifier) {
         .limit(1)
     : { data: [], error: null };
 
-  if (queryByName.error && isMissingMenuItemAllergenColumn(queryByName.error)) {
-    throw createAdminMenuError(
-      'MENU_ALLERGEN_COLUMNS_MISSING',
-      'Le colonne allergeni non esistono ancora su Supabase.',
-    );
-  }
-
-  if (queryByName.error) {
-    throw createAdminMenuError(queryByName.error.code || 'MENU_FLAGS_LOAD_FAILED', queryByName.error.message || 'Non riusciamo a leggere la pizza da Supabase.');
-  }
+  assertMenuItemQuerySuccess(queryByName);
 
   if (!queryByName.data?.[0]) {
     throw createAdminMenuError('MENU_ITEM_NOT_FOUND', 'Pizza non trovata su Supabase.');
@@ -127,10 +143,32 @@ async function fetchMenuItemFlagRow(identifier) {
 }
 
 export async function fetchSupabaseMenuItemFlags(identifier) {
+  if (!isStaticExport) {
+    const normalizedId = normalizeText(identifier?.id ?? identifier);
+
+    if (!normalizedId) {
+      throw createAdminMenuError('INVALID_MENU_ITEM', 'Pizza non valida.');
+    }
+
+    const payload = await apiGet(`/api/admin/menu-items/${encodeURIComponent(normalizedId)}/flags`);
+    return normalizeFlags(payload?.flags);
+  }
+
   return normalizeFlags(await fetchMenuItemFlagRow(identifier));
 }
 
 export async function updateSupabaseMenuItemFlags(identifier, flags) {
+  if (!isStaticExport) {
+    const normalizedId = normalizeText(identifier?.id ?? identifier);
+
+    if (!normalizedId) {
+      throw createAdminMenuError('INVALID_MENU_ITEM', 'Pizza non valida.');
+    }
+
+    const payload = await apiPatch(`/api/admin/menu-items/${encodeURIComponent(normalizedId)}/flags`, flags);
+    return normalizeFlags(payload?.flags);
+  }
+
   const client = getClient();
   const currentRow = await fetchMenuItemFlagRow(identifier);
   const { data, error } = await client
@@ -156,4 +194,35 @@ export async function updateSupabaseMenuItemFlags(identifier, flags) {
   }
 
   return normalizeFlags(data);
+}
+
+export async function saveSupabaseMenuItem(identifier, draft) {
+  if (isStaticExport) {
+    throw createAdminMenuError(
+      'STATIC_MENU_WRITE_UNSUPPORTED',
+      'La creazione e modifica completa delle pizze richiede il server admin.',
+    );
+  }
+
+  const normalizedId = normalizeText(identifier?.id ?? identifier);
+  const payload = normalizedId
+    ? await apiPatch(`/api/admin/menu-items/${encodeURIComponent(normalizedId)}`, draft)
+    : await apiPost('/api/admin/menu-items', draft);
+
+  return payload?.item ?? null;
+}
+
+export async function deleteSupabaseMenuItem(identifier) {
+  if (isStaticExport) {
+    throw createAdminMenuError('STATIC_MENU_WRITE_UNSUPPORTED', 'La rimozione delle pizze richiede il server admin.');
+  }
+
+  const normalizedId = normalizeText(identifier?.id ?? identifier);
+
+  if (!normalizedId) {
+    throw createAdminMenuError('INVALID_MENU_ITEM', 'Pizza non valida.');
+  }
+
+  const payload = await apiDelete(`/api/admin/menu-items/${encodeURIComponent(normalizedId)}`);
+  return payload?.item ?? null;
 }

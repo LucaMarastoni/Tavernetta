@@ -6,8 +6,9 @@ import MenuManager from '../components/admin/MenuManager';
 import PizzaEditorModal from '../components/admin/PizzaEditorModal';
 import {
   canUseSupabaseAdminMenu,
+  deleteSupabaseMenuItem,
   fetchSupabaseMenuItemFlags,
-  updateSupabaseMenuItemFlags,
+  saveSupabaseMenuItem,
 } from '../services/adminMenuSupabaseApi';
 
 function AdminMenuPage() {
@@ -17,11 +18,11 @@ function AdminMenuPage() {
     allergenOptions,
     menuLoading,
     menuError,
-    savePizza,
     deletePizza,
     createCategory,
     renameCategory,
     deleteCategory,
+    refreshMenu,
   } = useOutletContext();
 
   const [filters, setFilters] = useState({
@@ -130,7 +131,7 @@ function AdminMenuPage() {
 
   const openCreatePizza = () => {
     setEditorState({ open: true, mode: 'create', pizza: null });
-    setEditorStatus({ loading: false, saving: false, error: 'Le nuove pizze vengono create solo nella sessione locale dell admin.' });
+    setEditorStatus({ loading: false, saving: false, error: '' });
   };
 
   const openEditPizza = async (pizza) => {
@@ -168,7 +169,7 @@ function AdminMenuPage() {
       type: 'pizza',
       target: pizza,
       title: `Rimuovere ${pizza.name}?`,
-      message: 'La voce verra tolta solo dalla sessione corrente dell’admin.',
+      message: 'La voce verra disattivata su Supabase e tolta dal menu pubblico.',
       confirmLabel: 'Rimuovi pizza',
     });
   };
@@ -198,9 +199,19 @@ function AdminMenuPage() {
     });
   };
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (confirmState.type === 'pizza' && confirmState.target) {
-      deletePizza(confirmState.target);
+      try {
+        await deleteSupabaseMenuItem(confirmState.target);
+        deletePizza(confirmState.target);
+        await refreshMenu();
+      } catch (error) {
+        setEditorStatus({
+          loading: false,
+          saving: false,
+          error: error.message || 'Non riusciamo a rimuovere la pizza da Supabase.',
+        });
+      }
     }
 
     if (confirmState.type === 'category' && confirmState.target) {
@@ -216,21 +227,14 @@ function AdminMenuPage() {
     setEditorStatus((currentStatus) => ({ ...currentStatus, saving: true, error: '' }));
 
     try {
-      if (previousPizza && canUseSupabaseAdminMenu()) {
-        await updateSupabaseMenuItemFlags(previousPizza, {
-          spicy: draft.spicy,
-          vegetarian: draft.vegetarian,
-          allergens: draft.allergens,
-        });
-      }
-
-      savePizza(draft, previousPizza);
+      await saveSupabaseMenuItem(previousPizza, draft);
+      await refreshMenu();
       closeEditor();
     } catch (error) {
       setEditorStatus({
         loading: false,
         saving: false,
-        error: error.message || 'Non riusciamo ad aggiornare i checkbox su Supabase.',
+        error: error.message || 'Non riusciamo a salvare la pizza su Supabase.',
       });
     }
   };

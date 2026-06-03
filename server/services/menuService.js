@@ -7,14 +7,7 @@ import {
   resolveOptionPriceDelta,
 } from '../../shared/menuExtraProfiles.js';
 
-const CATEGORY_IMAGE_IDS = {
-  'le-pizze': ['photo-1513104890138-7c749659a591', 'photo-1414235077428-338989a2e8c0'],
-  'le-bianche': ['photo-1504674900247-0877df9cc836', 'photo-1498654896293-37aacf113fd9'],
-  'le-speciali': ['photo-1544025162-d76694265947', 'photo-1559339352-11d035aa65de'],
-  'i-calzoni': ['photo-1514933651103-005eec06c04b', 'photo-1513104890138-7c749659a591'],
-  'calzoni-in-fritteria': ['photo-1414235077428-338989a2e8c0', 'photo-1498654896293-37aacf113fd9'],
-  fallback: ['photo-1414235077428-338989a2e8c0'],
-};
+const MENU_PLACEHOLDER_IMAGE_URL = '/images/editorial/impasto-pizza-ingredienti.jpg';
 
 const CATEGORY_META_BY_KEY = {
   'le classiche': { name: 'Le Classiche', slug: 'le-pizze' },
@@ -122,18 +115,15 @@ function proxyMediaUrl(url) {
   }
 }
 
-function resolveFallbackImageUrl(categorySlug, itemSortOrder = 0) {
-  const imageIds = CATEGORY_IMAGE_IDS[categorySlug] ?? CATEGORY_IMAGE_IDS.fallback;
-  const normalizedIndex = Math.max(0, normalizePositiveInteger(itemSortOrder, 1) - 1);
-  const imageId = imageIds[normalizedIndex % imageIds.length];
-  return `/images/editorial/${imageId}.jpg`;
+function resolveFallbackImageUrl() {
+  return MENU_PLACEHOLDER_IMAGE_URL;
 }
 
-function resolveSupabaseImageUrl(client, imagePath, categorySlug, itemSortOrder) {
+function resolveSupabaseImageUrl(client, imagePath) {
   const cleanedPath = cleanInlineText(imagePath);
 
   if (!cleanedPath) {
-    return resolveFallbackImageUrl(categorySlug, itemSortOrder);
+    return resolveFallbackImageUrl();
   }
 
   if (/^https?:\/\//i.test(cleanedPath)) {
@@ -671,7 +661,7 @@ function buildSupabaseMenuItem(row, category, client, relations) {
     slug: cleanInlineText(row.slug),
     description: buildMenuItemDescription(row, defaultIngredients),
     basePrice: normalizeNumber(row.base_price),
-    imageUrl: resolveSupabaseImageUrl(client, row.image_path, category.slug, row.sort_order),
+    imageUrl: resolveSupabaseImageUrl(client, row.image_path),
     tags: mapTags(row),
     allergens: mapAllergens(row),
     active: Boolean(row.active),

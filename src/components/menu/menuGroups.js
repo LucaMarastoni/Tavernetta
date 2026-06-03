@@ -13,6 +13,14 @@ export const MENU_GROUPS = [
     patterns: [/degust/i, /tasting/i],
   },
   {
+    id: 'starter',
+    title: 'Starter',
+    description: 'Fritti, salumi e accompagnamenti pensati per iniziare la tavola.',
+    ctaLabel: 'Apri sezione',
+    slugs: ['in-fritteria', 'salumi', 'accompagnamenti'],
+    patterns: [/starter/i, /fritteria/i, /salum/i, /accompagnament/i],
+  },
+  {
     id: 'pizze',
     title: 'Pizze',
     description: 'La selezione completa del forno, dalle classiche alle bianche e speciali.',

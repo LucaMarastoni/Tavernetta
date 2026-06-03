@@ -14,6 +14,7 @@ const MENU_LANDING_MARQUEE_IMAGES = {
   classiche: restaurant.about.image.src,
   bianche: restaurant.about.image.src,
   speciali: restaurant.about.image.src,
+  starter: restaurant.about.image.src,
   calzoni: restaurant.about.image.src,
   fritteria: restaurant.about.image.src,
   birre: restaurant.about.image.src,

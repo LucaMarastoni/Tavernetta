@@ -72,3 +72,19 @@ export async function apiPatch(path, body) {
 
   return payload;
 }
+
+export async function apiDelete(path) {
+  const response = await fetch(buildUrl(path), {
+    method: 'DELETE',
+    headers: {
+      Accept: 'application/json',
+    },
+  });
+  const payload = await parseJson(response);
+
+  if (!response.ok) {
+    throw createApiError(response, payload);
+  }
+
+  return payload;
+}
