@@ -237,7 +237,7 @@ function AdminPage() {
       setMenuError('');
     } catch (error) {
       setMenuState(createEmptyAdminMenuState());
-      setMenuError(error.message || 'Non riusciamo a leggere il menu da Supabase.');
+      setMenuError(error.message || 'Non riusciamo a leggere il menu.');
     } finally {
       setMenuLoading(false);
     }

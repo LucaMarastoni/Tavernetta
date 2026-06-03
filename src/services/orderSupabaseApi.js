@@ -264,7 +264,7 @@ function normalizeRpcError(error) {
   if (error?.code === 'PGRST202') {
     return createOrderError(
       'ORDER_RPC_NOT_DEPLOYED',
-      'La funzione ordini su Supabase non e disponibile. Pubblica prima lo script SQL dedicato.',
+      'Il servizio ordini non e ancora disponibile.',
     );
   }
 
@@ -279,14 +279,14 @@ function normalizeRpcError(error) {
   ) {
     return createOrderError(
       'SUPABASE_ORDER_RPC_OUTDATED',
-      'La funzione ordini su Supabase e da aggiornare. Riesegui lo script SQL piu recente.',
+      'Il servizio ordini e da aggiornare.',
     );
   }
 
   if (/row-level security policy/i.test(error?.message || '')) {
     return createOrderError(
       'SUPABASE_ORDER_RPC_BLOCKED',
-      'Supabase sta bloccando il salvataggio dell ordine. Controlla la funzione SQL pubblica.',
+      'Il servizio ordini sta bloccando il salvataggio. Controlla la configurazione.',
     );
   }
 

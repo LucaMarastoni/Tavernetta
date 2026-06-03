@@ -22,8 +22,8 @@ function assertSupabaseAdminMenuConfig() {
     throw new HttpError(
       500,
       'SUPABASE_MENU_NOT_CONFIGURED',
-      'Supabase non e configurato per modificare il menu.',
-      'Configura SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY sul server.',
+      'Il servizio menu non e configurato.',
+      'Configurazione server mancante.',
     );
   }
 }
@@ -42,12 +42,12 @@ function handleMenuItemQueryError(error, fallbackCode = 'SUPABASE_QUERY_FAILED')
     throw new HttpError(
       500,
       'MENU_ALLERGEN_COLUMNS_MISSING',
-      'Le colonne allergeni non esistono ancora su Supabase.',
+      'La gestione allergeni non e ancora configurata.',
       error.message,
     );
   }
 
-  throw new HttpError(500, fallbackCode, 'Non riusciamo a leggere la pizza da Supabase.', error.message);
+  throw new HttpError(500, fallbackCode, 'Non riusciamo a leggere la pizza.', error.message);
 }
 
 function normalizeFlags(row = {}) {
@@ -323,7 +323,7 @@ async function fetchMenuItemFlagRow(identifier) {
   handleMenuItemQueryError(error);
 
   if (!data) {
-    throw new HttpError(404, 'MENU_ITEM_NOT_FOUND', 'Pizza non trovata su Supabase.');
+    throw new HttpError(404, 'MENU_ITEM_NOT_FOUND', 'Pizza non trovata.');
   }
 
   return data;
@@ -348,7 +348,7 @@ export async function updateAdminMenuItemFlags(menuItemId, flags) {
   handleMenuItemQueryError(error, 'SUPABASE_MENU_UPDATE_FAILED');
 
   if (!data) {
-    throw new HttpError(404, 'MENU_ITEM_NOT_FOUND', 'Pizza non trovata su Supabase.');
+    throw new HttpError(404, 'MENU_ITEM_NOT_FOUND', 'Pizza non trovata.');
   }
 
   return normalizeFlags(data);
@@ -395,7 +395,7 @@ export async function updateAdminMenuItem(menuItemId, payload) {
   handleMenuItemQueryError(error, 'SUPABASE_MENU_UPDATE_FAILED');
 
   if (!data) {
-    throw new HttpError(404, 'MENU_ITEM_NOT_FOUND', 'Pizza non trovata su Supabase.');
+    throw new HttpError(404, 'MENU_ITEM_NOT_FOUND', 'Pizza non trovata.');
   }
 
   await replaceMenuItemIngredients(supabase, currentRow.id, draft.ingredients);
@@ -417,7 +417,7 @@ export async function archiveAdminMenuItem(menuItemId) {
   handleMenuItemQueryError(error, 'SUPABASE_MENU_DELETE_FAILED');
 
   if (!data) {
-    throw new HttpError(404, 'MENU_ITEM_NOT_FOUND', 'Pizza non trovata su Supabase.');
+    throw new HttpError(404, 'MENU_ITEM_NOT_FOUND', 'Pizza non trovata.');
   }
 
   return { id: normalizeIdentifier(data.id) };

@@ -226,8 +226,8 @@ function assertSupabaseMenuConfig() {
     throw new HttpError(
       500,
       'SUPABASE_MENU_NOT_CONFIGURED',
-      'Supabase non e configurato per leggere il menu.',
-      'Configura SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY sul server.',
+      'Il servizio menu non e configurato.',
+      'Configurazione server mancante.',
     );
   }
 }

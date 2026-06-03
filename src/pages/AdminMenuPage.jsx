@@ -142,7 +142,7 @@ function AdminMenuPage() {
       setEditorStatus({
         loading: false,
         saving: false,
-        error: 'Supabase non e configurato: i checkbox verranno modificati solo nella sessione locale.',
+        error: 'Il servizio menu non e configurato: le modifiche resteranno solo in questa sessione.',
       });
       return;
     }
@@ -158,7 +158,7 @@ function AdminMenuPage() {
       setEditorStatus({
         loading: false,
         saving: false,
-        error: error.message || 'Non riusciamo a leggere i checkbox da Supabase.',
+        error: error.message || 'Non riusciamo a leggere i dati della pizza.',
       });
     }
   };
@@ -169,7 +169,7 @@ function AdminMenuPage() {
       type: 'pizza',
       target: pizza,
       title: `Rimuovere ${pizza.name}?`,
-      message: 'La voce verra disattivata su Supabase e tolta dal menu pubblico.',
+      message: 'La voce verra tolta dal menu pubblico.',
       confirmLabel: 'Rimuovi pizza',
     });
   };
@@ -209,7 +209,7 @@ function AdminMenuPage() {
         setEditorStatus({
           loading: false,
           saving: false,
-          error: error.message || 'Non riusciamo a rimuovere la pizza da Supabase.',
+          error: error.message || 'Non riusciamo a rimuovere la pizza dal menu.',
         });
       }
     }
@@ -234,7 +234,7 @@ function AdminMenuPage() {
       setEditorStatus({
         loading: false,
         saving: false,
-        error: error.message || 'Non riusciamo a salvare la pizza su Supabase.',
+        error: error.message || 'Non riusciamo a salvare la pizza.',
       });
     }
   };
@@ -250,7 +250,7 @@ function AdminMenuPage() {
       {menuLoading ? (
         <div className="admin-empty-state">
           <h3>Caricamento menu</h3>
-          <p>Leggo categorie e pizze da Supabase.</p>
+          <p>Leggo categorie e pizze disponibili.</p>
         </div>
       ) : null}
 

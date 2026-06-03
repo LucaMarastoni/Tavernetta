@@ -734,7 +734,7 @@ function getConfiguredClient() {
   const client = getBrowserSupabase();
 
   if (!client) {
-    throw new Error('Supabase non e configurato per il build statico.');
+    throw new Error('Il servizio menu non e configurato.');
   }
 
   return client;

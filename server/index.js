@@ -32,8 +32,8 @@ app.use(express.json({ limit: '1mb' }));
 app.get('/api/health', (request, response) => {
   response.json({
     status: 'ok',
-    dataSource: usesSupabase ? 'supabase' : 'sqlite',
-    databaseFile: usesSupabase ? null : getDatabaseFile(),
+    dataSource: usesSupabase ? 'remote' : 'local',
+    databaseFile: null,
   });
 });
 
@@ -64,6 +64,7 @@ app.use((error, request, response, next) => {
   const status = error instanceof HttpError ? error.status : 500;
   const code = error instanceof HttpError ? error.code : 'INTERNAL_ERROR';
   const message = error?.message || 'Errore interno del server.';
+  const publicCode = code.includes('SUPABASE') ? 'SERVICE_ERROR' : code;
 
   if (status >= 500) {
     console.error(error);
@@ -71,7 +72,7 @@ app.use((error, request, response, next) => {
 
   response.status(status).json({
     error: {
-      code,
+      code: publicCode,
       message,
       details: error instanceof HttpError ? error.details : null,
     },
@@ -80,7 +81,7 @@ app.use((error, request, response, next) => {
 
 const server = app.listen(port, host, () => {
   console.log(`Tavernetta server attivo su http://${host}:${port}`);
-  console.log(usesSupabase ? 'Datasource: Supabase' : `Database SQLite: ${getDatabaseFile()}`);
+  console.log('Servizio pronto.');
 });
 
 server.once('error', (error) => {

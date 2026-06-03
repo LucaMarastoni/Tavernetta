@@ -39,20 +39,20 @@ function mapOrderApiError(error) {
         code,
       );
     case 'SUPABASE_NOT_CONFIGURED':
-      return new OrderApiError('Supabase non e configurato per ricevere ordini dal sito statico.', code);
+      return new OrderApiError('Il servizio ordini non e configurato.', code);
     case 'ORDER_RPC_NOT_DEPLOYED':
       return new OrderApiError(
-        'La funzione ordini di Supabase non e ancora pubblicata. Esegui prima lo script SQL dedicato.',
+        'Il servizio ordini non e ancora attivo.',
         code,
       );
     case 'SUPABASE_ORDER_RPC_OUTDATED':
       return new OrderApiError(
-        'La funzione ordini di Supabase e da aggiornare. Riesegui lo script SQL piu recente.',
+        'Il servizio ordini e da aggiornare.',
         code,
       );
     case 'SUPABASE_ORDER_RPC_BLOCKED':
       return new OrderApiError(
-        'Supabase sta bloccando il salvataggio dell ordine. Controlla la funzione SQL pubblica.',
+        'Il servizio ordini sta bloccando il salvataggio. Controlla la configurazione.',
         code,
       );
     case 'INVALID_OPTION_SELECTION':
@@ -79,7 +79,7 @@ export async function submitOrder(payload) {
   if (isStaticExport) {
     if (!canUseSupabaseOrderSource()) {
       throw new OrderApiError(
-        'Supabase non e configurato per ricevere ordini dal sito statico.',
+        'Il servizio ordini non e configurato.',
         'SUPABASE_NOT_CONFIGURED',
       );
     }

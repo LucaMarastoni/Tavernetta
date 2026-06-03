@@ -100,7 +100,7 @@ function PizzaEditorModal({
           <div className="admin-editor-grid">
             {loadingFlags || statusMessage ? (
               <div className="admin-order-status-error admin-field-wide" role={statusMessage ? 'alert' : 'status'}>
-                {loadingFlags ? 'Carico i checkbox da Supabase...' : statusMessage}
+                {loadingFlags ? 'Carico i dati della pizza...' : statusMessage}
               </div>
             ) : null}
 

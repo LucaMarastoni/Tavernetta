@@ -20,10 +20,10 @@ function mapAdminOrdersError(error) {
 
   switch (code) {
     case 'SUPABASE_NOT_CONFIGURED':
-      return new AdminOrdersApiError('Supabase non e configurato per l area admin statica.', code);
+      return new AdminOrdersApiError('Il servizio admin non e configurato.', code);
     case 'ADMIN_PUBLIC_POLICIES_MISSING':
       return new AdminOrdersApiError(
-        'Manca la configurazione Supabase pubblica per l area admin. Esegui lo script SQL dedicato.',
+        'Manca la configurazione pubblica per l area admin.',
         code,
       );
     case 'INVALID_ORDER_STATUS':

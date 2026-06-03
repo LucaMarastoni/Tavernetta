@@ -117,7 +117,7 @@ function ensureClient() {
   if (!client) {
     throw createAdminSupabaseError(
       'SUPABASE_NOT_CONFIGURED',
-      'Supabase non e configurato per l area admin statica.',
+      'Il servizio admin non e configurato.',
     );
   }
 
@@ -136,14 +136,14 @@ function normalizeAdminSupabaseError(error) {
   if (isMissingSupabaseResource(error)) {
     return createAdminSupabaseError(
       'ADMIN_PUBLIC_POLICIES_MISSING',
-      'Manca la configurazione Supabase pubblica per l area admin. Esegui lo script SQL dedicato.',
+      'Manca la configurazione pubblica per l area admin.',
     );
   }
 
   if (error.code === '42501' || /row-level security/i.test(error.message || '')) {
     return createAdminSupabaseError(
       'ADMIN_PUBLIC_POLICIES_MISSING',
-      'Le policy pubbliche di Supabase non permettono ancora questa operazione.',
+      'La configurazione pubblica non permette ancora questa operazione.',
     );
   }
 

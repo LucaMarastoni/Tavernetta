@@ -30,7 +30,7 @@ function getClient() {
   const client = getBrowserSupabase();
 
   if (!client) {
-    throw createAdminMenuError('SUPABASE_NOT_CONFIGURED', 'Supabase non e configurato per modificare il menu.');
+    throw createAdminMenuError('SUPABASE_NOT_CONFIGURED', 'Il servizio menu non e configurato.');
   }
 
   return client;
@@ -45,14 +45,14 @@ function assertMenuItemQuerySuccess(result, fallbackCode = 'MENU_FLAGS_LOAD_FAIL
   if (result.error && isMissingMenuItemAllergenColumn(result.error)) {
     throw createAdminMenuError(
       'MENU_ALLERGEN_COLUMNS_MISSING',
-      'Le colonne allergeni non esistono ancora su Supabase.',
+      'La gestione allergeni non e ancora configurata.',
     );
   }
 
   if (result.error) {
     throw createAdminMenuError(
       result.error.code || fallbackCode,
-      result.error.message || 'Non riusciamo a leggere la pizza da Supabase.',
+      result.error.message || 'Non riusciamo a leggere la pizza.',
     );
   }
 }
@@ -136,7 +136,7 @@ async function fetchMenuItemFlagRow(identifier) {
   assertMenuItemQuerySuccess(queryByName);
 
   if (!queryByName.data?.[0]) {
-    throw createAdminMenuError('MENU_ITEM_NOT_FOUND', 'Pizza non trovata su Supabase.');
+    throw createAdminMenuError('MENU_ITEM_NOT_FOUND', 'Pizza non trovata.');
   }
 
   return queryByName.data[0];
@@ -181,16 +181,16 @@ export async function updateSupabaseMenuItemFlags(identifier, flags) {
   if (error && isMissingMenuItemAllergenColumn(error)) {
     throw createAdminMenuError(
       'MENU_ALLERGEN_COLUMNS_MISSING',
-      'Le colonne allergeni non esistono ancora su Supabase.',
+      'La gestione allergeni non e ancora configurata.',
     );
   }
 
   if (error) {
-    throw createAdminMenuError(error.code || 'MENU_FLAGS_UPDATE_FAILED', error.message || 'Non riusciamo ad aggiornare la pizza su Supabase.');
+    throw createAdminMenuError(error.code || 'MENU_FLAGS_UPDATE_FAILED', error.message || 'Non riusciamo ad aggiornare la pizza.');
   }
 
   if (!data) {
-    throw createAdminMenuError('MENU_ITEM_NOT_FOUND', 'Pizza non trovata su Supabase.');
+    throw createAdminMenuError('MENU_ITEM_NOT_FOUND', 'Pizza non trovata.');
   }
 
   return normalizeFlags(data);
