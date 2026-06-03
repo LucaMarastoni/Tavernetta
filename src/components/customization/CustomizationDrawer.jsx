@@ -164,30 +164,13 @@ function ProductInfoChips({ configuration }) {
   }
 
   return (
-    <>
-      {tags.length ? (
-        <div className="menu-product-info-chip-list">
-          {tags.map((tag) => (
-            <span key={tag} className="menu-product-info-chip">
-              {tag}
-            </span>
-          ))}
-        </div>
-      ) : null}
-
-      {allergens.length ? (
-        <div className="menu-product-info-panel">
-          <span>Allergeni</span>
-          <div className="menu-product-info-chip-list">
-            {allergens.map((allergen) => (
-              <span key={allergen} className="menu-product-info-chip">
-                {allergen}
-              </span>
-            ))}
-          </div>
-        </div>
-      ) : null}
-    </>
+    <div className="menu-product-info-chip-list">
+      {[...tags, ...allergens].map((label) => (
+        <span key={label} className="menu-product-info-chip">
+          {label}
+        </span>
+      ))}
+    </div>
   );
 }
 
