@@ -14,6 +14,14 @@ const ALLERGEN_FIELD_BY_CODE = {
 };
 
 const ALLERGEN_FIELDS = Object.values(ALLERGEN_FIELD_BY_CODE);
+const CANONICAL_CATEGORY_SLUG_BY_NAME = {
+  'le classiche': 'le-pizze',
+  'le pizze': 'le-pizze',
+  'le bianche': 'le-bianche',
+  'le speciali': 'le-speciali',
+  'i calzoni': 'i-calzoni',
+  'calzoni in fritteria': 'calzoni-in-fritteria',
+};
 const MENU_ITEM_FLAGS_SELECT = `id, category_id, slug, name, spicy, vegetarian, ${ALLERGEN_FIELDS.join(', ')}`;
 const MENU_ITEM_SELECT = `id, category_id, name, slug, description, base_price, active, featured, sort_order, note, ${ALLERGEN_FIELDS.join(', ')}`;
 
@@ -33,6 +41,28 @@ function isMissingMenuItemAllergenColumn(error) {
   return error?.code === '42703' && /allergen_/i.test(message);
 }
 
+function getMenuItemErrorMessage(error, fallbackCode) {
+  const message = error?.message || '';
+
+  if (/duplicate key value/i.test(message) && /menu_item_ingredients/i.test(message)) {
+    return 'Controlla gli ingredienti del piatto: alcuni risultano duplicati.';
+  }
+
+  if (/duplicate key value/i.test(message) && /menu_items_slug/i.test(message)) {
+    return 'Esiste gia un piatto con questo nome.';
+  }
+
+  if (fallbackCode.includes('CREATE') || fallbackCode.includes('UPDATE')) {
+    return 'Non riusciamo a salvare il piatto.';
+  }
+
+  if (fallbackCode.includes('DELETE')) {
+    return 'Non riusciamo a rimuovere il piatto.';
+  }
+
+  return 'Non riusciamo a leggere i dati del menu.';
+}
+
 function handleMenuItemQueryError(error, fallbackCode = 'SUPABASE_QUERY_FAILED') {
   if (!error) {
     return;
@@ -47,7 +77,7 @@ function handleMenuItemQueryError(error, fallbackCode = 'SUPABASE_QUERY_FAILED')
     );
   }
 
-  throw new HttpError(500, fallbackCode, 'Non riusciamo a leggere la pizza.', error.message);
+  throw new HttpError(500, fallbackCode, getMenuItemErrorMessage(error, fallbackCode), error.message);
 }
 
 function normalizeFlags(row = {}) {
@@ -84,14 +114,21 @@ function normalizePrice(value) {
 }
 
 function normalizeIngredientNames(value) {
-  if (Array.isArray(value)) {
-    return value.map(normalizeText).filter(Boolean);
-  }
-
-  return String(value || '')
-    .split(',')
+  const names = (Array.isArray(value) ? value : String(value || '').split(','))
     .map(normalizeText)
     .filter(Boolean);
+  const seenKeys = new Set();
+
+  return names.filter((ingredientName) => {
+    const key = slugify(ingredientName) || normalizeComparableText(ingredientName);
+
+    if (!key || seenKeys.has(key)) {
+      return false;
+    }
+
+    seenKeys.add(key);
+    return true;
+  });
 }
 
 function buildFlagsPayload(flags = {}) {
@@ -141,7 +178,8 @@ async function resolveCategory(supabase, categoryName, preferredCategoryId = '')
     .from('categories')
     .select('id, name, slug, sort_order, active')
     .eq('active', true)
-    .order('sort_order', { ascending: true });
+    .order('sort_order', { ascending: true })
+    .order('slug', { ascending: true });
 
   handleMenuItemQueryError(error);
 
@@ -157,6 +195,15 @@ async function resolveCategory(supabase, categoryName, preferredCategoryId = '')
     return preferredCategory;
   }
 
+  const canonicalSlug = CANONICAL_CATEGORY_SLUG_BY_NAME[normalizedCategoryName] ?? '';
+  const canonicalCategory = canonicalSlug
+    ? (data ?? []).find((category) => slugify(category.slug) === canonicalSlug)
+    : null;
+
+  if (canonicalCategory) {
+    return canonicalCategory;
+  }
+
   const existingCategory = (data ?? []).find((category) => normalizeComparableText(category.name) === normalizedCategoryName);
 
   if (existingCategory) {
@@ -168,7 +215,7 @@ async function resolveCategory(supabase, categoryName, preferredCategoryId = '')
     .from('categories')
     .insert({
       name: categoryName,
-      slug: slugify(categoryName) || `categoria-${Date.now()}`,
+      slug: canonicalSlug || slugify(categoryName) || `categoria-${Date.now()}`,
       sort_order: nextSortOrder,
       active: true,
     })
@@ -268,9 +315,16 @@ async function replaceMenuItemIngredients(supabase, menuItemId, ingredientNames)
   }
 
   const ingredients = [];
+  const ingredientIds = new Set();
 
   for (const ingredientName of ingredientNames) {
-    ingredients.push(await resolveIngredient(supabase, ingredientName));
+    const ingredient = await resolveIngredient(supabase, ingredientName);
+    const ingredientId = normalizeIdentifier(ingredient.id);
+
+    if (!ingredientIds.has(ingredientId)) {
+      ingredientIds.add(ingredientId);
+      ingredients.push(ingredient);
+    }
   }
 
   const linkRows = ingredients.map((ingredient, index) => ({
