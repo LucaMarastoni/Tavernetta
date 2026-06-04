@@ -1,6 +1,6 @@
 # Tavernetta
 
-Esperienza menu e ordering per un ristorante italiano premium, costruita con `React + Vite` sul frontend e `Express + SQLite` sul backend. Il focus del progetto e una navigazione mobile-first della carta, con personalizzazione sicura delle pizze, carrello persistente e checkout guest pronto per futuri strumenti admin.
+Esperienza menu e ordering per un ristorante italiano premium, costruita con `React + Vite` sul frontend, `Express` sul backend e Supabase come unica fonte dati. Il focus del progetto e una navigazione mobile-first della carta, con personalizzazione sicura delle pizze, carrello persistente e checkout guest.
 
 ## Cosa include
 
@@ -13,9 +13,8 @@ Esperienza menu e ordering per un ristorante italiano premium, costruita con `Re
 - Personalizzazione pizze con ingredienti rimovibili, extra e varianti
 - Pricing client live e ricalcolo server-side obbligatorio
 - Persistenza locale di carrello e order draft
-- SQLite con schema relazionale pronto per dashboard ordini e gestione menu
+- Supabase come fonte unica per menu, personalizzazioni, ordini e admin
 - API REST per catalogo, dettagli prodotto, personalizzazione e invio ordini
-- Seed demo realistico Tavernetta con antipasti, pizze, dessert e bevande
 
 ## Architettura
 
@@ -52,27 +51,23 @@ Esperienza menu e ordering per un ristorante italiano premium, costruita con `Re
   valida varianti/extra/ingredienti rimossi e ricalcola il prezzo finale.
 - `server/services/orderService.js`
   valida il payload ordine, salva snapshot in `orders` e `order_items`.
-- `server/db/database.js`
-  inizializza SQLite, applica schema/seed e gestisce reset pulito dei sidecar `-wal` e `-shm`.
+- `server/lib/supabase.js`
+  crea il client Supabase server-side e rende esplicita la configurazione richiesta.
 
 ## File structure
 
 ```text
 .
 |-- database/
-|   |-- schema.sql
-|   `-- seed.sql
+|   |-- supabase-menu-item-allergens.sql
+|   `-- supabase-public-admin.sql
 |-- server/
-|   |-- db/
-|   |   `-- database.js
 |   |-- index.js
 |   |-- routes/
 |   |   |-- categories.js
 |   |   |-- media.js
 |   |   |-- menu.js
 |   |   `-- orders.js
-|   |-- scripts/
-|   |   `-- resetDatabase.js
 |   |-- services/
 |   |   |-- menuService.js
 |   |   |-- orderService.js
@@ -212,7 +207,10 @@ Configura `.env`:
 
 ```bash
 PORT=3001
-DATABASE_FILE=./data/tavernetta.sqlite
+SUPABASE_URL=...
+SUPABASE_SERVICE_ROLE_KEY=...
+VITE_SUPABASE_URL=...
+VITE_SUPABASE_ANON_KEY=...
 ```
 
 Avvia frontend e backend insieme:
@@ -235,16 +233,6 @@ Per servire build e API dallo stesso processo:
 ```bash
 npm start
 ```
-
-## Reset database
-
-Per ricreare SQLite da zero:
-
-```bash
-npm run db:reset
-```
-
-Il reset rimuove anche i file `-wal` e `-shm`, cosi il riavvio resta pulito.
 
 ## Validazione e pricing
 
@@ -293,4 +281,4 @@ La struttura attuale e pronta per aggiungere in seguito:
 - attivazione/disattivazione prodotti
 - gestione disponibilita ingredienti
 - editing menu da admin
-- sostituzione futura di SQLite con PostgreSQL mantenendo separazione tra route, service e pricing
+- evoluzione dello schema Supabase mantenendo separazione tra route, service e pricing

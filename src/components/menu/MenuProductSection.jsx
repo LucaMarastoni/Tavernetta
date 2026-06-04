@@ -14,7 +14,6 @@ function MenuProductSection({ group, setSectionRef, onSelectProduct }) {
       <header className="menu-catalog-section-head">
         <div className="menu-catalog-section-copy">
           <h2 id={`menu-group-title-${group.id}`}>{group.title}</h2>
-          <p>{group.description}</p>
         </div>
       </header>
 

@@ -9,12 +9,10 @@
     "dev:server": "nodemon --watch server --watch database --watch shared --ext js,sql --ignore \"data/**\" --exec \"node --env-file=.env server/index.js\"",
     "build": "vite build",
     "start": "NODE_ENV=production node --env-file=.env server/index.js",
-    "preview": "vite preview",
-    "db:reset": "node --env-file=.env server/scripts/resetDatabase.js"
+    "preview": "vite preview"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.100.0",
-    "better-sqlite3": "^11.10.0",
     "concurrently": "^9.1.2",
     "express": "^5.1.0",
     "gsap": "^3.14.2",

@@ -1,4 +1,3 @@
-import { getDatabase } from '../db/database.js';
 import { getSupabaseAdmin, hasSupabaseConfig } from '../lib/supabase.js';
 import { getPreferredTimeValidationCode, serializePreferredTimeValue } from '../../shared/orderTiming.js';
 import { calculateOrderTotals, buildOrderLine } from './pricingService.js';
@@ -132,6 +131,17 @@ function mapOrderResponse(savedOrder, orderLines, createdItemIds = []) {
   };
 }
 
+function assertSupabaseOrderConfig() {
+  if (!hasSupabaseConfig()) {
+    throw new HttpError(
+      500,
+      'SUPABASE_NOT_CONFIGURED',
+      'Il servizio ordini non e configurato.',
+      'Configurazione server mancante.',
+    );
+  }
+}
+
 async function loadSupabaseCreatedOrder(supabase, orderId, fallbackOrder) {
   const primarySelection = await supabase
     .from('orders')
@@ -226,104 +236,18 @@ async function createOrderSupabase(cleanPayload, orderLines, totals) {
   );
 }
 
-function createOrderSqlite(cleanPayload, orderLines, totals, database) {
-  const transaction = database.transaction(() => {
-    const orderResult = database
-      .prepare(
-        `
-          insert into orders (
-            customer_name,
-            customer_phone,
-            customer_email,
-            privacy_accepted_at,
-            order_type,
-            address,
-            preferred_time,
-            notes,
-            status,
-            subtotal,
-            delivery_fee,
-            total
-          )
-          values (?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?)
-        `,
-      )
-      .run(
-        cleanPayload.customer.name,
-        cleanPayload.customer.phone,
-        cleanPayload.customer.email,
-        new Date().toISOString(),
-        cleanPayload.order.orderType,
-        cleanPayload.order.orderType === 'delivery' ? cleanPayload.order.address : null,
-        serializePreferredTimeValue(cleanPayload.order.preferredTime),
-        cleanPayload.order.notes,
-        totals.subtotal,
-        totals.deliveryFee,
-        totals.total,
-      );
+export async function createOrder(payload) {
+  assertSupabaseOrderConfig();
 
-    const orderId = Number(orderResult.lastInsertRowid);
-    const insertOrderItem = database.prepare(
-      `
-        insert into order_items (
-          order_id,
-          menu_item_id,
-          item_name_snapshot,
-          base_price_snapshot,
-          final_unit_price,
-          quantity,
-          line_total,
-          customization_json,
-          notes
-        )
-        values (?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `,
-    );
-
-    orderLines.forEach((line) => {
-      insertOrderItem.run(
-        orderId,
-        Number(line.menuItemId),
-        line.itemNameSnapshot,
-        line.basePriceSnapshot,
-        line.finalUnitPrice,
-        line.quantity,
-        line.lineTotal,
-        JSON.stringify(line.customization),
-        line.notes,
-      );
-    });
-
-    const savedOrder = database
-      .prepare(
-        `
-          select id, status, subtotal, delivery_fee, total, created_at
-          from orders
-          where id = ?
-        `,
-      )
-      .get(orderId);
-
-    return mapOrderResponse(savedOrder, orderLines);
-  });
-
-  return transaction();
-}
-
-export async function createOrder(payload, database = getDatabase()) {
   const cleanPayload = sanitizeOrderPayload(payload);
   validatePayload(cleanPayload);
 
   const orderLines = await Promise.all(
     cleanPayload.items.map((item) =>
-      buildOrderLine(item.menuItemId, item.quantity, item.note, item.customization, database),
+      buildOrderLine(item.menuItemId, item.quantity, item.note, item.customization),
     ),
   );
   const totals = calculateOrderTotals(orderLines, cleanPayload.order.orderType);
 
-  if (hasSupabaseConfig()) {
-    return createOrderSupabase(cleanPayload, orderLines, totals);
-  }
-
-  return createOrderSqlite(cleanPayload, orderLines, totals, database);
+  return createOrderSupabase(cleanPayload, orderLines, totals);
 }

@@ -16,8 +16,8 @@ const MENU_LANDING_MARQUEE_IMAGES = {
   speciali: restaurant.about.image.src,
   starter: restaurant.about.image.src,
   calzoni: restaurant.about.image.src,
-  fritteria: restaurant.about.image.src,
-  birre: restaurant.about.image.src,
+  fritteria: `${import.meta.env.BASE_URL}images/pizze/calzone-fritto.jpeg`,
+  birre: `${import.meta.env.BASE_URL}images/birre/sicilian-pils.png`,
   dolci: restaurant.about.image.src,
   vini: restaurant.about.image.src,
 };

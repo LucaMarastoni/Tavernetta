@@ -1,9 +1,19 @@
-import { getDatabase } from '../db/database.js';
 import { getSupabaseAdmin, hasSupabaseConfig } from '../lib/supabase.js';
 import { HttpError } from '../utils/httpError.js';
 import { assert, normalizeIdentifier, normalizeNullableText, normalizeText } from '../utils/validators.js';
 
 const ORDER_STATUSES = new Set(['pending', 'confirmed', 'preparing', 'ready', 'delivered', 'completed', 'cancelled']);
+
+function assertSupabaseOrdersConfig() {
+  if (!hasSupabaseConfig()) {
+    throw new HttpError(
+      500,
+      'SUPABASE_NOT_CONFIGURED',
+      'Il servizio ordini non e configurato.',
+      'Configurazione server mancante.',
+    );
+  }
+}
 
 function normalizeNumber(value, fallbackValue = 0) {
   const parsedValue = Number(value);
@@ -292,23 +302,16 @@ function validateNextStatus(nextStatus) {
   return normalizedStatus;
 }
 
-export async function listAdminOrders(database) {
-  if (hasSupabaseConfig()) {
-    return listSupabaseOrders();
-  }
-
-  return listSqliteOrders(database ?? getDatabase());
+export async function listAdminOrders() {
+  assertSupabaseOrdersConfig();
+  return listSupabaseOrders();
 }
 
-export async function updateAdminOrderStatus(orderId, nextStatus, database) {
+export async function updateAdminOrderStatus(orderId, nextStatus) {
+  assertSupabaseOrdersConfig();
   const normalizedOrderId = normalizeIdentifier(orderId);
   const normalizedStatus = validateNextStatus(nextStatus);
 
   assert(normalizedOrderId, 400, 'INVALID_ORDER_ID', 'Ordine non valido.');
-
-  if (hasSupabaseConfig()) {
-    return updateSupabaseOrderStatus(normalizedOrderId, normalizedStatus);
-  }
-
-  return updateSqliteOrderStatus(normalizedOrderId, normalizedStatus, database ?? getDatabase());
+  return updateSupabaseOrderStatus(normalizedOrderId, normalizedStatus);
 }

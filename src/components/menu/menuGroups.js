@@ -18,7 +18,7 @@ export const MENU_GROUPS = [
     description: 'Fritti, salumi e accompagnamenti pensati per iniziare la tavola.',
     ctaLabel: 'Apri sezione',
     slugs: ['in-fritteria', 'salumi', 'accompagnamenti'],
-    patterns: [/starter/i, /fritteria/i, /salum/i, /accompagnament/i],
+    patterns: [/starter/i, /salum/i, /accompagnament/i],
   },
   {
     id: 'pizze',
