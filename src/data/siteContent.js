@@ -301,12 +301,12 @@ export const previewCategories = [
 
 export const galleryItems = [
   {
-    title: 'Squadra',
-    caption: 'La squadra riunita attorno al tavolo, tra pizze, bottiglie e servizio condiviso.',
+    title: 'Aperitivo',
+    caption: 'Un cocktail ambrato pensato per aprire la serata con un tono morbido, aromatico e conviviale.',
     layout: 'large',
     image: {
-      src: photo('chi-siamo-squadra', 1600),
-      alt: 'Squadra Tavernetta riunita attorno al tavolo',
+      src: photo('cocktail-ambrato', 1600),
+      alt: 'Cocktail ambrato servito al tavolo da Tavernetta',
     },
   },
   {
