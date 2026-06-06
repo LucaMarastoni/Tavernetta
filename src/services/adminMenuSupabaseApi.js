@@ -87,6 +87,10 @@ function isMissingMenuItemAllergenColumn(error) {
   return error?.code === '42703' && /allergen_/i.test(message);
 }
 
+function isAccessPolicyError(error) {
+  return error?.code === '42501' || /row-level security|permission denied/i.test(error?.message || '');
+}
+
 function assertMenuItemQuerySuccess(result, fallbackCode = 'MENU_FLAGS_LOAD_FAILED') {
   if (result.error && isMissingMenuItemAllergenColumn(result.error)) {
     throw createAdminMenuError(
@@ -173,7 +177,7 @@ function normalizeStaticWriteError(error, fallbackCode = 'STATIC_MENU_WRITE_FAIL
     );
   }
 
-  if (error.code === '42501' || /row-level security/i.test(error.message || '')) {
+  if (isAccessPolicyError(error)) {
     return createAdminMenuError(
       'ADMIN_MENU_POLICIES_MISSING',
       'Supabase non permette ancora la modifica completa del menu da admin.',
@@ -264,7 +268,12 @@ async function fetchMenuItemFlagRow(identifier) {
   assertMenuItemQuerySuccess(queryByName);
 
   if (!queryByName.data?.[0]) {
-    throw createAdminMenuError('MENU_ITEM_NOT_FOUND', 'Pizza non trovata.');
+    throw createAdminMenuError(
+      'MENU_ITEM_NOT_ACCESSIBLE',
+      isStaticExport
+        ? 'Il piatto non e accessibile dal dominio pubblicato. In locale funziona perche il server usa la service role key; sul dominio statico servono policy Supabase admin dedicate.'
+        : 'Pizza non trovata.',
+    );
   }
 
   return queryByName.data[0];
