@@ -1,4 +1,3 @@
-import Footer from '../components/Footer';
 import PageIntro from '../components/PageIntro';
 import { COOKIE_CATEGORIES } from '../utils/consentStorage';
 
@@ -80,8 +79,6 @@ function CookiePolicy() {
           </div>
         </div>
       </section>
-
-      <Footer />
     </>
   );
 }

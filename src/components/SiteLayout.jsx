@@ -6,6 +6,7 @@ import CookieBanner from './cookie/CookieBanner';
 import ConsentScriptsManager from './cookie/ConsentScriptsManager';
 import CookiePreferencesModal from './cookie/CookiePreferencesModal';
 import CursorFollower from './CursorFollower';
+import Footer from './Footer';
 import Header from './Header';
 import ScrollManager from './ScrollManager';
 
@@ -23,6 +24,7 @@ function SiteLayout() {
             <Outlet />
           </main>
 
+          <Footer />
           <CookieBanner />
           <CookiePreferencesModal />
         </div>

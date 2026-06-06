@@ -1,4 +1,3 @@
-import Footer from '../components/Footer';
 import Reveal from '../components/Reveal';
 import SectionTitle from '../components/SectionTitle';
 import { restaurant, socialLinks } from '../data/siteContent';
@@ -79,8 +78,6 @@ function ContactSection() {
           </div>
         </Reveal>
       </div>
-
-      <Footer />
     </section>
   );
 }

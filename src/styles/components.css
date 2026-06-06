@@ -522,10 +522,17 @@
 }
 
 .footer-note,
-.footer-copy {
+.footer-copy,
+.footer-credit {
   font-size: 0.9rem;
   line-height: 1.7;
   color: var(--color-ink);
+}
+
+.footer-credit a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
 }
 
 @media (max-width: 960px) {

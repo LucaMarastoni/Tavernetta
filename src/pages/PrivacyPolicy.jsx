@@ -1,28 +1,27 @@
-import Footer from '../components/Footer';
 import PageIntro from '../components/PageIntro';
 
-const lastUpdated = '21 marzo 2026';
+const lastUpdated = '6 giugno 2026';
 
 const sections = [
   {
     title: 'Titolare del trattamento',
     body: [
-      'Titolare del trattamento e Tavernetta S.r.l., con sede legale in Via Federico Garofoli 105, 37057 San Giovanni Lupatoto (VR), contattabile all indirizzo privacy@tavernetta.it e al numero +39 02 5501 2486.',
-      'I dati indicati sono placeholders strutturati correttamente e possono essere sostituiti con i riferimenti reali del ristorante senza modificare l architettura della pagina.',
+      'Titolare del trattamento dei dati personali e Alessandra Zangari.',
+      'Il titolare e contattabile al numero +39 349 793 7426. L indirizzo email dedicato alla privacy sara indicato appena disponibile.',
     ],
   },
   {
     title: 'Tipologie di dati raccolti',
     body: [
       'Dati di navigazione: indirizzo IP, user agent, log tecnici di accesso, preferenze cookie, informazioni strettamente necessarie al funzionamento del sito e del carrello.',
-      'Dati forniti volontariamente: nome, telefono, email, indirizzo di consegna, note ordine e qualunque informazione trasmessa tramite form di ordine, email o contatti diretti.',
+      'Dati forniti volontariamente: nome, telefono, indirizzo di consegna, note ordine e qualunque informazione trasmessa tramite form di ordine, telefono, WhatsApp o contatti diretti.',
     ],
   },
   {
     title: 'Finalita del trattamento',
     body: [
       'Gestione ordini online, preparazione del servizio, ricontatto del cliente e coordinamento di ritiro o consegna.',
-      'Gestione di richieste inviate tramite email, telefono, WhatsApp o altri canali volontariamente selezionati dall utente.',
+      'Gestione di richieste inviate tramite telefono, WhatsApp o altri canali volontariamente selezionati dall utente.',
       'Miglioramento del sito e del servizio, ove siano attivati strumenti analitici previo consenso.',
     ],
   },
@@ -51,7 +50,7 @@ const sections = [
   {
     title: 'Comunicazione a terzi',
     body: [
-      'I dati possono essere trattati da fornitori tecnici che supportano hosting, infrastruttura server, servizi email e continuita operativa, nominati ove necessario responsabili del trattamento.',
+      'I dati possono essere trattati da fornitori tecnici che supportano hosting, infrastruttura server, database, gestione ordini e continuita operativa, nominati ove necessario responsabili del trattamento.',
       'Se l utente sceglie volontariamente servizi esterni come WhatsApp o Google Maps incorporato, il relativo trattamento avviene anche secondo le informative dei rispettivi fornitori.',
     ],
   },
@@ -60,7 +59,7 @@ const sections = [
     body: [
       'L utente puo chiedere accesso, rettifica, cancellazione, limitazione del trattamento, opposizione e portabilita dei dati nei limiti previsti dagli articoli 15-22 del GDPR.',
       'E sempre possibile revocare il consenso ai cookie opzionali senza pregiudicare la liceita del trattamento basato sul consenso prestato prima della revoca.',
-      'Per esercitare i diritti e possibile scrivere a privacy@tavernetta.it. Resta salvo il diritto di proporre reclamo all Autorita Garante per la protezione dei dati personali.',
+      'Per esercitare i diritti e possibile contattare il titolare al numero +39 349 793 7426. Resta salvo il diritto di proporre reclamo all Autorita Garante per la protezione dei dati personali.',
     ],
   },
   {
@@ -111,8 +110,6 @@ function PrivacyPolicy() {
           </div>
         </div>
       </section>
-
-      <Footer />
     </>
   );
 }

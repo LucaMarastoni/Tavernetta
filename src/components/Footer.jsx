@@ -31,6 +31,13 @@ function Footer() {
           <p className="footer-copy">
             Copyright {new Date().getFullYear()} {restaurant.name}. Tutti i diritti riservati.
           </p>
+
+          <p className="footer-credit">
+            Realizzato da{' '}
+            <a href="https://lucamarastoni.eu" rel="noreferrer" target="_blank">
+              Luca Marastoni Digital Solutions
+            </a>
+          </p>
         </div>
       </div>
     </footer>
