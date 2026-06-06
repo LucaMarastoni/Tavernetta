@@ -9,7 +9,6 @@ import { OrderApiError, submitOrder } from '../services/orderApi';
 import {
   formatPreferredTimeDateTime,
   formatTimeInputValue,
-  getLeadTimeMinutes,
   getMinimumPreferredTime,
   getOrderingWindowEnd,
   getPreferredTimeValidationCode,
@@ -40,7 +39,6 @@ function OrderPage() {
     () => formatTimeInputValue(getMinimumPreferredTime(orderDraft.orderType)),
     [orderDraft.orderType],
   );
-  const preferredTimeLeadMinutes = useMemo(() => getLeadTimeMinutes(orderDraft.orderType), [orderDraft.orderType]);
   const maximumPreferredTime = useMemo(() => formatTimeInputValue(getOrderingWindowEnd()), []);
 
   const handleFieldChange = (event) => {
@@ -213,7 +211,6 @@ function OrderPage() {
                 submitting={isSubmitting}
                 minimumPreferredTime={minimumPreferredTime}
                 maximumPreferredTime={maximumPreferredTime}
-                preferredTimeLeadMinutes={preferredTimeLeadMinutes}
                 onFieldChange={handleFieldChange}
                 onSubmit={handleSubmit}
               />

@@ -44,7 +44,6 @@ function CheckoutForm({
   submitting,
   minimumPreferredTime,
   maximumPreferredTime,
-  preferredTimeLeadMinutes,
   onFieldChange,
   onSubmit,
 }) {
@@ -148,7 +147,6 @@ function CheckoutForm({
               </option>
             ))}
           </select>
-          <small>{`Solo oggi dalle 19:00 alle 22:00, almeno ${preferredTimeLeadMinutes} minuti dopo l inserimento.`}</small>
           {fieldErrors.preferredTime ? <small>{fieldErrors.preferredTime}</small> : null}
         </label>
 
