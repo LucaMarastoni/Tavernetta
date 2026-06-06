@@ -16,38 +16,20 @@ import {
   updateAdminOrder,
   usesStaticAdminSource,
 } from '../services/adminOrdersApi';
+import { getBrowserSupabase, hasBrowserSupabaseConfig } from '../lib/supabaseBrowser';
 import '../styles/admin.css';
-
-const ADMIN_AUTH_STORAGE_KEY = 'tavernetta-admin-auth-v1';
-const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD?.trim() || 'Tavernetta2027!';
 
 function sortItemsByName(items) {
   return [...items].sort((left, right) => left.name.localeCompare(right.name, 'it', { sensitivity: 'base' }));
 }
 
-function readAdminAuthSession() {
-  if (typeof window === 'undefined') {
-    return false;
-  }
-
-  return window.sessionStorage.getItem(ADMIN_AUTH_STORAGE_KEY) === 'authenticated';
-}
-
-function AdminLogin({ onLogin }) {
+function AdminLogin({ error = '', onLogin, signingIn = false }) {
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
 
   const handleSubmit = (event) => {
     event.preventDefault();
-
-    if (password === ADMIN_PASSWORD) {
-      setError('');
-      onLogin();
-      return;
-    }
-
-    setPassword('');
-    setError('Password non corretta.');
+    onLogin({ email, password });
   };
 
   return (
@@ -56,28 +38,38 @@ function AdminLogin({ onLogin }) {
         <div className="admin-login-copy">
           <p className="admin-kicker">Admin</p>
           <h1>Accesso area gestione</h1>
-          <p>Inserisci la password per aprire il pannello operativo.</p>
+          <p>Accedi con il profilo admin configurato su Supabase.</p>
         </div>
+
+        <label className="admin-field">
+          <span>Email</span>
+          <input
+            autoComplete="email"
+            autoFocus
+            name="adminEmail"
+            required
+            type="email"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+          />
+        </label>
 
         <label className="admin-field">
           <span>Password</span>
           <input
             autoComplete="current-password"
-            autoFocus
             name="adminPassword"
+            required
             type="password"
             value={password}
-            onChange={(event) => {
-              setPassword(event.target.value);
-              setError('');
-            }}
+            onChange={(event) => setPassword(event.target.value)}
           />
         </label>
 
         {error ? <p className="admin-login-error" role="alert">{error}</p> : null}
 
-        <button className="admin-primary-button" type="submit">
-          Entra
+        <button className="admin-primary-button" type="submit" disabled={signingIn}>
+          {signingIn ? 'Accesso...' : 'Entra'}
         </button>
       </form>
     </div>
@@ -86,7 +78,11 @@ function AdminLogin({ onLogin }) {
 
 function AdminPage() {
   const staticAdminEnabled = usesStaticAdminSource();
-  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(readAdminAuthSession);
+  const [adminSession, setAdminSession] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [authError, setAuthError] = useState('');
+  const [signingIn, setSigningIn] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
   const [menuState, setMenuState] = useState(createEmptyAdminMenuState);
   const [menuLoading, setMenuLoading] = useState(false);
   const [menuError, setMenuError] = useState('');
@@ -100,6 +96,57 @@ function AdminPage() {
     [menuState],
   );
   const allergenOptions = useMemo(() => getAdminAllergenOptions(menuState), [menuState]);
+  const isAdminAuthenticated = Boolean(adminSession);
+  const adminEmail = adminSession?.user?.email ?? '';
+
+  useEffect(() => {
+    if (!hasBrowserSupabaseConfig()) {
+      setAuthLoading(false);
+      setAuthError('Supabase Auth non e configurato per l area admin.');
+      return undefined;
+    }
+
+    const client = getBrowserSupabase();
+    let isActive = true;
+    let subscription = null;
+
+    client.auth
+      .getSession()
+      .then(({ data, error }) => {
+        if (!isActive) {
+          return;
+        }
+
+        if (error) {
+          setAuthError('Non riusciamo a verificare la sessione admin.');
+        }
+
+        setAdminSession(data?.session ?? null);
+        setAuthLoading(false);
+      })
+      .catch(() => {
+        if (!isActive) {
+          return;
+        }
+
+        setAuthError('Non riusciamo a verificare la sessione admin.');
+        setAdminSession(null);
+        setAuthLoading(false);
+      });
+
+    const authState = client.auth.onAuthStateChange((_event, session) => {
+      setAdminSession(session);
+      setAuthError('');
+      setAuthLoading(false);
+    });
+
+    subscription = authState.data?.subscription ?? null;
+
+    return () => {
+      isActive = false;
+      subscription?.unsubscribe();
+    };
+  }, []);
 
   const savePizza = (draft, previousPizza = null) => {
     setMenuState((currentState) => {
@@ -352,20 +399,49 @@ function AdminPage() {
     };
   }, [isAdminAuthenticated, refreshOrders]);
 
-  const handleAdminLogin = useCallback(() => {
-    if (typeof window !== 'undefined') {
-      window.sessionStorage.setItem(ADMIN_AUTH_STORAGE_KEY, 'authenticated');
+  const handleAdminLogin = useCallback(async ({ email, password }) => {
+    const cleanEmail = String(email || '').trim();
+    const cleanPassword = String(password || '');
+
+    if (!cleanEmail || !cleanPassword) {
+      setAuthError('Inserisci email e password.');
+      return;
     }
 
-    setIsAdminAuthenticated(true);
+    const client = getBrowserSupabase();
+
+    if (!client) {
+      setAuthError('Supabase Auth non e configurato per l area admin.');
+      return;
+    }
+
+    setSigningIn(true);
+    setAuthError('');
+
+    const { error } = await client.auth.signInWithPassword({
+      email: cleanEmail,
+      password: cleanPassword,
+    });
+
+    if (error) {
+      setAuthError('Credenziali admin non valide.');
+    }
+
+    setSigningIn(false);
   }, []);
 
-  const handleAdminSignOut = useCallback(() => {
-    if (typeof window !== 'undefined') {
-      window.sessionStorage.removeItem(ADMIN_AUTH_STORAGE_KEY);
+  const handleAdminSignOut = useCallback(async () => {
+    const client = getBrowserSupabase();
+
+    if (!client) {
+      setAdminSession(null);
+      return;
     }
 
-    setIsAdminAuthenticated(false);
+    setSigningOut(true);
+    await client.auth.signOut();
+    setAdminSession(null);
+    setSigningOut(false);
   }, []);
 
   const contextValue = useMemo(
@@ -404,14 +480,28 @@ function AdminPage() {
     ],
   );
 
+  if (authLoading) {
+    return (
+      <div className="admin-page admin-login-page">
+        <div className="admin-login-card admin-surface">
+          <div className="admin-login-copy">
+            <p className="admin-kicker">Admin</p>
+            <h1>Verifica sessione</h1>
+            <p>Controllo l accesso Supabase.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (!isAdminAuthenticated) {
-    return <AdminLogin onLogin={handleAdminLogin} />;
+    return <AdminLogin error={authError} signingIn={signingIn} onLogin={handleAdminLogin} />;
   }
 
   return (
     <div className="admin-page">
       <div className="admin-shell">
-        <AdminSidebar onSignOut={handleAdminSignOut} usesStaticAuth />
+        <AdminSidebar adminEmail={adminEmail} onSignOut={handleAdminSignOut} signingOut={signingOut} usesStaticAuth />
 
         <main className="admin-main">
           <Outlet context={contextValue} />
