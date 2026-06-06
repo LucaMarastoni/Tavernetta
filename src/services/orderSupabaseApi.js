@@ -1,6 +1,6 @@
 import { getBrowserSupabase, hasBrowserSupabaseConfig } from '../lib/supabaseBrowser';
 import { getPreferredTimeValidationCode, serializePreferredTimeValue } from '../../shared/orderTiming.js';
-import { DELIVERY_FEE, roundCurrency } from '../utils/pricing';
+import { calculateDeliveryFee, roundCurrency } from '../utils/pricing';
 import { fetchMenuItemCustomizationFromSupabase } from './menuSupabaseApi';
 
 const ALLOWED_ORDER_TYPES = new Set(['pickup', 'delivery']);
@@ -250,7 +250,7 @@ async function buildOrderLine(item, loadConfiguration) {
 
 function calculateOrderTotals(lines, orderType = 'pickup') {
   const subtotal = roundCurrency(lines.reduce((sum, line) => sum + Number(line.lineTotal || 0), 0));
-  const deliveryFee = orderType === 'delivery' && lines.length > 0 ? DELIVERY_FEE : 0;
+  const deliveryFee = calculateDeliveryFee(subtotal, orderType);
   const total = roundCurrency(subtotal + deliveryFee);
 
   return {

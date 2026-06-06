@@ -1,7 +1,9 @@
 import { assert, normalizeIdentifierList } from '../utils/validators.js';
 import { getMenuItemCustomization } from './menuService.js';
 
-export const DELIVERY_FEE = 5;
+export const DELIVERY_LOW_ORDER_FEE = 2;
+export const DELIVERY_HIGH_ORDER_FEE = 1;
+export const DELIVERY_DISCOUNT_THRESHOLD = 15;
 
 export function roundCurrency(value) {
   return Math.round((Number(value) || 0) * 100) / 100;
@@ -175,9 +177,19 @@ export async function buildOrderLine(menuItemId, quantity, note, customization =
   };
 }
 
+export function calculateDeliveryFee(subtotal = 0, orderType = 'pickup') {
+  const normalizedSubtotal = roundCurrency(subtotal);
+
+  if (orderType !== 'delivery' || normalizedSubtotal <= 0) {
+    return 0;
+  }
+
+  return normalizedSubtotal > DELIVERY_DISCOUNT_THRESHOLD ? DELIVERY_HIGH_ORDER_FEE : DELIVERY_LOW_ORDER_FEE;
+}
+
 export function calculateOrderTotals(lines, orderType = 'pickup') {
   const subtotal = roundCurrency(lines.reduce((sum, line) => sum + line.lineTotal, 0));
-  const deliveryFee = orderType === 'delivery' && lines.length > 0 ? DELIVERY_FEE : 0;
+  const deliveryFee = calculateDeliveryFee(subtotal, orderType);
   const total = roundCurrency(subtotal + deliveryFee);
 
   return {

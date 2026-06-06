@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { formatPrice } from '../../utils/formatPrice';
+import { calculateDeliveryFee } from '../../utils/pricing';
 
 function CheckoutForm({
   draft,
@@ -12,6 +13,8 @@ function CheckoutForm({
   onFieldChange,
   onSubmit,
 }) {
+  const currentDeliveryFee = calculateDeliveryFee(totals.subtotal, 'delivery');
+
   return (
     <form className="ordering-checkout-card" noValidate onSubmit={onSubmit}>
       <div className="ordering-card-heading">
@@ -58,7 +61,7 @@ function CheckoutForm({
                 onChange={onFieldChange}
               />
               <span>Ritiro</span>
-              <small>Pronto in circa 25-35 minuti</small>
+              <small>Disponibile dopo 15 minuti</small>
             </label>
 
             <label className={`ordering-choice-card ${draft.orderType === 'delivery' ? 'is-selected' : ''}`}>
@@ -70,7 +73,7 @@ function CheckoutForm({
                 onChange={onFieldChange}
               />
               <span>Consegna</span>
-              <small>Supplemento attuale {formatPrice(totals.deliveryFee || 5)}</small>
+              <small>Supplemento attuale {formatPrice(currentDeliveryFee)}</small>
             </label>
           </div>
         </div>

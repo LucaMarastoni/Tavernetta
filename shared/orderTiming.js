@@ -1,5 +1,5 @@
-export const PICKUP_LEAD_MINUTES = 30;
-export const DELIVERY_LEAD_MINUTES = 60;
+export const PICKUP_LEAD_MINUTES = 15;
+export const DELIVERY_LEAD_MINUTES = 25;
 export const ORDER_TIME_STEP_MINUTES = 5;
 
 function padNumber(value) {

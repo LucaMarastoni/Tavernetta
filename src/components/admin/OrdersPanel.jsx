@@ -157,7 +157,7 @@ function getOrderItemSummary(item) {
   }
 
   if (addedExtras.length) {
-    summary.push(`Extra ${addedExtras.map((extra) => extra.name).join(', ')}`);
+    summary.push(addedExtras.map((extra) => extra.name).join(', '));
   }
 
   uniqueNotes([item.notes, item.customization?.specialNotes]).forEach((note) => {
@@ -223,7 +223,6 @@ function OrderDetailsModal({ order, onClose, isUpdating = false, onUpdateOrderSt
   const orderNotes = uniqueNotes([order.notes]);
   const primaryDetails = [
     { label: 'Telefono', value: formatFieldValue(order.customerPhone) },
-    { label: 'Email', value: formatFieldValue(order.customerEmail) },
     { label: 'Tipo ordine', value: formatOrderType(order.orderType) },
     { label: 'Orario', value: formatOrderTime(order) },
   ];
@@ -335,9 +334,7 @@ function OrderDetailsModal({ order, onClose, isUpdating = false, onUpdateOrderSt
                           <li key={`${item.id || item.name}-${entryIndex}`}>{entry}</li>
                         ))}
                       </ul>
-                    ) : (
-                      <p className="admin-order-line-note">Preparazione standard.</p>
-                    )}
+                    ) : null}
                   </li>
                 );
               })}

@@ -161,8 +161,8 @@ export const restaurant = {
     title: 'Scegli con calma, aggiungi al carrello, conferma in pochi passaggi.',
     intro:
       'La selezione online segue la disponibilita reale del servizio serale. Ogni richiesta entra subito nel flusso operativo, pronta per la conferma della sala.',
-    pickupEstimate: 'Ritiro indicativo: 25-35 minuti dal momento della conferma.',
-    deliveryEstimate: 'Consegna indicativa: 35-45 minuti, in base alla fascia e alla zona.',
+    pickupEstimate: 'Ritiro disponibile dopo 15 minuti dal momento dell ordine.',
+    deliveryEstimate: 'Consegna disponibile dopo 25 minuti dal momento dell ordine.',
     emptyCartTitle: 'Il carrello e ancora vuoto.',
     emptyCartBody: 'Aggiungi dalla carta i piatti che desideri e costruisci il tuo ordine con calma.',
     successEyebrow: 'Ordine ricevuto',
