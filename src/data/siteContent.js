@@ -126,7 +126,8 @@ export const restaurant = {
   },
   preview: {
     eyebrow: 'Menu',
-    title: 'Una carta breve, pulita, pensata per la sera.',
+    title:
+      'Il nostro stile Gourmet dipinto nelle tre tipologie "di stagione". I fritti sono il tocco d\'autore che firmano il quadro.',
     intro:
       'La struttura del menu segue il ritmo della cena, non l accumulo. Ogni categoria ha un tono preciso e una funzione nel percorso della tavola.',
     cta: {
