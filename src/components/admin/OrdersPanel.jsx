@@ -44,7 +44,7 @@ const ORDER_STATUS_LABELS = {
 const ORDER_STATUS_ACTIONS = {
   pending: [{ status: 'preparing', label: 'Inizia' }],
   confirmed: [{ status: 'preparing', label: 'Inizia' }],
-  preparing: [{ status: 'ready', label: 'Pronto' }],
+  preparing: [{ status: 'completed', label: 'Pronto' }],
 };
 
 function isClosedOrderStatus(status) {
