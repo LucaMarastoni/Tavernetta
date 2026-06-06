@@ -20,7 +20,7 @@ const ORDER_GROUPS = [
     title: 'In lavorazione',
     kicker: 'Cucina',
     emptyTitle: 'Nessun ordine in lavorazione',
-    emptyBody: 'Quando un ordine passa a In forno, viene spostato qui fino a quando sara pronto.',
+    emptyBody: 'Quando un ordine viene iniziato, resta qui fino alla chiusura.',
   },
   {
     id: 'closed',
@@ -42,16 +42,10 @@ const ORDER_STATUS_LABELS = {
 };
 
 const ORDER_STATUS_ACTIONS = {
-  pending: [
-    { status: 'confirmed', label: 'Conferma' },
-    { status: 'preparing', label: 'Inizia' },
-  ],
-  confirmed: [
-    { status: 'preparing', label: 'Inizia' },
-    { status: 'ready', label: 'Pronto' },
-  ],
+  pending: [{ status: 'preparing', label: 'Inizia' }],
+  confirmed: [{ status: 'preparing', label: 'Inizia' }],
   preparing: [{ status: 'ready', label: 'Pronto' }],
-  ready: [{ status: 'completed', label: 'Chiudi' }],
+  ready: [{ status: 'completed', label: 'Ordine chiuso' }],
 };
 
 function isClosedOrderStatus(status) {
@@ -59,7 +53,7 @@ function isClosedOrderStatus(status) {
 }
 
 function getOrderGroup(status) {
-  if (status === 'preparing') {
+  if (status === 'preparing' || status === 'ready') {
     return 'working';
   }
 
