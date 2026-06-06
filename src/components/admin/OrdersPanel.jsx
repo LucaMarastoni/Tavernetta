@@ -45,15 +45,14 @@ const ORDER_STATUS_ACTIONS = {
   pending: [{ status: 'preparing', label: 'Inizia' }],
   confirmed: [{ status: 'preparing', label: 'Inizia' }],
   preparing: [{ status: 'ready', label: 'Pronto' }],
-  ready: [{ status: 'completed', label: 'Ordine chiuso' }],
 };
 
 function isClosedOrderStatus(status) {
-  return status === 'delivered' || status === 'completed' || status === 'cancelled';
+  return status === 'ready' || status === 'delivered' || status === 'completed' || status === 'cancelled';
 }
 
 function getOrderGroup(status) {
-  if (status === 'preparing' || status === 'ready') {
+  if (status === 'preparing') {
     return 'working';
   }
 
