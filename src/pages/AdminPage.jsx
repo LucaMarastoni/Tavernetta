@@ -147,6 +147,8 @@ function AdminPage() {
         allergens: draft.allergens,
         spicy: draft.spicy,
         vegetarian: draft.vegetarian,
+        imagePath: draft.imagePath,
+        active: draft.active,
         ingredients: draft.ingredients,
         note: draft.note,
       };

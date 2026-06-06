@@ -135,6 +135,11 @@
   background: rgba(184, 118, 95, 0.16);
 }
 
+.admin-inline-badge.is-muted {
+  background: rgba(61, 43, 33, 0.08);
+  color: rgba(61, 43, 33, 0.68);
+}
+
 .admin-primary-button,
 .admin-secondary-button,
 .admin-danger-button,

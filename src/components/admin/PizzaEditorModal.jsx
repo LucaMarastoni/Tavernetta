@@ -76,6 +76,8 @@ function PizzaEditorModal({
       allergens: formState.allergens,
       spicy: formState.spicy,
       vegetarian: formState.vegetarian,
+      imagePath: formState.imagePath.trim(),
+      active: formState.active,
       note: formState.note.trim(),
     });
   };
@@ -149,8 +151,26 @@ function PizzaEditorModal({
               />
             </label>
 
+            <label className="admin-field admin-field-wide">
+              <span>Percorso immagine</span>
+              <input
+                type="text"
+                placeholder="/images/pizze/margherita.jpeg"
+                value={formState.imagePath}
+                onChange={(event) => setFormState((currentState) => ({ ...currentState, imagePath: event.target.value }))}
+              />
+            </label>
+
             <fieldset className="admin-fieldset">
               <legend>Segnalazioni</legend>
+              <label className="admin-check">
+                <input
+                  type="checkbox"
+                  checked={formState.active}
+                  onChange={(event) => setFormState((currentState) => ({ ...currentState, active: event.target.checked }))}
+                />
+                <span>Attivo</span>
+              </label>
               <label className="admin-check">
                 <input
                   type="checkbox"

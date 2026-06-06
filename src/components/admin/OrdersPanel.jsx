@@ -11,7 +11,6 @@ const ORDER_GROUPS = [
   {
     id: 'todo',
     title: 'Da fare',
-    intro: 'Ordini attivi da gestire adesso, con una lettura piu immediata delle priorita.',
     kicker: 'Operativo',
     emptyTitle: 'Nessun ordine di oggi da fare',
     emptyBody: 'Quando arrivano ordini nella giornata corrente, li trovi subito qui ordinati per orario.',
@@ -19,7 +18,6 @@ const ORDER_GROUPS = [
   {
     id: 'working',
     title: 'In lavorazione',
-    intro: 'Ordini gia in forno, separati dal flusso iniziale per seguire meglio la preparazione.',
     kicker: 'Cucina',
     emptyTitle: 'Nessun ordine in lavorazione',
     emptyBody: 'Quando un ordine passa a In forno, viene spostato qui fino a quando sara pronto.',
@@ -27,7 +25,6 @@ const ORDER_GROUPS = [
   {
     id: 'closed',
     title: 'Chiusi',
-    intro: 'Storico degli ordini gia conclusi, consultabile in una vista separata e piu discreta.',
     kicker: 'Archivio',
     emptyTitle: 'Nessun ordine di oggi chiuso',
     emptyBody: 'Gli ordini chiusi della giornata corrente restano qui come storico rapido.',
@@ -424,10 +421,6 @@ function OrdersPanel({ orders, loading, error, onRefresh, onUpdateOrderStatus })
           <div>
             <p className="admin-kicker">Ordini</p>
             <h2 id="admin-orders-title">Ordini</h2>
-            <p className="admin-section-intro">
-              La lista mette in primo piano cliente, orario, servizio e totale, mentre il riepilogo completo si apre
-              in una scheda dedicata. Vengono mostrati solo gli ordini della giornata corrente.
-            </p>
           </div>
 
           <div className="admin-orders-summary">
@@ -468,7 +461,6 @@ function OrdersPanel({ orders, loading, error, onRefresh, onUpdateOrderStatus })
                   <div className="admin-orders-group-copy">
                     <p className="admin-kicker">{group.kicker}</p>
                     <h3 id={`admin-orders-group-${group.id}`}>{group.title}</h3>
-                    <p>{group.intro}</p>
                   </div>
                 </div>
 

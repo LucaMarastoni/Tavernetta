@@ -113,6 +113,7 @@ function MenuManager({
                   </div>
 
                   <div className="admin-badge-row">
+                    {!item.active ? <span className="admin-inline-badge is-muted">Non attiva</span> : null}
                     {item.spicy ? <span className="admin-inline-badge is-accent">Piccante</span> : null}
                     {item.vegetarian ? <span className="admin-inline-badge">Vegetariana</span> : null}
                   </div>
@@ -127,6 +128,7 @@ function MenuManager({
                     {item.allergens.length ? `Allergeni: ${formatAllergenList(item.allergens)}` : 'Senza allergeni indicati'}
                   </span>
                   {item.note ? <span>Nota: {item.note}</span> : null}
+                  {item.imagePath ? <span>Immagine: {item.imagePath}</span> : null}
                 </div>
               </div>
 

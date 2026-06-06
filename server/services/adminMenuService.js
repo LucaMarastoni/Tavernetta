@@ -22,8 +22,8 @@ const CANONICAL_CATEGORY_SLUG_BY_NAME = {
   'i calzoni': 'i-calzoni',
   'calzoni in fritteria': 'calzoni-in-fritteria',
 };
-const MENU_ITEM_FLAGS_SELECT = `id, category_id, slug, name, spicy, vegetarian, ${ALLERGEN_FIELDS.join(', ')}`;
-const MENU_ITEM_SELECT = `id, category_id, name, slug, description, base_price, active, featured, sort_order, note, ${ALLERGEN_FIELDS.join(', ')}`;
+const MENU_ITEM_FLAGS_SELECT = `id, category_id, slug, name, image_path, active, spicy, vegetarian, ${ALLERGEN_FIELDS.join(', ')}`;
+const MENU_ITEM_SELECT = `id, category_id, name, slug, description, base_price, image_path, active, featured, sort_order, note, ${ALLERGEN_FIELDS.join(', ')}`;
 
 function assertSupabaseAdminMenuConfig() {
   if (!hasSupabaseConfig()) {
@@ -85,6 +85,8 @@ function normalizeFlags(row = {}) {
     id: normalizeIdentifier(row.id),
     slug: normalizeIdentifier(row.slug),
     name: normalizeText(row.name),
+    imagePath: normalizeText(row.image_path),
+    active: row.active !== false,
     spicy: Boolean(row.spicy),
     vegetarian: Boolean(row.vegetarian),
     allergens: Object.entries(ALLERGEN_FIELD_BY_CODE)
@@ -167,6 +169,8 @@ function normalizeMenuItemPayload(payload = {}) {
     price,
     ingredients,
     note: normalizeText(payload.note) || null,
+    imagePath: normalizeText(payload.imagePath),
+    active: payload.active !== false,
     spicy: Boolean(payload.spicy),
     vegetarian: Boolean(payload.vegetarian),
     allergens: Array.isArray(payload.allergens) ? payload.allergens : [],
@@ -345,7 +349,8 @@ function buildMenuItemPayload(draft, category, itemSlug, sortOrder) {
     slug: itemSlug,
     description: draft.ingredients.join(', '),
     base_price: draft.price,
-    active: true,
+    image_path: draft.imagePath || null,
+    active: draft.active,
     featured: false,
     note: draft.note,
     ...buildFlagsPayload(draft),

@@ -13,7 +13,7 @@ const ALLERGEN_FIELD_BY_CODE = {
 };
 
 const ALLERGEN_FIELDS = Object.values(ALLERGEN_FIELD_BY_CODE);
-const MENU_ITEM_FLAGS_SELECT = `id, slug, name, spicy, vegetarian, ${ALLERGEN_FIELDS.join(', ')}`;
+const MENU_ITEM_FLAGS_SELECT = `id, slug, name, image_path, active, spicy, vegetarian, ${ALLERGEN_FIELDS.join(', ')}`;
 const isStaticExport = import.meta.env.VITE_STATIC_EXPORT === 'true';
 
 function createAdminMenuError(code, message = code) {
@@ -62,6 +62,8 @@ function normalizeFlags(row = {}) {
     id: normalizeText(row.id),
     slug: normalizeText(row.slug),
     name: normalizeText(row.name),
+    imagePath: normalizeText(row.image_path),
+    active: row.active !== false,
     spicy: Boolean(row.spicy),
     vegetarian: Boolean(row.vegetarian),
     allergens: Object.entries(ALLERGEN_FIELD_BY_CODE)

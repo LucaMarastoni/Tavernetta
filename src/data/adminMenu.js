@@ -64,6 +64,8 @@ function mapCatalogItemToAdminItem(item, categorySlug, itemIndex) {
     spicy: Boolean(item?.spicy) || tags.includes('piccante'),
     vegetarian: Boolean(item?.vegetarian) || tags.includes('vegetariana'),
     ingredients: readCatalogItemIngredients(item),
+    imagePath: cleanInlineText(item?.imagePath ?? item?.imageUrl ?? ''),
+    active: item?.active !== false,
     note: cleanInlineText(item?.note || ''),
   };
 }
@@ -149,6 +151,8 @@ export function buildPizzaFormState(item, fallbackCategoryName = '') {
     allergens: Array.isArray(item?.allergens) ? item.allergens.map((entry) => Number(entry)) : [],
     spicy: Boolean(item?.spicy),
     vegetarian: Boolean(item?.vegetarian),
+    imagePath: item?.imagePath ?? '',
+    active: item?.active !== false,
     note: item?.note ?? '',
   };
 }
