@@ -166,10 +166,10 @@ export const restaurant = {
     deliveryEstimate: 'Consegna disponibile dopo 25 minuti dal momento dell ordine.',
     emptyCartTitle: 'Il carrello e ancora vuoto.',
     emptyCartBody: 'Aggiungi dalla carta i piatti che desideri e costruisci il tuo ordine con calma.',
-    successEyebrow: 'Ordine ricevuto',
-    successTitle: 'La richiesta e stata registrata correttamente.',
+    successEyebrow: 'Ci siamo',
+    successTitle: 'Abbiamo preso in carico il tuo ordine.',
     successBody:
-      'Ti ricontatteremo se serviranno dettagli aggiuntivi o conferme sull orario richiesto.',
+      'Stiamo preparando tutto con cura. Se ci servira un dettaglio in piu ti chiameremo al numero indicato.',
   },
   aboutPage: {
     eyebrow: 'Chi siamo',

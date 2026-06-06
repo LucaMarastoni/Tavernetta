@@ -1721,7 +1721,7 @@
 
 .ordering-success-summary {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: 0.8rem;
 }
 
@@ -1750,9 +1750,46 @@
 
 .ordering-success-item {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
+}
+
+.ordering-success-item-copy {
+  display: grid;
+  min-width: 0;
+  gap: 0.45rem;
+}
+
+.ordering-success-item-copy > span {
+  font-weight: 700;
+}
+
+.ordering-success-item-summary {
+  display: grid;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--color-mocha);
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
+.ordering-success-item strong {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+@media (max-width: 540px) {
+  .ordering-success-item {
+    display: grid;
+    gap: 0.7rem;
+  }
+
+  .ordering-success-item strong {
+    justify-self: start;
+  }
 }
 
 .ordering-page-checkout {

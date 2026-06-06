@@ -159,8 +159,10 @@ export function getCartLineSummary(line) {
     );
   }
 
-  if (line.note) {
-    summary.push(`Nota: ${line.note}`);
+  const note = line.note || line.customization?.specialNotes || '';
+
+  if (note) {
+    summary.push(`Nota: ${note}`);
   }
 
   return summary;

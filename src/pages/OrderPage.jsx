@@ -14,6 +14,7 @@ import {
   getPreferredTimeValidationCode,
   serializePreferredTimeValue,
 } from '../../shared/orderTiming.js';
+import { getCartLineSummary } from '../utils/cart';
 import { formatPrice } from '../utils/formatPrice';
 import { sanitizeOrderDraft, validateOrderDraft } from '../utils/validators';
 
@@ -158,14 +159,29 @@ function OrderPage() {
             </div>
 
             <div className="ordering-success-items">
-              {successOrder.items?.map((item) => (
-                <div key={item.id} className="ordering-success-item">
-                  <span>
-                    {item.quantity} x {item.name}
-                  </span>
-                  <strong>{formatPrice(item.lineTotal)}</strong>
-                </div>
-              ))}
+              {successOrder.items?.map((item) => {
+                const itemSummary = getCartLineSummary(item);
+
+                return (
+                  <div key={item.id} className="ordering-success-item">
+                    <div className="ordering-success-item-copy">
+                      <span>
+                        {item.quantity} x {item.name}
+                      </span>
+
+                      {itemSummary.length ? (
+                        <ul className="ordering-success-item-summary" role="list">
+                          {itemSummary.map((entry) => (
+                            <li key={entry}>{entry}</li>
+                          ))}
+                        </ul>
+                      ) : null}
+                    </div>
+
+                    <strong>{formatPrice(item.lineTotal)}</strong>
+                  </div>
+                );
+              })}
             </div>
 
             <Link className="ordering-primary-cta" to="/menu" viewTransition>
