@@ -1,6 +1,10 @@
 export const PICKUP_LEAD_MINUTES = 15;
 export const DELIVERY_LEAD_MINUTES = 25;
-export const ORDER_TIME_STEP_MINUTES = 5;
+export const ORDER_TIME_STEP_MINUTES = 30;
+export const ORDER_OPEN_HOUR = 19;
+export const ORDER_OPEN_MINUTE = 0;
+export const ORDER_CLOSE_HOUR = 22;
+export const ORDER_CLOSE_MINUTE = 0;
 
 function padNumber(value) {
   return String(value).padStart(2, '0');
@@ -102,9 +106,22 @@ export function roundDateUp(date, stepMinutes = ORDER_TIME_STEP_MINUTES) {
   return new Date(Math.ceil(roundedDate.getTime() / stepMilliseconds) * stepMilliseconds);
 }
 
+export function getOrderingWindowStart(now = new Date()) {
+  const resolvedDate = new Date(now);
+  resolvedDate.setHours(ORDER_OPEN_HOUR, ORDER_OPEN_MINUTE, 0, 0);
+  return resolvedDate;
+}
+
+export function getOrderingWindowEnd(now = new Date()) {
+  const resolvedDate = new Date(now);
+  resolvedDate.setHours(ORDER_CLOSE_HOUR, ORDER_CLOSE_MINUTE, 0, 0);
+  return resolvedDate;
+}
+
 export function getMinimumPreferredTime(orderType = 'pickup', now = new Date()) {
   const nextDate = new Date(now.getTime() + getLeadTimeMinutes(orderType) * 60 * 1000);
-  return roundDateUp(nextDate);
+  const orderingWindowStart = getOrderingWindowStart(now);
+  return roundDateUp(nextDate > orderingWindowStart ? nextDate : orderingWindowStart);
 }
 
 export function formatDateTimeLocalValue(value) {
@@ -135,10 +152,18 @@ export function getPreferredTimeValidationCode(preferredTime, orderType = 'picku
     return 'PREFERRED_TIME_REQUIRED';
   }
 
-  const resolvedDate = parsePreferredTimeValue(normalizedValue);
+  const resolvedDate = parsePreferredTimeValue(normalizedValue, now);
 
   if (!resolvedDate) {
     return 'INVALID_PREFERRED_TIME';
+  }
+
+  if (!isSameLocalDate(resolvedDate, now)) {
+    return 'PREFERRED_TIME_NOT_TODAY';
+  }
+
+  if (resolvedDate < getOrderingWindowStart(now) || resolvedDate > getOrderingWindowEnd(now)) {
+    return 'PREFERRED_TIME_OUTSIDE_ORDERING_HOURS';
   }
 
   if (resolvedDate.getTime() < getMinimumPreferredTime(orderType, now).getTime()) {
@@ -159,6 +184,16 @@ export function isSameLocalDate(leftDate, rightDate) {
 export function isCurrentDayPreferredTime(value, today = new Date(), fallbackDateValue = null) {
   const resolvedDate = parsePreferredTimeValue(value, fallbackDateValue);
   return resolvedDate ? isSameLocalDate(resolvedDate, today) : false;
+}
+
+export function formatTimeInputValue(value) {
+  const resolvedDate = parsePreferredTimeValue(value);
+
+  if (!resolvedDate) {
+    return '';
+  }
+
+  return [padNumber(resolvedDate.getHours()), padNumber(resolvedDate.getMinutes())].join(':');
 }
 
 export function formatPreferredTimeClock(value, fallbackDateValue = null, locale = 'it-IT') {

@@ -839,6 +839,9 @@ export async function getMenuItemCustomization(menuItemId) {
   const defaultIngredients = relations.defaultIngredientsByItemId.get(normalizedMenuItemId) ?? [];
   const ingredientCatalog = await getSupabaseIngredientCatalog(client);
   const isCustomizableCategory = CUSTOMIZABLE_CATEGORY_SLUGS.has(category.slug);
+  const visibleDefaultIngredients = isCustomizableCategory
+    ? defaultIngredients
+    : defaultIngredients.map((ingredient) => ({ ...ingredient, isRemovable: false }));
   const allowedExtras = isCustomizableCategory
     ? buildAllowedExtrasFromIngredientCatalog(
         defaultIngredients,
@@ -849,7 +852,7 @@ export async function getMenuItemCustomization(menuItemId) {
 
   return {
     item,
-    defaultIngredients,
+    defaultIngredients: visibleDefaultIngredients,
     removableIngredients: isCustomizableCategory
       ? relations.removableIngredientsByItemId.get(normalizedMenuItemId) ?? []
       : [],

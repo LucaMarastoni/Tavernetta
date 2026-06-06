@@ -1,6 +1,40 @@
 import { Link } from 'react-router-dom';
+import { ORDER_TIME_STEP_MINUTES, formatTimeInputValue } from '../../../shared/orderTiming.js';
 import { formatPrice } from '../../utils/formatPrice';
 import { calculateDeliveryFee } from '../../utils/pricing';
+
+function parseTimeToMinutes(value) {
+  const match = String(value || '').match(/^(\d{2}):(\d{2})$/);
+
+  if (!match) {
+    return null;
+  }
+
+  return Number(match[1]) * 60 + Number(match[2]);
+}
+
+function formatMinutesToTime(totalMinutes) {
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+}
+
+function buildAvailableTimeOptions(minimumPreferredTime, maximumPreferredTime) {
+  const startMinutes = parseTimeToMinutes(minimumPreferredTime);
+  const endMinutes = parseTimeToMinutes(maximumPreferredTime);
+
+  if (startMinutes === null || endMinutes === null || startMinutes > endMinutes) {
+    return [];
+  }
+
+  const options = [];
+
+  for (let currentMinutes = startMinutes; currentMinutes <= endMinutes; currentMinutes += ORDER_TIME_STEP_MINUTES) {
+    options.push(formatMinutesToTime(currentMinutes));
+  }
+
+  return options;
+}
 
 function CheckoutForm({
   draft,
@@ -9,11 +43,15 @@ function CheckoutForm({
   totals,
   submitting,
   minimumPreferredTime,
+  maximumPreferredTime,
   preferredTimeLeadMinutes,
   onFieldChange,
   onSubmit,
 }) {
   const currentDeliveryFee = calculateDeliveryFee(totals.subtotal, 'delivery');
+  const preferredTimeOptions = buildAvailableTimeOptions(minimumPreferredTime, maximumPreferredTime);
+  const selectedPreferredTime = formatTimeInputValue(draft.preferredTime);
+  const preferredTimeValue = preferredTimeOptions.includes(selectedPreferredTime) ? selectedPreferredTime : '';
 
   return (
     <form className="ordering-checkout-card" noValidate onSubmit={onSubmit}>
@@ -93,17 +131,24 @@ function CheckoutForm({
         ) : null}
 
         <label className="ordering-field">
-          <span>Orario ritiro / consegna</span>
-          <input
+          <span>Orario ritiro / consegna di oggi</span>
+          <select
             name="preferredTime"
-            type="datetime-local"
-            min={minimumPreferredTime}
-            step="300"
-            value={draft.preferredTime}
+            value={preferredTimeValue}
             onChange={onFieldChange}
             required
-          />
-          <small>{`Seleziona almeno ${preferredTimeLeadMinutes} minuti dopo l inserimento dell ordine.`}</small>
+            disabled={!preferredTimeOptions.length}
+          >
+            <option value="">
+              {preferredTimeOptions.length ? 'Seleziona orario' : 'Nessun orario disponibile oggi'}
+            </option>
+            {preferredTimeOptions.map((timeOption) => (
+              <option key={timeOption} value={timeOption}>
+                {timeOption}
+              </option>
+            ))}
+          </select>
+          <small>{`Solo oggi dalle 19:00 alle 22:00, almeno ${preferredTimeLeadMinutes} minuti dopo l inserimento.`}</small>
           {fieldErrors.preferredTime ? <small>{fieldErrors.preferredTime}</small> : null}
         </label>
 

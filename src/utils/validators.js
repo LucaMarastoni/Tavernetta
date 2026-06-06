@@ -71,6 +71,12 @@ export function validateOrderDraft({ draft, items }) {
     case 'INVALID_PREFERRED_TIME':
       errors.preferredTime = 'L orario selezionato non e valido.';
       break;
+    case 'PREFERRED_TIME_NOT_TODAY':
+      errors.preferredTime = 'Puoi ordinare solo per il giorno corrente.';
+      break;
+    case 'PREFERRED_TIME_OUTSIDE_ORDERING_HOURS':
+      errors.preferredTime = 'Puoi scegliere un orario tra le 19:00 e le 22:00.';
+      break;
     case 'PREFERRED_TIME_TOO_SOON': {
       const minimumDate = getMinimumPreferredTime(draft.orderType);
       const leadTimeMinutes = getLeadTimeMinutes(draft.orderType);

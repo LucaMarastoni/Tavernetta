@@ -2,8 +2,6 @@ export const CUSTOMIZABLE_CATEGORY_SLUGS = new Set([
   'le-pizze',
   'le-bianche',
   'le-speciali',
-  'i-calzoni',
-  'calzoni-in-fritteria',
 ]);
 
 const EXTRA_GROUPS = {

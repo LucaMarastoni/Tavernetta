@@ -7,10 +7,11 @@ import { useCart } from '../context/CartContext';
 import { restaurant } from '../data/siteContent';
 import { OrderApiError, submitOrder } from '../services/orderApi';
 import {
-  formatDateTimeLocalValue,
   formatPreferredTimeDateTime,
+  formatTimeInputValue,
   getLeadTimeMinutes,
   getMinimumPreferredTime,
+  getOrderingWindowEnd,
   getPreferredTimeValidationCode,
   serializePreferredTimeValue,
 } from '../../shared/orderTiming.js';
@@ -36,10 +37,11 @@ function OrderPage() {
 
   const sanitizedDraft = useMemo(() => sanitizeOrderDraft(orderDraft), [orderDraft]);
   const minimumPreferredTime = useMemo(
-    () => formatDateTimeLocalValue(getMinimumPreferredTime(orderDraft.orderType)),
+    () => formatTimeInputValue(getMinimumPreferredTime(orderDraft.orderType)),
     [orderDraft.orderType],
   );
   const preferredTimeLeadMinutes = useMemo(() => getLeadTimeMinutes(orderDraft.orderType), [orderDraft.orderType]);
+  const maximumPreferredTime = useMemo(() => formatTimeInputValue(getOrderingWindowEnd()), []);
 
   const handleFieldChange = (event) => {
     const { checked, name, type, value } = event.target;
@@ -53,7 +55,7 @@ function OrderPage() {
       const validationCode = getPreferredTimeValidationCode(orderDraft.preferredTime, nextValue);
 
       if (validationCode === 'PREFERRED_TIME_TOO_SOON') {
-        nextDraft.preferredTime = formatDateTimeLocalValue(getMinimumPreferredTime(nextValue));
+        nextDraft.preferredTime = formatTimeInputValue(getMinimumPreferredTime(nextValue));
       }
     }
 
@@ -210,6 +212,7 @@ function OrderPage() {
                 totals={totals}
                 submitting={isSubmitting}
                 minimumPreferredTime={minimumPreferredTime}
+                maximumPreferredTime={maximumPreferredTime}
                 preferredTimeLeadMinutes={preferredTimeLeadMinutes}
                 onFieldChange={handleFieldChange}
                 onSubmit={handleSubmit}

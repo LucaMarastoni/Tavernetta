@@ -75,6 +75,14 @@ function validatePayload(payload) {
       throw new HttpError(400, 'PREFERRED_TIME_REQUIRED', 'Seleziona l orario desiderato per ritiro o consegna.');
     case 'INVALID_PREFERRED_TIME':
       throw new HttpError(400, 'INVALID_PREFERRED_TIME', 'L orario selezionato non e valido.');
+    case 'PREFERRED_TIME_NOT_TODAY':
+      throw new HttpError(400, 'PREFERRED_TIME_NOT_TODAY', 'Puoi ordinare solo per il giorno corrente.');
+    case 'PREFERRED_TIME_OUTSIDE_ORDERING_HOURS':
+      throw new HttpError(
+        400,
+        'PREFERRED_TIME_OUTSIDE_ORDERING_HOURS',
+        'Puoi scegliere un orario tra le 19:00 e le 22:00.',
+      );
     case 'PREFERRED_TIME_TOO_SOON':
       throw new HttpError(
         400,

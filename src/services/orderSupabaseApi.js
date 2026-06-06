@@ -109,6 +109,12 @@ function validatePayload(payload) {
     case 'INVALID_PREFERRED_TIME':
       assert(false, 'INVALID_PREFERRED_TIME');
       break;
+    case 'PREFERRED_TIME_NOT_TODAY':
+      assert(false, 'PREFERRED_TIME_NOT_TODAY');
+      break;
+    case 'PREFERRED_TIME_OUTSIDE_ORDERING_HOURS':
+      assert(false, 'PREFERRED_TIME_OUTSIDE_ORDERING_HOURS');
+      break;
     case 'PREFERRED_TIME_TOO_SOON':
       assert(false, 'PREFERRED_TIME_TOO_SOON');
       break;

@@ -33,6 +33,10 @@ function mapOrderApiError(error) {
       return new OrderApiError('Seleziona l orario desiderato per ritiro o consegna.', code);
     case 'INVALID_PREFERRED_TIME':
       return new OrderApiError('L orario selezionato non e valido.', code);
+    case 'PREFERRED_TIME_NOT_TODAY':
+      return new OrderApiError('Puoi ordinare solo per il giorno corrente.', code);
+    case 'PREFERRED_TIME_OUTSIDE_ORDERING_HOURS':
+      return new OrderApiError('Puoi scegliere un orario tra le 19:00 e le 22:00.', code);
     case 'PREFERRED_TIME_TOO_SOON':
       return new OrderApiError(
         'L orario scelto e troppo vicino. Seleziona un orario piu avanti rispetto adesso.',
