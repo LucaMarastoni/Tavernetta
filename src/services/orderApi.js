@@ -36,7 +36,7 @@ function mapOrderApiError(error) {
     case 'PREFERRED_TIME_NOT_TODAY':
       return new OrderApiError('Puoi ordinare solo per il giorno corrente.', code);
     case 'PREFERRED_TIME_OUTSIDE_ORDERING_HOURS':
-      return new OrderApiError('Puoi scegliere un orario tra le 19:00 e le 22:00.', code);
+      return new OrderApiError('Puoi scegliere un orario tra le 17:00 e le 22:00.', code);
     case 'PREFERRED_TIME_TOO_SOON':
       return new OrderApiError(
         'L orario scelto e troppo vicino. Seleziona un orario piu avanti rispetto adesso.',

@@ -81,7 +81,7 @@ function validatePayload(payload) {
       throw new HttpError(
         400,
         'PREFERRED_TIME_OUTSIDE_ORDERING_HOURS',
-        'Puoi scegliere un orario tra le 19:00 e le 22:00.',
+        'Puoi scegliere un orario tra le 17:00 e le 22:00.',
       );
     case 'PREFERRED_TIME_TOO_SOON':
       throw new HttpError(

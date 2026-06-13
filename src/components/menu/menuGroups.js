@@ -62,6 +62,7 @@ export const MENU_GROUPS = [
     title: 'Vini',
     description: 'La carta vini con bottiglie, calici e pairing costruiti attorno alla cucina.',
     ctaLabel: 'Vai alla carta',
+    slugs: ['vini', 'vini-bianchi', 'vini-rose', 'vini-rossi'],
     patterns: [/vin/i, /wine/i, /cantina/i, /calic/i, /bottigli/i],
   },
 ];

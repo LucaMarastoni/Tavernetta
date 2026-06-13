@@ -1,7 +1,7 @@
 export const PICKUP_LEAD_MINUTES = 15;
 export const DELIVERY_LEAD_MINUTES = 25;
 export const ORDER_TIME_STEP_MINUTES = 30;
-export const ORDER_OPEN_HOUR = 19;
+export const ORDER_OPEN_HOUR = 17;
 export const ORDER_OPEN_MINUTE = 0;
 export const ORDER_CLOSE_HOUR = 22;
 export const ORDER_CLOSE_MINUTE = 0;

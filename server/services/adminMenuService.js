@@ -21,6 +21,14 @@ const CANONICAL_CATEGORY_SLUG_BY_NAME = {
   'le speciali': 'le-speciali',
   'i calzoni': 'i-calzoni',
   'calzoni in fritteria': 'calzoni-in-fritteria',
+  vini: 'vini',
+  'i vini': 'vini',
+  'vini bianchi': 'vini-bianchi',
+  bianchi: 'vini-bianchi',
+  'vini rose': 'vini-rose',
+  rose: 'vini-rose',
+  'vini rossi': 'vini-rossi',
+  rossi: 'vini-rossi',
 };
 const MENU_ITEM_FLAGS_SELECT = `id, category_id, slug, name, image_path, active, spicy, vegetarian, ${ALLERGEN_FIELDS.join(', ')}`;
 const MENU_ITEM_SELECT = `id, category_id, name, slug, description, base_price, image_path, active, featured, sort_order, note, ${ALLERGEN_FIELDS.join(', ')}`;

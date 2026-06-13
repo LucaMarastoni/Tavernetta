@@ -1,6 +1,21 @@
 import { useEffect, useMemo, useState } from 'react';
 import { buildPizzaFormState } from '../../data/adminMenu';
 
+const WINE_CATEGORY_OPTIONS = [
+  { key: 'white', label: 'Bianchi', categoryName: 'Vini Bianchi' },
+  { key: 'rose', label: 'Rose', categoryName: 'Vini Rose' },
+  { key: 'red', label: 'Rossi', categoryName: 'Vini Rossi' },
+];
+
+function normalizeComparableText(value = '') {
+  return String(value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase();
+}
+
 function PizzaEditorModal({
   open,
   mode,
@@ -47,6 +62,10 @@ function PizzaEditorModal({
   if (!open) {
     return null;
   }
+
+  const selectedWineCategory = WINE_CATEGORY_OPTIONS.find(
+    (option) => normalizeComparableText(option.categoryName) === normalizeComparableText(formState.categoryName),
+  );
 
   const toggleAllergen = (code) => {
     setFormState((currentState) => ({
@@ -140,6 +159,25 @@ function PizzaEditorModal({
                 ))}
               </datalist>
             </label>
+
+            <fieldset className="admin-fieldset admin-fieldset-wide">
+              <legend>Tipologia vino</legend>
+              <div className="admin-toggle-row" role="group" aria-label="Tipologia vino">
+                {WINE_CATEGORY_OPTIONS.map((option) => (
+                  <button
+                    key={option.key}
+                    className={`admin-toggle-chip ${selectedWineCategory?.key === option.key ? 'is-active' : ''}`}
+                    type="button"
+                    aria-pressed={selectedWineCategory?.key === option.key}
+                    onClick={() =>
+                      setFormState((currentState) => ({ ...currentState, categoryName: option.categoryName }))
+                    }
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </fieldset>
 
             <label className="admin-field admin-field-wide">
               <span>Ingredienti</span>

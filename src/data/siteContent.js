@@ -161,7 +161,7 @@ export const restaurant = {
     eyebrow: 'Carta disponibile oggi',
     title: 'Scegli con calma, aggiungi al carrello, conferma in pochi passaggi.',
     intro:
-      'La selezione online segue la disponibilita reale del servizio serale. Ogni richiesta entra subito nel flusso operativo, pronta per la conferma della sala.',
+      'La selezione online segue la disponibilita reale del servizio. Ogni richiesta entra subito nel flusso operativo, pronta per la conferma della sala.',
     pickupEstimate: 'Ritiro disponibile dopo 15 minuti dal momento dell ordine.',
     deliveryEstimate: 'Consegna disponibile dopo 25 minuti dal momento dell ordine.',
     emptyCartTitle: 'Il carrello e ancora vuoto.',
@@ -237,7 +237,7 @@ export const restaurant = {
       'Tavernetta non ruota attorno a una firma solitaria, ma a un modo condiviso di trattare il tempo, il gusto e l accoglienza.',
     ],
     highlights: [
-      { label: 'Forno acceso', value: 'ogni sera' },
+      { label: 'Forno acceso', value: 'pranzo e sera' },
       { label: 'Carta vini', value: '140 etichette' },
       { label: 'Servizio di sala', value: 'discreto e continuo' },
     ],
@@ -262,7 +262,7 @@ export const restaurant = {
     mapEmbedUrl:
       'https://www.google.com/maps?q=Via%20Federico%20Garofoli%2C%20105%2C%2037057%20San%20Giovanni%20Lupatoto%20VR&z=16&output=embed',
     hours: [
-      { day: 'Martedi - Domenica', time: '19:00 - 22:00' },
+      { day: 'Martedi - Domenica', time: '8:00 - 14:00 / 17:00 - 22:00' },
       { day: 'Lunedi', time: 'Chiuso' },
     ],
   },

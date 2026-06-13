@@ -22,6 +22,14 @@ const CANONICAL_CATEGORY_SLUG_BY_NAME = {
   'le speciali': 'le-speciali',
   'i calzoni': 'i-calzoni',
   'calzoni in fritteria': 'calzoni-in-fritteria',
+  vini: 'vini',
+  'i vini': 'vini',
+  'vini bianchi': 'vini-bianchi',
+  bianchi: 'vini-bianchi',
+  'vini rose': 'vini-rose',
+  rose: 'vini-rose',
+  'vini rossi': 'vini-rossi',
+  rossi: 'vini-rossi',
 };
 
 function createAdminMenuError(code, message = code) {
