@@ -32,6 +32,8 @@ function Footer() {
             Copyright {new Date().getFullYear()} {restaurant.name}. Tutti i diritti riservati.
           </p>
 
+          <p className="footer-copy">P.IVA 03972220234</p>
+
           <p className="footer-credit">
             Realizzato da{' '}
             <a href="https://lucamarastoni.eu" rel="noreferrer" target="_blank">

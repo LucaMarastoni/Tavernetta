@@ -6,8 +6,8 @@ const sections = [
   {
     title: 'Titolare del trattamento',
     body: [
-      'Titolare del trattamento dei dati personali e Alessandra Zangari.',
-      'Il titolare e contattabile al numero +39 349 793 7426. L indirizzo email dedicato alla privacy sara indicato appena disponibile.',
+      'Titolare del trattamento dei dati personali e Vecchie Elena.',
+      'Il titolare e contattabile al numero +39 349 793 7426 e all indirizzo email tavernetta.marchesino@yahoo.com.',
     ],
   },
   {
@@ -59,7 +59,7 @@ const sections = [
     body: [
       'L utente puo chiedere accesso, rettifica, cancellazione, limitazione del trattamento, opposizione e portabilita dei dati nei limiti previsti dagli articoli 15-22 del GDPR.',
       'E sempre possibile revocare il consenso ai cookie opzionali senza pregiudicare la liceita del trattamento basato sul consenso prestato prima della revoca.',
-      'Per esercitare i diritti e possibile contattare il titolare al numero +39 349 793 7426. Resta salvo il diritto di proporre reclamo all Autorita Garante per la protezione dei dati personali.',
+      'Per esercitare i diritti e possibile contattare il titolare al numero +39 349 793 7426 o all indirizzo email tavernetta.marchesino@yahoo.com. Resta salvo il diritto di proporre reclamo all Autorita Garante per la protezione dei dati personali.',
     ],
   },
   {
