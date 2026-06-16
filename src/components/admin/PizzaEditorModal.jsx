@@ -17,7 +17,8 @@ function normalizeComparableText(value = '') {
 }
 
 function parsePrice(value) {
-  const price = Number.parseFloat(String(value ?? '').replace(',', '.'));
+  const normalizedValue = String(value ?? '').replace(',', '.').trim();
+  const price = normalizedValue ? Number(normalizedValue) : null;
   return Number.isFinite(price) ? price : null;
 }
 
@@ -144,8 +145,6 @@ function PizzaEditorModal({
               <input
                 type="text"
                 inputMode="decimal"
-                min="0"
-                step="0.01"
                 value={formState.price}
                 onChange={(event) => setFormState((currentState) => ({ ...currentState, price: event.target.value }))}
               />
