@@ -119,7 +119,7 @@ function slugify(value = '') {
 }
 
 function normalizePrice(value) {
-  const price = Number(value);
+  const price = Number(String(value ?? '').replace(',', '.'));
   return Number.isFinite(price) && price >= 0 ? price : null;
 }
 

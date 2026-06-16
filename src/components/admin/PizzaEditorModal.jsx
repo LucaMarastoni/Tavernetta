@@ -16,6 +16,11 @@ function normalizeComparableText(value = '') {
     .toLowerCase();
 }
 
+function parsePrice(value) {
+  const price = Number.parseFloat(String(value ?? '').replace(',', '.'));
+  return Number.isFinite(price) ? price : null;
+}
+
 function PizzaEditorModal({
   open,
   mode,
@@ -54,9 +59,9 @@ function PizzaEditorModal({
   const canSubmit = useMemo(() => {
     const name = formState.name.trim();
     const categoryName = formState.categoryName.trim();
-    const price = Number.parseFloat(formState.price);
+    const price = parsePrice(formState.price);
 
-    return Boolean(name && categoryName && Number.isFinite(price) && price >= 0);
+    return Boolean(name && categoryName && price !== null && price >= 0);
   }, [formState]);
 
   if (!open) {
@@ -87,7 +92,7 @@ function PizzaEditorModal({
       id: formState.id,
       name: formState.name.trim(),
       categoryName: formState.categoryName.trim(),
-      price: Number.parseFloat(formState.price),
+      price: parsePrice(formState.price),
       ingredients: formState.ingredients
         .split(',')
         .map((entry) => entry.trim())
@@ -137,9 +142,10 @@ function PizzaEditorModal({
             <label className="admin-field">
               <span>Prezzo</span>
               <input
-                type="number"
+                type="text"
+                inputMode="decimal"
                 min="0"
-                step="0.1"
+                step="0.01"
                 value={formState.price}
                 onChange={(event) => setFormState((currentState) => ({ ...currentState, price: event.target.value }))}
               />
