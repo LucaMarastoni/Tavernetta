@@ -565,7 +565,7 @@ function CustomizationDrawer({ open, loading, error, configuration, initialLine,
           <div className="menu-product-extra-overlay" id="menu-product-extra-panel" role="dialog" aria-modal="true">
             <div className="menu-product-extra-overlay-head">
               <div>
-                <p>Tutti gli ingredienti del menu</p>
+                <p>Ingredienti extra</p>
                 <span>{`${configuration.allowedExtras.length} disponibili`}</span>
               </div>
 
@@ -584,6 +584,7 @@ function CustomizationDrawer({ open, loading, error, configuration, initialLine,
                 {configuration.allowedExtras.map((extra) => {
                   const isActive = state.addedExtraIds.includes(normalizeDrawerId(extra.id));
                   const metaText = extra.description || '';
+                  const priceText = extra.extraPrice > 0 ? `+${formatPrice(extra.extraPrice)}` : '';
 
                   return (
                     <button
@@ -597,7 +598,7 @@ function CustomizationDrawer({ open, loading, error, configuration, initialLine,
                         {metaText ? <small>{metaText}</small> : null}
                       </div>
 
-                      <span>{`${isActive ? 'Aggiunto ' : ''}${formatPrice(extra.extraPrice)}`}</span>
+                      <span>{[isActive ? 'Aggiunto' : '', priceText].filter(Boolean).join(' ')}</span>
                     </button>
                   );
                 })}
