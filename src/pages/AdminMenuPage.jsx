@@ -1,14 +1,17 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import CategoriesPanel from '../components/admin/CategoriesPanel';
 import ConfirmDialog from '../components/admin/ConfirmDialog';
+import ExtraIngredientsPanel from '../components/admin/ExtraIngredientsPanel';
 import MenuManager from '../components/admin/MenuManager';
 import PizzaEditorModal from '../components/admin/PizzaEditorModal';
 import {
   canUseSupabaseAdminMenu,
   deleteSupabaseMenuItem,
+  fetchSupabaseExtraIngredients,
   fetchSupabaseMenuItemFlags,
   saveSupabaseMenuItem,
+  updateSupabaseExtraIngredientPrice,
 } from '../services/adminMenuSupabaseApi';
 
 function AdminMenuPage() {
@@ -40,6 +43,12 @@ function AdminMenuPage() {
   const [editorStatus, setEditorStatus] = useState({
     loading: false,
     saving: false,
+    error: '',
+  });
+  const [extraIngredients, setExtraIngredients] = useState([]);
+  const [extraIngredientsStatus, setExtraIngredientsStatus] = useState({
+    loading: true,
+    savingId: null,
     error: '',
   });
   const [confirmState, setConfirmState] = useState({
@@ -122,6 +131,51 @@ function AdminMenuPage() {
 
   const updateFilters = (key, value) => {
     setFilters((currentFilters) => ({ ...currentFilters, [key]: value }));
+  };
+
+  const loadExtraIngredients = useCallback(async () => {
+    setExtraIngredientsStatus((currentStatus) => ({ ...currentStatus, loading: true, error: '' }));
+
+    try {
+      setExtraIngredients(await fetchSupabaseExtraIngredients());
+      setExtraIngredientsStatus({ loading: false, savingId: null, error: '' });
+    } catch (error) {
+      setExtraIngredientsStatus({
+        loading: false,
+        savingId: null,
+        error: error.message || 'Non riusciamo a leggere gli ingredienti aggiuntivi.',
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    loadExtraIngredients();
+  }, [loadExtraIngredients]);
+
+  const handleSaveExtraIngredient = async (ingredient, price) => {
+    setExtraIngredientsStatus((currentStatus) => ({
+      ...currentStatus,
+      savingId: ingredient.id,
+      error: '',
+    }));
+
+    try {
+      const updatedIngredient = await updateSupabaseExtraIngredientPrice(ingredient, price);
+      setExtraIngredients((currentIngredients) =>
+        currentIngredients.map((currentIngredient) =>
+          currentIngredient.id === ingredient.id ? { ...currentIngredient, ...updatedIngredient } : currentIngredient,
+        ),
+      );
+      setExtraIngredientsStatus({ loading: false, savingId: null, error: '' });
+      return updatedIngredient;
+    } catch (error) {
+      setExtraIngredientsStatus({
+        loading: false,
+        savingId: null,
+        error: error.message || 'Non riusciamo ad aggiornare il prezzo.',
+      });
+      throw error;
+    }
   };
 
   const closeEditor = () => {
@@ -270,6 +324,15 @@ function AdminMenuPage() {
             onCreatePizza={openCreatePizza}
             onEditPizza={openEditPizza}
             onDeletePizza={openDeletePizzaDialog}
+          />
+
+          <ExtraIngredientsPanel
+            ingredients={extraIngredients}
+            loading={extraIngredientsStatus.loading}
+            error={extraIngredientsStatus.error}
+            savingId={extraIngredientsStatus.savingId}
+            onRetry={loadExtraIngredients}
+            onSave={handleSaveExtraIngredient}
           />
 
           <CategoriesPanel

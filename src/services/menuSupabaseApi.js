@@ -738,6 +738,27 @@ async function getSupabaseIngredientCatalog(client) {
     .sort(sortByOrderThenName);
 }
 
+async function getSupabaseExtraIngredientCatalog(client) {
+  const rows = await runSupabaseQuery(
+    client
+      .from('extra_ingredients')
+      .select('id, ingredient_id, extra_price, sort_order, active')
+      .eq('active', true)
+      .order('sort_order'),
+  );
+
+  return rows
+    .filter((extra) => extra.active !== false)
+    .map((extra) => ({
+      id: normalizeId(extra.id),
+      extraIngredientId: normalizeId(extra.id),
+      ingredientId: normalizeId(extra.ingredient_id),
+      extraPrice: normalizeNumber(extra.extra_price),
+      sortOrder: normalizeNumber(extra.sort_order),
+    }))
+    .filter((extra) => Boolean(extra.id) && Boolean(extra.ingredientId));
+}
+
 function getConfiguredClient() {
   const client = getBrowserSupabase();
 
@@ -785,17 +806,16 @@ export async function fetchMenuItemCustomizationFromSupabase(menuItemId) {
   const relations = await loadSupabaseRelations(client, [normalizedMenuItemId]);
   const item = buildSupabaseMenuItem(row, category, client, relations);
   const defaultIngredients = relations.defaultIngredientsByItemId.get(normalizedMenuItemId) ?? [];
-  const ingredientCatalog = await getSupabaseIngredientCatalog(client);
+  const [ingredientCatalog, extraIngredientCatalog] = await Promise.all([
+    getSupabaseIngredientCatalog(client),
+    getSupabaseExtraIngredientCatalog(client),
+  ]);
   const isCustomizableCategory = CUSTOMIZABLE_CATEGORY_SLUGS.has(category.slug);
   const visibleDefaultIngredients = isCustomizableCategory
     ? defaultIngredients
     : defaultIngredients.map((ingredient) => ({ ...ingredient, isRemovable: false }));
   const allowedExtras = isCustomizableCategory
-    ? buildAllowedExtrasFromIngredientCatalog(
-        defaultIngredients,
-        ingredientCatalog,
-        relations.allowedExtrasByItemId.get(normalizedMenuItemId) ?? [],
-      )
+    ? buildAllowedExtrasFromIngredientCatalog(defaultIngredients, ingredientCatalog, extraIngredientCatalog)
     : [];
 
   return {

@@ -423,6 +423,7 @@
 
 .admin-menu-list,
 .admin-categories-list,
+.admin-extra-list,
 .admin-orders-list {
   display: grid;
   gap: 0.8rem;
@@ -430,6 +431,7 @@
 
 .admin-menu-row,
 .admin-category-row,
+.admin-extra-row,
 .admin-order-card,
 .admin-empty-state {
   display: grid;
@@ -446,7 +448,8 @@
 }
 
 .admin-menu-row-main,
-.admin-category-row-main {
+.admin-category-row-main,
+.admin-extra-row-main {
   display: grid;
   gap: 0.45rem;
   min-width: 0;
@@ -462,6 +465,7 @@
 
 .admin-menu-row-head h3,
 .admin-category-row h3,
+.admin-extra-row h3,
 .admin-order-card h3,
 .admin-overview-card h3,
 .admin-setting-card h3,
@@ -505,6 +509,70 @@
 .admin-category-row {
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
+}
+
+.admin-extra-search {
+  max-width: 28rem;
+}
+
+.admin-extra-row {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+.admin-extra-row-main p {
+  color: var(--color-mocha);
+  font-size: 0.88rem;
+}
+
+.admin-extra-row-side {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+.admin-extra-row-side strong {
+  min-width: 5rem;
+  font-size: 1.18rem;
+  text-align: right;
+}
+
+.admin-extra-price-editor {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.admin-extra-price-field {
+  position: relative;
+  display: block;
+  width: 8rem;
+}
+
+.admin-field.admin-extra-price-field input {
+  padding-left: 2.25rem;
+}
+
+.admin-extra-currency {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: 1rem;
+  transform: translateY(-50%);
+  color: var(--color-terra);
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.admin-extra-error {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.8rem;
 }
 
 .admin-inline-editor {
@@ -1035,6 +1103,7 @@
   .admin-orders-group-head,
   .admin-menu-row,
   .admin-category-row,
+  .admin-extra-row,
   .admin-order-card-head,
   .admin-modal-head {
     grid-template-columns: 1fr;
@@ -1044,10 +1113,20 @@
 
   .admin-header-actions,
   .admin-menu-row-side,
+  .admin-extra-row-side,
   .admin-order-summary,
   .admin-orders-summary {
     justify-content: flex-start;
     justify-items: start;
+  }
+
+  .admin-extra-price-editor {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .admin-extra-row-side strong {
+    text-align: left;
   }
 
   .admin-order-hero-total,
@@ -1145,5 +1224,20 @@
 
   .admin-allergen-grid {
     grid-template-columns: 1fr;
+  }
+
+  .admin-extra-row-side,
+  .admin-extra-price-editor,
+  .admin-extra-price-editor .admin-row-actions {
+    width: 100%;
+  }
+
+  .admin-extra-price-field {
+    width: 100%;
+  }
+
+  .admin-extra-price-editor .admin-row-actions > button,
+  .admin-extra-row-side > button {
+    flex: 1 1 9rem;
   }
 }

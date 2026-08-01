@@ -24,6 +24,7 @@ alter table if exists public.categories enable row level security;
 alter table if exists public.menu_items enable row level security;
 alter table if exists public.ingredients enable row level security;
 alter table if exists public.menu_item_ingredients enable row level security;
+alter table if exists public.extra_ingredients enable row level security;
 
 grant usage on schema public to anon, authenticated;
 
@@ -31,11 +32,13 @@ grant select on table public.categories to anon, authenticated;
 grant select on table public.menu_items to anon, authenticated;
 grant select on table public.ingredients to anon, authenticated;
 grant select on table public.menu_item_ingredients to anon, authenticated;
+grant select on table public.extra_ingredients to anon, authenticated;
 
 grant insert, update on table public.categories to authenticated;
 grant insert, update on table public.menu_items to authenticated;
 grant insert, update on table public.ingredients to authenticated;
 grant insert, delete on table public.menu_item_ingredients to authenticated;
+grant update (extra_price) on table public.extra_ingredients to authenticated;
 
 drop policy if exists tavernetta_public_select_menu_items on public.menu_items;
 drop policy if exists tavernetta_public_update_menu_item_flags on public.menu_items;
@@ -55,6 +58,9 @@ drop policy if exists tavernetta_admin_update_ingredients on public.ingredients;
 drop policy if exists tavernetta_public_select_menu_item_ingredients on public.menu_item_ingredients;
 drop policy if exists tavernetta_admin_insert_menu_item_ingredients on public.menu_item_ingredients;
 drop policy if exists tavernetta_admin_delete_menu_item_ingredients on public.menu_item_ingredients;
+
+drop policy if exists tavernetta_public_select_extra_ingredients on public.extra_ingredients;
+drop policy if exists tavernetta_admin_update_extra_ingredient_prices on public.extra_ingredients;
 
 create policy tavernetta_public_select_categories
   on public.categories
@@ -138,3 +144,16 @@ create policy tavernetta_admin_delete_menu_item_ingredients
   for delete
   to authenticated
   using (public.is_tavernetta_admin());
+
+create policy tavernetta_public_select_extra_ingredients
+  on public.extra_ingredients
+  for select
+  to anon, authenticated
+  using (active = true or public.is_tavernetta_admin());
+
+create policy tavernetta_admin_update_extra_ingredient_prices
+  on public.extra_ingredients
+  for update
+  to authenticated
+  using (public.is_tavernetta_admin())
+  with check (public.is_tavernetta_admin() and extra_price >= 0);

@@ -1,7 +1,7 @@
 import { Link, NavLink } from 'react-router-dom';
 
 const adminLinks = [
-  { to: '/admin/menu', label: 'Menu', caption: 'Prodotti, categorie e filtri' },
+  { to: '/admin/menu', label: 'Menu', caption: 'Prodotti, extra e categorie' },
   { to: '/admin/ordini', label: 'Ordini', caption: 'Servizio, stati e priorita' },
 ];
 

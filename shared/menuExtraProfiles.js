@@ -464,6 +464,7 @@ export function buildAllowedExtrasFromIngredientCatalog(
         ? cleanInlineText(profile?.labelWhenPresent || `Extra ${baseName}`)
         : cleanInlineText(profile?.labelWhenAbsent || explicitExtra?.name || baseName);
       const fixedPrice = resolveFixedExtraPrice(normalizedSlug, group.id);
+      const explicitPrice = explicitExtra ? normalizeNumber(explicitExtra.extraPrice, null) : null;
 
       return {
         id: cleanInlineText(explicitExtra?.id ?? explicitExtra?.extraIngredientId) || createSyntheticExtraId(ingredientId, normalizedSlug, baseName),
@@ -476,8 +477,9 @@ export function buildAllowedExtrasFromIngredientCatalog(
         allergenInfo: ingredient.allergenInfo ?? explicitExtra?.allergenInfo ?? null,
         description: cleanInlineText(explicitExtra?.description || profile?.description || ''),
         extraPrice:
+          explicitPrice ??
           fixedPrice ??
-          normalizeNumber(explicitExtra?.extraPrice ?? profile?.extraPrice, inferGenericExtraPrice(normalizedSlug, group.id)),
+          normalizeNumber(profile?.extraPrice, inferGenericExtraPrice(normalizedSlug, group.id)),
         groupId: group.id,
         groupName: group.name,
         sortOrder: normalizeNumber(explicitExtra?.sortOrder ?? profile?.sortOrder, getExtraGroupOrder(group.id) * 100 + index + 1),

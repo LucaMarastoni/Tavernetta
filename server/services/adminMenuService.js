@@ -123,6 +123,33 @@ function normalizePrice(value) {
   return Number.isFinite(price) && price >= 0 ? price : null;
 }
 
+function normalizeExtraIngredient(row = {}, ingredient = {}) {
+  return {
+    id: normalizeIdentifier(row.id),
+    ingredientId: normalizeIdentifier(row.ingredient_id),
+    name: normalizeText(ingredient.name),
+    slug: normalizeIdentifier(ingredient.slug),
+    extraPrice: Number(row.extra_price) || 0,
+    sortOrder: Number(row.sort_order) || 0,
+    active: row.active !== false,
+  };
+}
+
+function handleExtraIngredientQueryError(error, fallbackCode = 'SUPABASE_EXTRA_INGREDIENTS_QUERY_FAILED') {
+  if (!error) {
+    return;
+  }
+
+  throw new HttpError(
+    500,
+    fallbackCode,
+    fallbackCode.includes('UPDATE')
+      ? 'Non riusciamo ad aggiornare il prezzo dell ingrediente.'
+      : 'Non riusciamo a leggere gli ingredienti aggiuntivi.',
+    error.message,
+  );
+}
+
 function normalizeIngredientNames(value) {
   const names = (Array.isArray(value) ? value : String(value || '').split(','))
     .map(normalizeText)
@@ -398,6 +425,84 @@ async function fetchMenuItemFlagRow(identifier) {
 
 export async function getAdminMenuItemFlags(menuItemId) {
   return normalizeFlags(await fetchMenuItemFlagRow(menuItemId));
+}
+
+export async function getAdminExtraIngredients() {
+  assertSupabaseAdminMenuConfig();
+
+  const supabase = getSupabaseAdmin();
+  const { data: extras, error: extrasError } = await supabase
+    .from('extra_ingredients')
+    .select('id, ingredient_id, extra_price, sort_order, active')
+    .eq('active', true)
+    .order('sort_order', { ascending: true });
+
+  handleExtraIngredientQueryError(extrasError);
+
+  const ingredientIds = [
+    ...new Set((extras ?? []).map((extra) => normalizeIdentifier(extra.ingredient_id)).filter(Boolean)),
+  ];
+
+  if (!ingredientIds.length) {
+    return [];
+  }
+
+  const { data: ingredients, error: ingredientsError } = await supabase
+    .from('ingredients')
+    .select('id, name, slug, active')
+    .in('id', ingredientIds);
+
+  handleExtraIngredientQueryError(ingredientsError);
+
+  const ingredientsById = new Map(
+    (ingredients ?? []).map((ingredient) => [normalizeIdentifier(ingredient.id), ingredient]),
+  );
+
+  return (extras ?? [])
+    .map((extra) => normalizeExtraIngredient(extra, ingredientsById.get(normalizeIdentifier(extra.ingredient_id))))
+    .filter((extra) => Boolean(extra.id) && Boolean(extra.name) && extra.active)
+    .sort(
+      (left, right) =>
+        left.sortOrder - right.sortOrder || left.name.localeCompare(right.name, 'it', { sensitivity: 'base' }),
+    );
+}
+
+export async function updateAdminExtraIngredientPrice(extraIngredientId, value) {
+  assertSupabaseAdminMenuConfig();
+
+  const normalizedId = normalizeIdentifier(extraIngredientId);
+  const price = normalizePrice(value?.extraPrice ?? value?.extra_price ?? value);
+
+  if (!normalizedId) {
+    throw new HttpError(400, 'INVALID_EXTRA_INGREDIENT', 'Ingrediente aggiuntivo non valido.');
+  }
+
+  if (price === null) {
+    throw new HttpError(400, 'INVALID_EXTRA_INGREDIENT_PRICE', 'Inserisci un prezzo valido.');
+  }
+
+  const supabase = getSupabaseAdmin();
+  const { data: extra, error: updateError } = await supabase
+    .from('extra_ingredients')
+    .update({ extra_price: price })
+    .eq('id', normalizedId)
+    .select('id, ingredient_id, extra_price, sort_order, active')
+    .maybeSingle();
+
+  handleExtraIngredientQueryError(updateError, 'SUPABASE_EXTRA_INGREDIENT_UPDATE_FAILED');
+
+  if (!extra) {
+    throw new HttpError(404, 'EXTRA_INGREDIENT_NOT_FOUND', 'Ingrediente aggiuntivo non trovato.');
+  }
+
+  const { data: ingredient, error: ingredientError } = await supabase
+    .from('ingredients')
+    .select('id, name, slug, active')
+    .eq('id', extra.ingredient_id)
+    .maybeSingle();
+
+  handleExtraIngredientQueryError(ingredientError);
+  return normalizeExtraIngredient(extra, ingredient);
 }
 
 export async function updateAdminMenuItemFlags(menuItemId, flags) {

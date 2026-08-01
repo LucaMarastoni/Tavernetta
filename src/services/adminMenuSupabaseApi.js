@@ -62,6 +62,18 @@ function normalizePrice(value) {
   return Number.isFinite(price) && price >= 0 ? price : null;
 }
 
+function normalizeExtraIngredient(row = {}, ingredient = {}) {
+  return {
+    id: normalizeText(row.id),
+    ingredientId: normalizeText(row.ingredient_id),
+    name: normalizeText(ingredient.name),
+    slug: normalizeText(ingredient.slug),
+    extraPrice: Number(row.extra_price) || 0,
+    sortOrder: Number(row.sort_order) || 0,
+    active: row.active !== false,
+  };
+}
+
 function normalizeIngredientNames(value) {
   const names = (Array.isArray(value) ? value : String(value || '').split(','))
     .map(normalizeText)
@@ -224,6 +236,91 @@ function buildMenuItemPayload(draft, category, itemSlug, sortOrder) {
 
 export function canUseSupabaseAdminMenu() {
   return !isStaticExport || hasBrowserSupabaseConfig();
+}
+
+export async function fetchSupabaseExtraIngredients() {
+  if (!isStaticExport) {
+    const payload = await apiGet('/api/admin/extra-ingredients');
+    return Array.isArray(payload?.ingredients) ? payload.ingredients : [];
+  }
+
+  const client = getClient();
+  const extrasResult = await client
+    .from('extra_ingredients')
+    .select('id, ingredient_id, extra_price, sort_order, active')
+    .eq('active', true)
+    .order('sort_order', { ascending: true });
+
+  assertStaticWriteSuccess(extrasResult, 'STATIC_EXTRA_INGREDIENTS_LOAD_FAILED');
+
+  const extras = extrasResult.data ?? [];
+  const ingredientIds = [...new Set(extras.map((extra) => normalizeText(extra.ingredient_id)).filter(Boolean))];
+
+  if (!ingredientIds.length) {
+    return [];
+  }
+
+  const ingredientsResult = await client
+    .from('ingredients')
+    .select('id, name, slug, active')
+    .in('id', ingredientIds);
+
+  assertStaticWriteSuccess(ingredientsResult, 'STATIC_EXTRA_INGREDIENT_NAMES_LOAD_FAILED');
+
+  const ingredientsById = new Map(
+    (ingredientsResult.data ?? []).map((ingredient) => [normalizeText(ingredient.id), ingredient]),
+  );
+
+  return extras
+    .map((extra) => normalizeExtraIngredient(extra, ingredientsById.get(normalizeText(extra.ingredient_id))))
+    .filter((extra) => Boolean(extra.id) && Boolean(extra.name) && extra.active)
+    .sort(
+      (left, right) =>
+        left.sortOrder - right.sortOrder || left.name.localeCompare(right.name, 'it', { sensitivity: 'base' }),
+    );
+}
+
+export async function updateSupabaseExtraIngredientPrice(identifier, value) {
+  const normalizedId = normalizeText(identifier?.id ?? identifier);
+  const price = normalizePrice(value);
+
+  if (!normalizedId) {
+    throw createAdminMenuError('INVALID_EXTRA_INGREDIENT', 'Ingrediente aggiuntivo non valido.');
+  }
+
+  if (price === null) {
+    throw createAdminMenuError('INVALID_EXTRA_INGREDIENT_PRICE', 'Inserisci un prezzo valido.');
+  }
+
+  if (!isStaticExport) {
+    const payload = await apiPatch(`/api/admin/extra-ingredients/${encodeURIComponent(normalizedId)}`, {
+      extraPrice: price,
+    });
+    return payload?.ingredient ?? null;
+  }
+
+  const client = getClient();
+  const updateResult = await client
+    .from('extra_ingredients')
+    .update({ extra_price: price })
+    .eq('id', normalizedId)
+    .select('id, ingredient_id, extra_price, sort_order, active')
+    .maybeSingle();
+
+  assertStaticWriteSuccess(updateResult, 'STATIC_EXTRA_INGREDIENT_UPDATE_FAILED');
+
+  if (!updateResult.data) {
+    throw createAdminMenuError('EXTRA_INGREDIENT_NOT_FOUND', 'Ingrediente aggiuntivo non trovato.');
+  }
+
+  const ingredientResult = await client
+    .from('ingredients')
+    .select('id, name, slug, active')
+    .eq('id', updateResult.data.ingredient_id)
+    .maybeSingle();
+
+  assertStaticWriteSuccess(ingredientResult, 'STATIC_EXTRA_INGREDIENT_NAME_LOAD_FAILED');
+  return normalizeExtraIngredient(updateResult.data, ingredientResult.data);
 }
 
 async function fetchMenuItemFlagRow(identifier) {

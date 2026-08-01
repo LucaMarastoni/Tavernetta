@@ -2,12 +2,34 @@ import { Router } from 'express';
 import {
   archiveAdminMenuItem,
   createAdminMenuItem,
+  getAdminExtraIngredients,
   getAdminMenuItemFlags,
+  updateAdminExtraIngredientPrice,
   updateAdminMenuItem,
   updateAdminMenuItemFlags,
 } from '../services/adminMenuService.js';
 
 const router = Router();
+
+router.get('/extra-ingredients', async (request, response, next) => {
+  try {
+    response.json({
+      ingredients: await getAdminExtraIngredients(),
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.patch('/extra-ingredients/:id', async (request, response, next) => {
+  try {
+    response.json({
+      ingredient: await updateAdminExtraIngredientPrice(request.params.id, request.body),
+    });
+  } catch (error) {
+    next(error);
+  }
+});
 
 router.get('/menu-items/:id/flags', async (request, response, next) => {
   try {
