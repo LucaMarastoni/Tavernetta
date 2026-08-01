@@ -15,7 +15,7 @@ const EXTRA_GROUPS = {
 const DEFAULT_EXTRA_PROFILES = [
   {
     slug: 'mozzarella',
-    extraPrice: 1.5,
+    extraPrice: 2,
     sortOrder: 10,
     groupId: 'formaggi',
     labelWhenAbsent: 'Mozzarella',
@@ -24,7 +24,7 @@ const DEFAULT_EXTRA_PROFILES = [
   },
   {
     slug: 'bufala-campana-dop',
-    extraPrice: 3,
+    extraPrice: 2,
     sortOrder: 20,
     groupId: 'formaggi',
     labelWhenAbsent: 'Bufala campana DOP',
@@ -32,14 +32,14 @@ const DEFAULT_EXTRA_PROFILES = [
   },
   {
     slug: 'burrata',
-    extraPrice: 3.5,
+    extraPrice: 2,
     sortOrder: 30,
     groupId: 'formaggi',
     labelWhenAbsent: 'Burrata',
   },
   {
     slug: 'stracciatella',
-    extraPrice: 3,
+    extraPrice: 2,
     sortOrder: 40,
     groupId: 'formaggi',
     labelWhenAbsent: 'Stracciatella',
@@ -244,9 +244,8 @@ const EXTRA_GROUP_PATTERNS = {
 const CHEESE_PATTERNS = EXTRA_GROUP_PATTERNS.formaggi;
 const DOUGH_PREMIUM_PATTERNS = ['integrale', 'carbone'];
 const DOUBLE_DOUGH_PATTERNS = ['doppio-impasto', 'doppio impasto'];
-const BURRATA_STRACCIATELLA_PATTERNS = ['burrata', 'stracciatella'];
-const BUFFALO_PATTERNS = ['bufala'];
 const POTATO_PATTERNS = ['patate-cubettate-al-forno', 'patatine-fritte', 'patate-fritte'];
+const SHRIMP_PATTERNS = ['gamberetti'];
 const AFFETTATI_PATTERNS = [
   'prosciutto',
   'crudo',
@@ -330,12 +329,8 @@ function inferExtraGroupId(slug, name = '') {
 }
 
 function resolveFixedExtraPrice(slug, groupId) {
-  if (matchesPattern(slug, BURRATA_STRACCIATELLA_PATTERNS)) {
-    return 3;
-  }
-
-  if (matchesPattern(slug, BUFFALO_PATTERNS)) {
-    return 3;
+  if (groupId === 'formaggi' || matchesPattern(slug, CHEESE_PATTERNS)) {
+    return 2;
   }
 
   if (matchesPattern(slug, AFFETTATI_PATTERNS)) {
@@ -346,8 +341,8 @@ function resolveFixedExtraPrice(slug, groupId) {
     return 2;
   }
 
-  if (groupId === 'formaggi' || matchesPattern(slug, CHEESE_PATTERNS)) {
-    return 2;
+  if (matchesPattern(slug, SHRIMP_PATTERNS)) {
+    return 3.5;
   }
 
   if (matchesPattern(slug, ONE_AND_HALF_PATTERNS)) {
