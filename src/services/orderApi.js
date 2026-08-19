@@ -42,6 +42,11 @@ function mapOrderApiError(error) {
         'L orario scelto e troppo vicino. Seleziona un orario piu avanti rispetto adesso.',
         code,
       );
+    case 'ORDERING_PAUSED':
+      return new OrderApiError(
+        'Siamo in vacanza: le prenotazioni sono temporaneamente sospese.',
+        code,
+      );
     case 'SUPABASE_NOT_CONFIGURED':
       return new OrderApiError('Il servizio ordini non e configurato.', code);
     case 'ORDER_RPC_NOT_DEPLOYED':

@@ -9,6 +9,7 @@ import menuRouter from './routes/menu.js';
 import adminMenuRouter from './routes/adminMenu.js';
 import adminOrdersRouter from './routes/adminOrders.js';
 import ordersRouter from './routes/orders.js';
+import orderingSettingsRouter from './routes/orderingSettings.js';
 import { HttpError } from './utils/httpError.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -39,6 +40,7 @@ app.use('/api', menuRouter);
 app.use('/api/admin', adminMenuRouter);
 app.use('/api/admin/orders', adminOrdersRouter);
 app.use('/api/orders', ordersRouter);
+app.use('/api/ordering-status', orderingSettingsRouter);
 
 if (fs.existsSync(path.join(distDir, 'index.html'))) {
   app.use(express.static(distDir));

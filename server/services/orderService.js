@@ -11,6 +11,7 @@ import {
   normalizeText,
 } from '../utils/validators.js';
 import { HttpError } from '../utils/httpError.js';
+import { assertOrderingAvailable } from './orderingSettingsService.js';
 
 const ALLOWED_ORDER_TYPES = new Set(['pickup', 'delivery']);
 const MISSING_RESOURCE_CODES = new Set(['42703', 'PGRST204', 'PGRST205', '42P01']);
@@ -198,6 +199,14 @@ async function createOrderSupabase(cleanPayload, orderLines, totals) {
     .single();
 
   if (orderInsertError || !insertedOrder) {
+    if (/ORDERING_PAUSED/i.test(orderInsertError?.message || '')) {
+      throw new HttpError(
+        503,
+        'ORDERING_PAUSED',
+        'Siamo in vacanza: le prenotazioni sono temporaneamente sospese.',
+      );
+    }
+
     throw new HttpError(
       500,
       'SUPABASE_ORDER_CREATE_FAILED',
@@ -246,6 +255,7 @@ async function createOrderSupabase(cleanPayload, orderLines, totals) {
 
 export async function createOrder(payload) {
   assertSupabaseOrderConfig();
+  await assertOrderingAvailable();
 
   const cleanPayload = sanitizeOrderPayload(payload);
   validatePayload(cleanPayload);

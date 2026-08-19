@@ -17,6 +17,7 @@ import {
   usesStaticAdminSource,
 } from '../services/adminOrdersApi';
 import { getBrowserSupabase, hasBrowserSupabaseConfig } from '../lib/supabaseBrowser';
+import { fetchOrderingStatus, updateOrderingPaused } from '../services/orderingSettingsApi';
 import '../styles/admin.css';
 
 function sortItemsByName(items) {
@@ -89,6 +90,10 @@ function AdminPage() {
   const [orders, setOrders] = useState([]);
   const [ordersLoading, setOrdersLoading] = useState(false);
   const [ordersError, setOrdersError] = useState('');
+  const [orderingStatus, setOrderingStatus] = useState({ ordersPaused: false, updatedAt: null });
+  const [orderingStatusLoading, setOrderingStatusLoading] = useState(false);
+  const [orderingStatusSaving, setOrderingStatusSaving] = useState(false);
+  const [orderingStatusError, setOrderingStatusError] = useState('');
 
   const items = useMemo(() => flattenAdminMenu(menuState), [menuState]);
   const categories = useMemo(
@@ -332,6 +337,36 @@ function AdminPage() {
     return updatedOrder;
   }, [refreshOrders]);
 
+  const refreshOrderingStatus = useCallback(async () => {
+    if (!isAdminAuthenticated) {
+      return;
+    }
+
+    setOrderingStatusLoading(true);
+
+    try {
+      setOrderingStatus(await fetchOrderingStatus());
+      setOrderingStatusError('');
+    } catch (error) {
+      setOrderingStatusError(error.message || 'Non riusciamo a leggere lo stato delle prenotazioni.');
+    } finally {
+      setOrderingStatusLoading(false);
+    }
+  }, [isAdminAuthenticated]);
+
+  const changeOrderingPaused = useCallback(async (ordersPaused) => {
+    setOrderingStatusSaving(true);
+    setOrderingStatusError('');
+
+    try {
+      setOrderingStatus(await updateOrderingPaused(ordersPaused));
+    } catch (error) {
+      setOrderingStatusError(error.message || 'Non riusciamo ad aggiornare lo stato delle prenotazioni.');
+    } finally {
+      setOrderingStatusSaving(false);
+    }
+  }, []);
+
   useEffect(() => {
     if (!isAdminAuthenticated) {
       setMenuState(createEmptyAdminMenuState());
@@ -398,6 +433,17 @@ function AdminPage() {
       }
     };
   }, [isAdminAuthenticated, refreshOrders]);
+
+  useEffect(() => {
+    if (!isAdminAuthenticated) {
+      setOrderingStatus({ ordersPaused: false, updatedAt: null });
+      setOrderingStatusError('');
+      setOrderingStatusLoading(false);
+      return;
+    }
+
+    refreshOrderingStatus();
+  }, [isAdminAuthenticated, refreshOrderingStatus]);
 
   const handleAdminLogin = useCallback(async ({ email, password }) => {
     const cleanEmail = String(email || '').trim();
@@ -501,7 +547,17 @@ function AdminPage() {
   return (
     <div className="admin-page">
       <div className="admin-shell">
-        <AdminSidebar adminEmail={adminEmail} onSignOut={handleAdminSignOut} signingOut={signingOut} usesStaticAuth />
+        <AdminSidebar
+          adminEmail={adminEmail}
+          onSignOut={handleAdminSignOut}
+          signingOut={signingOut}
+          usesStaticAuth
+          vacationMode={orderingStatus.ordersPaused}
+          vacationModeError={orderingStatusError}
+          vacationModeLoading={orderingStatusLoading}
+          vacationModeSaving={orderingStatusSaving}
+          onVacationModeChange={changeOrderingPaused}
+        />
 
         <main className="admin-main">
           <Outlet context={contextValue} />

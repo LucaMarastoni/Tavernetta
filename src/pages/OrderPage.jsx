@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import CartSummary from '../components/cart/CartSummary';
 import CheckoutForm from '../components/checkout/CheckoutForm';
@@ -6,6 +6,7 @@ import StatusPanel from '../components/StatusPanel';
 import { useCart } from '../context/CartContext';
 import { restaurant } from '../data/siteContent';
 import { OrderApiError, submitOrder } from '../services/orderApi';
+import { fetchOrderingStatus } from '../services/orderingSettingsApi';
 import {
   formatPreferredTimeDateTime,
   formatTimeInputValue,
@@ -34,6 +35,7 @@ function OrderPage() {
   const [submitError, setSubmitError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successOrder, setSuccessOrder] = useState(null);
+  const [orderingPaused, setOrderingPaused] = useState(false);
 
   const sanitizedDraft = useMemo(() => sanitizeOrderDraft(orderDraft), [orderDraft]);
   const minimumPreferredTime = useMemo(
@@ -41,6 +43,24 @@ function OrderPage() {
     [orderDraft.orderType],
   );
   const maximumPreferredTime = useMemo(() => formatTimeInputValue(getOrderingWindowEnd()), []);
+
+  useEffect(() => {
+    let isActive = true;
+
+    fetchOrderingStatus()
+      .then((status) => {
+        if (isActive) {
+          setOrderingPaused(status.ordersPaused);
+        }
+      })
+      .catch(() => {
+        // Il database verifica nuovamente il flag al momento dell invio.
+      });
+
+    return () => {
+      isActive = false;
+    };
+  }, []);
 
   const handleFieldChange = (event) => {
     const { checked, name, type, value } = event.target;
@@ -124,6 +144,10 @@ function OrderPage() {
     } catch (error) {
       if (error instanceof OrderApiError) {
         setSubmitError(error.message);
+
+        if (error.code === 'ORDERING_PAUSED') {
+          setOrderingPaused(true);
+        }
       } else {
         setSubmitError('Non siamo riusciti a registrare l ordine. Riprova tra poco.');
       }
@@ -188,6 +212,13 @@ function OrderPage() {
               Nuovo ordine
             </Link>
           </article>
+        ) : orderingPaused ? (
+          <StatusPanel
+            title="Siamo in vacanza."
+            message="Le prenotazioni delle pizze sono temporaneamente sospese. Torna a trovarci presto."
+            actionLabel="Torna al menu"
+            onAction={() => navigate('/menu')}
+          />
         ) : items.length === 0 ? (
           <StatusPanel
             title="Il carrello e vuoto."

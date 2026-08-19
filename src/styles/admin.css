@@ -220,6 +220,101 @@
   gap: 0.55rem;
 }
 
+.admin-vacation-control {
+  display: grid;
+  gap: 0.85rem;
+  padding: 1rem;
+  border: 1px solid rgba(61, 43, 33, 0.1);
+  border-radius: 1.25rem;
+  background: rgba(239, 226, 210, 0.42);
+  transition: border-color 0.24s var(--ease), background-color 0.24s var(--ease);
+}
+
+.admin-vacation-control.is-active {
+  border-color: rgba(184, 118, 95, 0.34);
+  background: rgba(184, 118, 95, 0.14);
+}
+
+.admin-vacation-copy {
+  display: grid;
+  gap: 0.28rem;
+}
+
+.admin-vacation-copy strong {
+  font-size: 1.05rem;
+}
+
+.admin-vacation-copy p:last-child {
+  color: var(--color-mocha);
+  font-size: 0.84rem;
+}
+
+.admin-vacation-switch {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  cursor: pointer;
+}
+
+.admin-vacation-switch:has(input:disabled) {
+  cursor: wait;
+  opacity: 0.68;
+}
+
+.admin-vacation-switch input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.admin-vacation-switch-track {
+  display: flex;
+  align-items: center;
+  width: 3rem;
+  height: 1.65rem;
+  padding: 0.18rem;
+  border-radius: 999px;
+  background: rgba(61, 43, 33, 0.22);
+  transition: background-color 0.2s var(--ease);
+}
+
+.admin-vacation-switch-thumb {
+  width: 1.29rem;
+  height: 1.29rem;
+  border-radius: 50%;
+  background: var(--color-shell);
+  box-shadow: 0 2px 6px rgba(36, 25, 20, 0.2);
+  transition: transform 0.2s var(--ease);
+}
+
+.admin-vacation-switch input:checked + .admin-vacation-switch-track {
+  background: var(--color-terra);
+}
+
+.admin-vacation-switch input:checked + .admin-vacation-switch-track .admin-vacation-switch-thumb {
+  transform: translateX(1.35rem);
+}
+
+.admin-vacation-switch input:focus-visible + .admin-vacation-switch-track {
+  outline: 3px solid rgba(184, 118, 95, 0.3);
+  outline-offset: 2px;
+}
+
+.admin-vacation-switch-label {
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.admin-vacation-error {
+  color: var(--color-terra);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
 .admin-sidebar-link {
   display: grid;
   gap: 0.16rem;

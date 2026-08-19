@@ -1,11 +1,22 @@
 import { Link, NavLink } from 'react-router-dom';
+import AdminVacationControl from './AdminVacationControl';
 
 const adminLinks = [
   { to: '/admin/menu', label: 'Menu', caption: 'Prodotti, extra e categorie' },
   { to: '/admin/ordini', label: 'Ordini', caption: 'Servizio, stati e priorita' },
 ];
 
-function AdminSidebar({ adminEmail = '', onSignOut = null, signingOut = false, usesStaticAuth = false }) {
+function AdminSidebar({
+  adminEmail = '',
+  onSignOut = null,
+  onVacationModeChange,
+  signingOut = false,
+  usesStaticAuth = false,
+  vacationMode = false,
+  vacationModeError = '',
+  vacationModeLoading = false,
+  vacationModeSaving = false,
+}) {
   return (
     <aside className="admin-sidebar admin-surface">
       <div className="admin-sidebar-head">
@@ -28,6 +39,14 @@ function AdminSidebar({ adminEmail = '', onSignOut = null, signingOut = false, u
           </NavLink>
         ))}
       </nav>
+
+      <AdminVacationControl
+        checked={vacationMode}
+        error={vacationModeError}
+        loading={vacationModeLoading}
+        saving={vacationModeSaving}
+        onChange={onVacationModeChange}
+      />
 
       <div className="admin-sidebar-footer">
         <Link className="admin-primary-link" to="/menu/pizze" viewTransition>
